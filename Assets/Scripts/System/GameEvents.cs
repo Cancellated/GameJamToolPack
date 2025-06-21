@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace MyGame.System
 {
+
     /// <summary>
     /// 全局静态事件系统，支持类型安全的事件注册与触发。
     /// 用于模块间解耦通信。
@@ -84,6 +85,55 @@ namespace MyGame.System
         {
             Debug.Log($"[GameEvents] 游戏状态变更：{from} -> {to}");
             OnGameStateChanged?.Invoke(from, to);
+        }
+
+        #endregion
+
+        #region 场景管理事件
+
+        /// <summary>
+        /// 场景加载开始事件
+        /// </summary>
+        public static event Action<string> OnSceneLoadStart;
+        
+        /// <summary>
+        /// 场景加载完成事件
+        /// </summary>
+        public static event Action<string> OnSceneLoadComplete;
+        
+        /// <summary>
+        /// 场景卸载事件
+        /// </summary>
+        public static event Action<string> OnSceneUnload;
+        
+        /// <summary>
+        /// 触发场景加载开始事件
+        /// </summary>
+        /// <param name="sceneName">场景名称</param>
+        public static void TriggerSceneLoadStart(string sceneName)
+        {
+            Debug.Log($"[GameEvents] 开始加载场景: {sceneName}");
+            OnSceneLoadStart?.Invoke(sceneName);
+        }
+        
+        /// <summary>
+        /// 触发场景加载完成事件
+        /// </summary>
+        /// <param name="sceneName">场景名称</param>
+        public static void TriggerSceneLoadComplete(string sceneName)
+        {
+            Debug.Log($"[GameEvents] 场景加载完成: {sceneName}");
+            OnSceneLoadComplete?.Invoke(sceneName);
+        }
+        
+        /// <summary>
+        /// 触发场景卸载事件
+        /// </summary>
+        /// <param name="sceneName">场景名称</param>
+        public static void TriggerSceneUnload(string sceneName)
+        {
+            Debug.Log($"[GameEvents] 卸载场景: {sceneName}");
+            OnSceneUnload?.Invoke(sceneName);
         }
 
         #endregion

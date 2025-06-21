@@ -17,6 +17,7 @@ namespace UI.Managers
         public CanvasGroup pauseMenu;
         public CanvasGroup resultPanel;
         public CanvasGroup hudPanel;
+        public CanvasGroup loadingPanel;
 
         [Header("动画设置")]
         [Tooltip("UI淡入淡出动画时长（秒）")]
@@ -32,7 +33,8 @@ namespace UI.Managers
             MainMenu,
             PauseMenu,
             ResultPanel,
-            HUD
+            HUD,
+            Loading
         }
 
         private UIState currentState = UIState.None;
@@ -47,21 +49,25 @@ namespace UI.Managers
             HideAllUI();
 
             // 注册UI相关事件监听
+            GameEvents.OnMenuShow += OnMenuShow;    //这个是通用窗口显隐处理
             GameEvents.OnMainMenuShow += ShowMainMenu;
             GameEvents.OnPauseMenuShow += ShowPauseMenu;
             GameEvents.OnResultPanelShow += ShowResultPanel;
             GameEvents.OnHUDShow += ShowHUD;
-            GameEvents.OnMenuShow += OnMenuShow;
+            GameEvents.OnSceneLoadStart += ShowLoading;
+            GameEvents.OnSceneLoadComplete += HideLoading;
         }
 
         private void OnDestroy()
         {
             // 注销事件监听
+            GameEvents.OnMenuShow -= OnMenuShow;
             GameEvents.OnMainMenuShow -= ShowMainMenu;
             GameEvents.OnPauseMenuShow -= ShowPauseMenu;
             GameEvents.OnResultPanelShow -= ShowResultPanel;
             GameEvents.OnHUDShow -= ShowHUD;
-            GameEvents.OnMenuShow -= OnMenuShow;
+            GameEvents.OnSceneLoadStart -= ShowLoading;
+            GameEvents.OnSceneLoadComplete -= HideLoading;
         }
 
         #endregion
@@ -77,6 +83,7 @@ namespace UI.Managers
             ShowCanvasGroup(pauseMenu, false);
             ShowCanvasGroup(resultPanel, false);
             ShowCanvasGroup(hudPanel, false);
+            ShowCanvasGroup(loadingPanel, false);
             currentState = UIState.None;
         }
 
@@ -102,6 +109,9 @@ namespace UI.Managers
                         SetUIState(UIState.PauseMenu, false);
                         SetUIState(UIState.HUD, false);
                         break;
+                    case UIState.Loading:
+                        // 加载界面不与其他UI互斥
+                        break;
                 }
             }
 
@@ -124,9 +134,14 @@ namespace UI.Managers
                 case UIState.HUD:
                     ShowCanvasGroup(hudPanel, show);
                     break;
+                case UIState.Loading:
+                    ShowCanvasGroup(loadingPanel, show);
+                    break;
             }
         }
+        
 
+            #region 通用UI显隐处理方法
         /// <summary>
         /// CanvasGroup显隐通用方法（带动画）
         /// </summary>
@@ -173,7 +188,27 @@ namespace UI.Managers
                 group.blocksRaycasts = false;
             }
         }
+            #endregion
+            
+            #region 独有UI处理方法
+                #region 加载界面显隐处理方法
+        /// <summary>
+        /// 显示加载界面
+        /// </summary>
+        private void ShowLoading(string sceneName)
+        {
+            SetUIState(UIState.Loading, true);
+        }
 
+        /// <summary>
+        /// 隐藏加载界面
+        /// </summary>
+        private void HideLoading(string sceneName)
+        {
+            SetUIState(UIState.Loading, false);
+        }
+                #endregion
+            #endregion
         #endregion
 
         #region UI事件响应

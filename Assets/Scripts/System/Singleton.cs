@@ -1,32 +1,32 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 namespace MyGame.System
 {
     /// <summary>
-    /// Í¨ÓÃMonoBehaviourµ¥Àı»ùÀà¡£
-    /// ¼Ì³Ğ´ËÀà¿É¿ìËÙÊµÏÖÈ«¾ÖÎ¨Ò»µÄ¹ÜÀíÆ÷»ò¹¤¾ßÀà¡£
+    /// é€šç”¨MonoBehaviourå•ä¾‹åŸºç±»ã€‚
+    /// ç»§æ‰¿æ­¤ç±»å¯å¿«é€Ÿå®ç°å…¨å±€å”¯ä¸€çš„ç®¡ç†å™¨æˆ–å·¥å…·ç±»ã€‚
     /// </summary>
-    /// <typeparam name="T">µ¥ÀıÀàĞÍ£¬Ğè¼Ì³Ğ×ÔMonoBehaviour</typeparam>
+    /// <typeparam name="T">å•ä¾‹ç±»å‹ï¼Œéœ€ç»§æ‰¿è‡ªMonoBehaviour</typeparam>
     public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
     {
-        #region ×Ö¶Î
+        #region å­—æ®µ
 
         /// <summary>
-        /// µ¥ÀıÊµÀı¡£
+        /// å•ä¾‹å®ä¾‹ã€‚
         /// </summary>
         private static T _instance;
 
         /// <summary>
-        /// Ïß³ÌËø£¬È·±£¶àÏß³Ì»·¾³ÏÂµÄ°²È«£¨ËäÈ»UnityÖ÷Ïß³ÌÎªÖ÷£¬µ«¼ÓËø¸üÎÈÍ×£©¡£
+        /// çº¿ç¨‹é”ï¼Œç¡®ä¿å¤šçº¿ç¨‹ç¯å¢ƒä¸‹çš„å®‰å…¨ï¼ˆè™½ç„¶Unityä¸»çº¿ç¨‹ä¸ºä¸»ï¼Œä½†åŠ é”æ›´ç¨³å¦¥ï¼‰ã€‚
         /// </summary>
         private static readonly object _lock = new();
 
         #endregion
 
-        #region ÊôĞÔ
+        #region å±æ€§
 
         /// <summary>
-        /// »ñÈ¡µ¥ÀıÊµÀı£¬Èô²»´æÔÚÔò×Ô¶¯²éÕÒ»ò´´½¨¡£
+        /// è·å–å•ä¾‹å®ä¾‹ï¼Œè‹¥ä¸å­˜åœ¨åˆ™è‡ªåŠ¨æŸ¥æ‰¾æˆ–åˆ›å»ºã€‚
         /// </summary>
         public static T Instance
         {
@@ -38,11 +38,11 @@ namespace MyGame.System
                     {
                         if (_instance == null)
                         {
-                            // ÓÅÏÈ²éÕÒ³¡¾°ÖĞÒÑ´æÔÚµÄÊµÀı
+                            // ä¼˜å…ˆæŸ¥æ‰¾åœºæ™¯ä¸­å·²å­˜åœ¨çš„å®ä¾‹
                             _instance = Object.FindFirstObjectByType<T>();
                             if (_instance == null)
                             {
-                                // Èô²»´æÔÚÔò×Ô¶¯´´½¨
+                                // è‹¥ä¸å­˜åœ¨åˆ™è‡ªåŠ¨åˆ›å»º
                                 var singletonObject = new GameObject(typeof(T).Name);
                                 _instance = singletonObject.AddComponent<T>();
                                 DontDestroyOnLoad(singletonObject);
@@ -56,10 +56,10 @@ namespace MyGame.System
 
         #endregion
 
-        #region ÉúÃüÖÜÆÚ
+        #region ç”Ÿå‘½å‘¨æœŸ
 
         /// <summary>
-        /// ±£Ö¤µ¥ÀıÎ¨Ò»ĞÔ£¬ÖØ¸´ÊµÀı×Ô¶¯Ïú»Ù¡£
+        /// ä¿è¯å•ä¾‹å”¯ä¸€æ€§ï¼Œé‡å¤å®ä¾‹è‡ªåŠ¨é”€æ¯ã€‚
         /// </summary>
         protected virtual void Awake()
         {
