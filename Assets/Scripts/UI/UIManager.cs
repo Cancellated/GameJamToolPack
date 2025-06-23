@@ -8,7 +8,7 @@ namespace UI.Managers
     /// 全局UI管理器，负责调度和管理所有UI界面。
     /// 通过事件系统与其他模块通信，实现解耦。
     /// </summary>
-    public class UIManager : MonoBehaviour
+    public class UIManager : Singleton<UIManager>
     {
         #region UI引用
 
@@ -18,6 +18,7 @@ namespace UI.Managers
         public CanvasGroup resultPanel;
         public CanvasGroup hudPanel;
         public CanvasGroup loadingPanel;
+        public CanvasGroup console;
 
         [Header("动画设置")]
         [Tooltip("UI淡入淡出动画时长（秒）")]
@@ -34,16 +35,17 @@ namespace UI.Managers
             PauseMenu,
             ResultPanel,
             HUD,
-            Loading
+            Loading,
+            Console
         }
 
-        private UIState currentState = UIState.None;
+        public UIState currentState = UIState.None;
 
         #endregion
 
         #region 生命周期
 
-        private void Awake()
+        protected override void Awake()
         {
             // 初始隐藏所有UI
             HideAllUI();
@@ -111,6 +113,8 @@ namespace UI.Managers
                         break;
                     case UIState.Loading:
                         // 加载界面不与其他UI互斥
+                    case UIState.Console:
+                        // 调试界面不与其他UI互斥
                         break;
                 }
             }
@@ -274,25 +278,6 @@ namespace UI.Managers
             SetUIState(UIState.HUD, true);
         }
 #endif
-
-        private void Update()
-        {
-#if UNITY_EDITOR
-            // 快捷键调试（仅编辑器下生效）
-            //按下数字键切换UI状态（注意：调试时绕过了事件系统）
-            if (Input.GetKeyDown(KeyCode.Alpha1))       
-                SetUIState(UIState.MainMenu, true);
-            if (Input.GetKeyDown(KeyCode.Alpha2))
-                SetUIState(UIState.PauseMenu, true);
-            if (Input.GetKeyDown(KeyCode.Alpha3))
-                SetUIState(UIState.ResultPanel, true);
-            if (Input.GetKeyDown(KeyCode.Alpha4))
-                SetUIState(UIState.HUD, true);
-            if (Input.GetKeyDown(KeyCode.Alpha0))
-                HideAllUI();
-#endif
-        }
-
         #endregion
     }
 }

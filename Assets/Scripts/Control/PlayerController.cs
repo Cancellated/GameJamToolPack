@@ -15,12 +15,7 @@ public class PlayerController : Singleton<PlayerController>
 
     private void OnEnable()
     {
-        _inputActions.GamePlay.Console.performed += ctx => ToggleDebugConsole();
         _inputActions.Enable();
     }
 
-    private void ToggleDebugConsole()
-    {
-        // 控制台显示/隐藏逻辑
-    }
 }

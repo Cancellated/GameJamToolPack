@@ -70,38 +70,6 @@ namespace MyGame.Managers
             StartGame();
         }
 
-        /// <summary>
-        /// 监听输入，实现暂停与恢复及快速测试。
-        /// </summary>
-        private void Update()
-        {
-            // 按下ESC切换暂停/继续
-            if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                if (State == GameState.Playing)
-                    PauseGame();
-                else if (State == GameState.Paused)
-                    ResumeGame();
-            }
-
-            // 快速测试：F1重开，F2胜利，F3失败
-            if (Input.GetKeyDown(KeyCode.F1))
-            {
-                Debug.Log("[测试] 快速重开游戏");
-                GameEvents.TriggerGameStart();
-            }
-            if (Input.GetKeyDown(KeyCode.F2))
-            {
-                Debug.Log("[测试] 快速胜利结束");
-                GameEvents.TriggerGameOver(true);
-            }
-            if (Input.GetKeyDown(KeyCode.F3))
-            {
-                Debug.Log("[测试] 快速失败结束");
-                GameEvents.TriggerGameOver(false);
-            }
-        }
-
         #endregion
 
         #region 状态切换校验
@@ -198,11 +166,10 @@ namespace MyGame.Managers
 
         #endregion
 
-        #region 快速测试方法
+        #region 控制台调试方法
 
-#if UNITY_EDITOR
         /// <summary>
-        /// 编辑器下通过Inspector按钮快速切换状态（可选）。
+        /// 控制台下通过ContextMenu按钮快速切换状态。
         /// </summary>
         [ContextMenu("测试/重开游戏")]
         public void TestRestartGame() => GameEvents.TriggerGameStart();
@@ -212,7 +179,6 @@ namespace MyGame.Managers
 
         [ContextMenu("测试/失败结束")]
         public void TestLoseGame() => GameEvents.TriggerGameOver(false);
-#endif
 
         #endregion
     }

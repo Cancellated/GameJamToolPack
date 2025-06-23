@@ -288,7 +288,7 @@ public partial class @GameControl: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""d443bf45-5355-479a-ad51-81dbf9abfa87"",
-                    ""path"": ""<Keyboard>/f1"",
+                    ""path"": ""<Keyboard>/backquote"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
