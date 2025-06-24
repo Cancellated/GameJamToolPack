@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{F0329F54-27E1-9EA8-51DD-BB6B802DC53E}|Assembly-CSharp.csproj|d:\\unity\\unity_projects\\game jam tool pack\\assets\\scripts\\control\\playercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F0329F54-27E1-9EA8-51DD-BB6B802DC53E}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\control\\playercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{F0329F54-27E1-9EA8-51DD-BB6B802DC53E}|Assembly-CSharp.csproj|d:\\unity\\unity_projects\\game jam tool pack\\assets\\scripts\\devtools\\debugconsole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F0329F54-27E1-9EA8-51DD-BB6B802DC53E}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\devtools\\debugconsole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -30,11 +34,24 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
+              "Title": "PlayerController.cs",
+              "DocumentMoniker": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Scripts\\Control\\PlayerController.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Control\\PlayerController.cs",
+              "ToolTip": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Scripts\\Control\\PlayerController.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Control\\PlayerController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-21T13:36:50.135Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "GameEvents.cs",
               "DocumentMoniker": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Scripts\\System\\GameEvents.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\System\\GameEvents.cs",
@@ -46,20 +63,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "DebugConsole.cs",
               "DocumentMoniker": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Scripts\\DevTools\\DebugConsole.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\DevTools\\DebugConsole.cs",
               "ToolTip": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Scripts\\DevTools\\DebugConsole.cs",
               "RelativeToolTip": "Assets\\Scripts\\DevTools\\DebugConsole.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAARAAAAAAAAAA==",
+              "ViewState": "AgIAAAcAAAAAAAAAAABAwAgAAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-06-20T02:06:53.247Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "UIManager.cs",
               "DocumentMoniker": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Scripts\\UI\\UIManager.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\UI\\UIManager.cs",
@@ -71,7 +88,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "Singleton.cs",
               "DocumentMoniker": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Scripts\\System\\Singleton.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\System\\Singleton.cs",
@@ -83,7 +100,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "GameManager.cs",
               "DocumentMoniker": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Scripts\\Managers\\GameManager.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Managers\\GameManager.cs",

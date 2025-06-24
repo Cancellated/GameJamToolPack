@@ -1,4 +1,4 @@
-﻿using MyGame.Managers; // 引入游戏状态枚举
+using MyGame.Managers; // 引入游戏状态枚举
 using System;
 using UI.Managers;
 using UnityEngine;

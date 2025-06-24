@@ -24,6 +24,7 @@ namespace MyGame.Managers
     /// </summary>
     public class GameManager : Singleton<GameManager>
     {
+        private GameControl _inputActions;
         #region 字段与属性
 
         /// <summary>
@@ -70,6 +71,21 @@ namespace MyGame.Managers
             StartGame();
         }
 
+        private void Update()
+        {
+            // 检测键盘ESC键和手柄Start键(在Inputsystem中配置的暂停键)
+            if (_inputActions.GamePlay.Pause.triggered)
+            {
+                if (State == GameState.Playing)
+                {
+                    GameEvents.TriggerGamePause();
+                }
+                else if (State == GameState.Paused)
+                {
+                    GameEvents.TriggerGameResume();
+                }
+            }
+        }
         #endregion
 
         #region 状态切换校验

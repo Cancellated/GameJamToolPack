@@ -229,7 +229,7 @@ namespace MyGame.DevTool
         
         #endregion
 
-        #region 图形界面
+        #region 控制台图形界面
 
         /// <summary>
         /// 添加调试按钮
