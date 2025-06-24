@@ -5,10 +5,10 @@
 ## 📦 预制件架构
 
 ### 系统数据流
-![系统数据流图](assets/Readme/diagrams/data-flow.png)
+![系统数据流图](Assets/Readme/diagrams/data-flow.png)
 
 ### 状态管理流程
-![GameManager 状态机](assets/Readme/diagrams/state-machine.png)
+![GameManager 状态机](Assets/Readme/diagrams/state-machine.png)
 
 ## 🛠 使用说明
 
@@ -39,7 +39,7 @@ GameManager.Instance.ChangeState(GameState.Paused);
 ## 🔄 场景切换
 
 ### 场景管理流程
-![场景切换流程](assets/Readme/diagrams/scene-switch.png)
+![场景切换流程](Assets/Readme/diagrams/scene-switch.png)
 
 ### 示例代码
 ```csharp
