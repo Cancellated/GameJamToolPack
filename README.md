@@ -1,6 +1,5 @@
-针对gamejam中unity游戏开发的神奇妙妙工具，快速组装拼好游，目前为2D游戏开发框架:)
-
 # 🎮 Unity Game Jam 工具箱
+针对gamejam中unity游戏开发的神奇妙妙工具，快速组装拼好游，目前为2D游戏开发框架:)
 
 ## 📦 预制件架构
 
@@ -82,7 +81,7 @@ GameEvents.OnSceneChanged += (newScene) => {
 | ↑↓        | 命令历史导航              |
 | Enter      | 执行命令                  |
 
-> 所有按键绑定可在`InputSystem.inputsettings`中修改
+> 所有按键绑定可在`GameControl.inputsettings`中修改
 
 > 所有图表使用 Mermaid 设计，导出为 PNG 格式  
-> 最后更新: {2025.6.24}
+> 最后更新: {2025.6.26}

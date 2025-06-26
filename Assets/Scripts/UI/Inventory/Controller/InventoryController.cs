@@ -48,21 +48,12 @@ namespace Inventory.controller
             // 使用InputSystem检测快捷键
             if (_inputActions.GamePlay.Inventory.triggered)
             {
-                ToggleInventory();
+                GameEvents.TriggerInventoryShow(true);
             }
         }
         #endregion
 
-        #region 方法
-        public void ToggleInventory()
-        {
-            bool isVisible = !view.gameObject.activeSelf;
-            view.SetVisible(isVisible);
-            
-            // 暂停游戏时间（可选）
-            Time.timeScale = isVisible ? 0 : 1;
-        }
-        
+        #region 方法    
         // 添加物品
         public bool AddItem(string itemID, int quantity = 1)
         {
@@ -134,6 +125,4 @@ namespace Inventory.controller
         }
         #endregion
     }
-
-
 }

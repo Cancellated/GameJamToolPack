@@ -45,6 +45,7 @@ namespace UI.Managers
         }
 
         public UIState currentState = UIState.None;
+        private GameControl _inputActions;
 
         #endregion
 
@@ -52,6 +53,9 @@ namespace UI.Managers
 
         protected override void Awake()
         {
+            base.Awake();
+            _inputActions = new GameControl();  // 初始化输入系统
+            
             // 初始隐藏所有UI
             HideAllUI();
 
@@ -108,6 +112,8 @@ namespace UI.Managers
             // 处理互斥关系
             if (show)
             {
+                _inputActions.GamePlay.Disable();
+                _inputActions.UI.Enable();
                 switch (state)
                 {
                     case UIState.MainMenu:
