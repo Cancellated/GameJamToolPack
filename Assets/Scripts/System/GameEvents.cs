@@ -179,7 +179,25 @@ namespace MyGame.System
             Debug.Log($"[GameEvents] HUD显示：{show}");
             OnHUDShow?.Invoke(show);
         }
-
+        
+        /// <summary>
+        /// 显示或隐藏控制台
+        /// </summary>
+        public static event Action<bool> OnConsoleShow;
+        public static void TriggerConsoleShow(bool show)
+        {
+            Debug.Log($"[GameEvents] 控制台显示：{show}");
+            OnConsoleShow?.Invoke(show);
+        }
+        /// <summary>
+        /// 显示或隐藏背包
+        /// </summary>
+        public static event Action<bool> OnInventoryShow;
+        public static void TriggerInventoryShow(bool show)
+        {
+            Debug.Log($"[GameEvents] 背包显示：{show}");
+            OnInventoryShow?.Invoke(show);
+        }
             #region UI切换事件
 
         /// <summary>
@@ -199,7 +217,5 @@ namespace MyGame.System
 
             #endregion
         #endregion
-
-
     }
 }

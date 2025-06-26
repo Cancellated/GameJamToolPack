@@ -8,7 +8,7 @@
 ![系统数据流图](Assets/Readme/diagrams/data-flow.png)
 
 ### 状态管理流程
-![GameManager 状态机](Assets/Readme/diagrams/state-machine.png)
+![GameManager 状态机](Assets/Readme/diagrams/game-state-machine.png)
 
 ## 🛠 使用说明
 
@@ -36,6 +36,18 @@ GameManager.Instance.ChangeState(GameState.Paused);
 | F          | 交互/拾取                 | PlayerController.Interact |
 | ESC        | 暂停菜单                  | GameManager.PauseGame |
 
+
+### 背包系统控制
+| 按键       | 功能描述                  | 对应方法               |
+|------------|--------------------------|-----------------------|
+| 鼠标左键   | 选择物品                  | InventorySlot.OnSlotClick |
+| 拖拽       | 移动物品                  | InventorySlot.OnBeginDrag/OnEndDrag |
+| 右键       | 使用物品                  | InventoryController.UseItem |
+
+![背包管理](Assets/Readme/diagrams/inventory.png)
+
+![背包管理数据流](Assets/Readme/diagrams/inventory-mvc.png)
+
 ## 🔄 场景切换
 
 ### 场景管理流程
@@ -53,6 +65,15 @@ GameEvents.OnSceneChanged += (newScene) => {
 ```
 
 > 场景切换会触发GameManager的状态重置，请确保在场景切换前保存必要数据。
+
+## 🖥 UI管理系统
+
+### 核心功能
+- **全局UI管理**：通过单例模式管理所有UI界面
+- **状态管理**：定义7种UI状态(主菜单、暂停菜单等)并处理互斥关系
+- **动画系统**：支持两种动画实现方式(协程淡入淡出和Animator状态机)
+- **事件驱动**：通过GameEvents与其他模块通信
+![UI管理流程](Assets/Readme/diagrams/UI-manager.png)
 
 ### 调试控制台（功能待实现）
 | 快捷键     | 功能描述                  |

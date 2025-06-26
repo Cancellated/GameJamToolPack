@@ -18,11 +18,15 @@ namespace UI.Managers
         public CanvasGroup resultPanel;
         public CanvasGroup hudPanel;
         public CanvasGroup loadingPanel;
-        public CanvasGroup console;
+        public CanvasGroup consolePanel;
+        public CanvasGroup inventoryPanel;
 
         [Header("动画设置")]
         [Tooltip("UI淡入淡出动画时长（秒）")]
         public float fadeDuration = 0.3f;
+
+        [Header("动画组件")]
+        public Animator inventoryAnimator;  // 背包动画组件
 
         #endregion
 
@@ -36,7 +40,8 @@ namespace UI.Managers
             ResultPanel,
             HUD,
             Loading,
-            Console
+            Console,
+            Inventory,
         }
 
         public UIState currentState = UIState.None;
@@ -56,6 +61,9 @@ namespace UI.Managers
             GameEvents.OnPauseMenuShow += ShowPauseMenu;
             GameEvents.OnResultPanelShow += ShowResultPanel;
             GameEvents.OnHUDShow += ShowHUD;
+            GameEvents.OnConsoleShow += ShowConsole;
+            GameEvents.OnInventoryShow += ShowInventory;
+            // 加载界面显隐处理方法
             GameEvents.OnSceneLoadStart += ShowLoading;
             GameEvents.OnSceneLoadComplete += HideLoading;
         }
@@ -68,6 +76,8 @@ namespace UI.Managers
             GameEvents.OnPauseMenuShow -= ShowPauseMenu;
             GameEvents.OnResultPanelShow -= ShowResultPanel;
             GameEvents.OnHUDShow -= ShowHUD;
+            GameEvents.OnConsoleShow -= ShowConsole;
+            GameEvents.OnInventoryShow -= ShowInventory;
             GameEvents.OnSceneLoadStart -= ShowLoading;
             GameEvents.OnSceneLoadComplete -= HideLoading;
         }
@@ -77,7 +87,7 @@ namespace UI.Managers
         #region UI控制核心方法
 
         /// <summary>
-        /// 隐藏所有UI界面
+        /// 隐藏所有UI界面(控制台除外)
         /// </summary>
         private void HideAllUI()
         {
@@ -86,6 +96,7 @@ namespace UI.Managers
             ShowCanvasGroup(resultPanel, false);
             ShowCanvasGroup(hudPanel, false);
             ShowCanvasGroup(loadingPanel, false);
+            ShowCanvasGroup(inventoryPanel, false);
             currentState = UIState.None;
         }
 
@@ -110,6 +121,10 @@ namespace UI.Managers
                     case UIState.ResultPanel:
                         SetUIState(UIState.PauseMenu, false);
                         SetUIState(UIState.HUD, false);
+                        break;
+                    case UIState.Inventory:
+                        SetUIState(UIState.MainMenu, false);
+                        SetUIState(UIState.PauseMenu, false);
                         break;
                     case UIState.Loading:
                         // 加载界面不与其他UI互斥
@@ -137,6 +152,12 @@ namespace UI.Managers
                     break;
                 case UIState.HUD:
                     ShowCanvasGroup(hudPanel, show);
+                    break;
+                case UIState.Console:
+                    SetCanvasGroup(consolePanel, show);
+                    break;
+                case UIState.Inventory:
+                    ShowCanvasGroup(inventoryPanel, show);
                     break;
                 case UIState.Loading:
                     ShowCanvasGroup(loadingPanel, show);
@@ -192,10 +213,22 @@ namespace UI.Managers
                 group.blocksRaycasts = false;
             }
         }
+        
+        /// <summary>
+        /// 直接显隐，不带动画
+        /// </summary>
+        /// <param name="canvasGroup">要设置的CanvasGroup</param>
+        /// <param name="show">是否显示</param>
+        private void SetCanvasGroup(CanvasGroup canvasGroup, bool show)
+        {
+            canvasGroup.alpha = show ? 1f : 0f;
+            canvasGroup.interactable = show;
+            canvasGroup.blocksRaycasts = show;
+        }
             #endregion
             
             #region 独有UI处理方法
-                #region 加载界面显隐处理方法
+                #region 加载界面显隐处理方法(因为加载界面用的参数不同所以单独拿出来)
         /// <summary>
         /// 显示加载界面
         /// </summary>
@@ -215,7 +248,7 @@ namespace UI.Managers
             #endregion
         #endregion
 
-        #region UI事件响应
+        #region UI事件响应(独特UI处理)
 
         private void ShowMainMenu(bool show)
         {
@@ -238,6 +271,29 @@ namespace UI.Managers
             SetUIState(UIState.HUD, show);
         }
 
+        private void ShowConsole(bool show)
+        {
+            SetUIState(UIState.Console, show);
+        }
+        /// <summary>
+        /// 使用动画状态机管理背包显隐，制作独特动画
+        /// <param name="IsOpen">动画状态机参数</param>
+        /// 确保状态机有一个布尔参数IsOpen以及Open和Close状态
+        /// </summary>
+        private void ShowInventory(bool show) 
+        {
+            if (inventoryAnimator != null)
+            {
+                inventoryAnimator.SetBool("IsOpen", show);
+                SetUIState(UIState.Inventory, show);
+            }
+            else
+            {
+                // 若没有动画状态机回退到原有动画逻辑
+                ShowCanvasGroup(inventoryPanel, show);
+            }
+        }
+        
         private void OnMenuShow(UIState state, bool show)
         {
             SetUIState(state, show);

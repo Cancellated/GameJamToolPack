@@ -736,8 +736,10 @@ MonoBehaviour:
   resultPanel: {fileID: 0}
   hudPanel: {fileID: 0}
   loadingPanel: {fileID: 0}
-  console: {fileID: 0}
+  consolePanel: {fileID: 0}
+  inventoryPanel: {fileID: 0}
   fadeDuration: 0.3
+  inventoryAnimator: {fileID: 0}
   currentState: 0
 --- !u!1 &813848618
 GameObject:
@@ -908,6 +910,37 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!1 &1185318795
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1185318796}
+  m_Layer: 0
+  m_Name: Inventory
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1185318796
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1185318795}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 978.01263, y: 594.7658, z: -884.1474}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1604512013
 GameObject:
   m_ObjectHideFlags: 0
@@ -1092,7 +1125,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 1626208506}
   m_TextComponent: {fileID: 0}
   m_Placeholder: {fileID: 0}
   m_ContentType: 0
@@ -1199,3 +1232,4 @@ SceneRoots:
   - {fileID: 66391496}
   - {fileID: 810887957}
   - {fileID: 813848621}
+  - {fileID: 1185318796}

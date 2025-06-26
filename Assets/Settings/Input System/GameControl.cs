@@ -89,6 +89,15 @@ public partial class @GameControl: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Inventory"",
+                    ""type"": ""Button"",
+                    ""id"": ""6bba8085-cdb3-4645-ad97-51f9f8bcee6f"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -386,6 +395,17 @@ public partial class @GameControl: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": "";Gamepad"",
                     ""action"": ""Pause"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0fd84953-1688-44ef-b6cc-a592a51a09d4"",
+                    ""path"": ""<Keyboard>/b"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""Inventory"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -980,6 +1000,7 @@ public partial class @GameControl: IInputActionCollection2, IDisposable
         m_GamePlay_Jump = m_GamePlay.FindAction("Jump", throwIfNotFound: true);
         m_GamePlay_Console = m_GamePlay.FindAction("Console", throwIfNotFound: true);
         m_GamePlay_Pause = m_GamePlay.FindAction("Pause", throwIfNotFound: true);
+        m_GamePlay_Inventory = m_GamePlay.FindAction("Inventory", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1066,6 +1087,7 @@ public partial class @GameControl: IInputActionCollection2, IDisposable
     private readonly InputAction m_GamePlay_Jump;
     private readonly InputAction m_GamePlay_Console;
     private readonly InputAction m_GamePlay_Pause;
+    private readonly InputAction m_GamePlay_Inventory;
     public struct GamePlayActions
     {
         private @GameControl m_Wrapper;
@@ -1077,6 +1099,7 @@ public partial class @GameControl: IInputActionCollection2, IDisposable
         public InputAction @Jump => m_Wrapper.m_GamePlay_Jump;
         public InputAction @Console => m_Wrapper.m_GamePlay_Console;
         public InputAction @Pause => m_Wrapper.m_GamePlay_Pause;
+        public InputAction @Inventory => m_Wrapper.m_GamePlay_Inventory;
         public InputActionMap Get() { return m_Wrapper.m_GamePlay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -1107,6 +1130,9 @@ public partial class @GameControl: IInputActionCollection2, IDisposable
             @Pause.started += instance.OnPause;
             @Pause.performed += instance.OnPause;
             @Pause.canceled += instance.OnPause;
+            @Inventory.started += instance.OnInventory;
+            @Inventory.performed += instance.OnInventory;
+            @Inventory.canceled += instance.OnInventory;
         }
 
         private void UnregisterCallbacks(IGamePlayActions instance)
@@ -1132,6 +1158,9 @@ public partial class @GameControl: IInputActionCollection2, IDisposable
             @Pause.started -= instance.OnPause;
             @Pause.performed -= instance.OnPause;
             @Pause.canceled -= instance.OnPause;
+            @Inventory.started -= instance.OnInventory;
+            @Inventory.performed -= instance.OnInventory;
+            @Inventory.canceled -= instance.OnInventory;
         }
 
         public void RemoveCallbacks(IGamePlayActions instance)
@@ -1321,6 +1350,7 @@ public partial class @GameControl: IInputActionCollection2, IDisposable
         void OnJump(InputAction.CallbackContext context);
         void OnConsole(InputAction.CallbackContext context);
         void OnPause(InputAction.CallbackContext context);
+        void OnInventory(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {
