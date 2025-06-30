@@ -3,8 +3,12 @@
   "WorkspaceRootPath": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{F0329F54-27E1-9EA8-51DD-BB6B802DC53E}|Assembly-CSharp.csproj|d:\\unity\\unity_projects\\game jam tool pack\\assets\\resources\\textassets\\ui.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{F0329F54-27E1-9EA8-51DD-BB6B802DC53E}|Assembly-CSharp.csproj|solutionrelative:assets\\resources\\textassets\\ui.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
+      "AbsoluteMoniker": "D:0:0:{F0329F54-27E1-9EA8-51DD-BB6B802DC53E}|Assembly-CSharp.csproj|d:\\unity\\unity_projects\\game jam tool pack\\assets\\scripts\\ui\\inventory\\controller\\inventorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F0329F54-27E1-9EA8-51DD-BB6B802DC53E}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\ui\\inventory\\controller\\inventorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Resources\\TextAssets\\ui.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Resources\\TextAssets\\ui.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Scripts\\Inventory\\Data\\InventoryItem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -27,10 +31,6 @@
       "RelativeMoniker": "D:0:0:{F0329F54-27E1-9EA8-51DD-BB6B802DC53E}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\ui\\uimanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F0329F54-27E1-9EA8-51DD-BB6B802DC53E}|Assembly-CSharp.csproj|D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\assets\\scripts\\managers\\gamemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F0329F54-27E1-9EA8-51DD-BB6B802DC53E}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\managers\\gamemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{F0329F54-27E1-9EA8-51DD-BB6B802DC53E}|Assembly-CSharp.csproj|D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\assets\\scripts\\system\\singleton.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F0329F54-27E1-9EA8-51DD-BB6B802DC53E}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\system\\singleton.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
@@ -47,30 +47,30 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "ui.txt",
-              "DocumentMoniker": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Resources\\TextAssets\\ui.txt",
-              "RelativeDocumentMoniker": "Assets\\Resources\\TextAssets\\ui.txt",
-              "ToolTip": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Resources\\TextAssets\\ui.txt",
-              "RelativeToolTip": "Assets\\Resources\\TextAssets\\ui.txt",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
-              "WhenOpened": "2025-06-26T07:52:17.271Z",
+              "Title": "InventoryController.cs",
+              "DocumentMoniker": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Scripts\\UI\\Inventory\\Controller\\InventoryController.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\UI\\Inventory\\Controller\\InventoryController.cs",
+              "ToolTip": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Scripts\\UI\\Inventory\\Controller\\InventoryController.cs",
+              "RelativeToolTip": "Assets\\Scripts\\UI\\Inventory\\Controller\\InventoryController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-30T15:35:51.065Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "InventoryItem.cs",
-              "DocumentMoniker": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Scripts\\Inventory\\Data\\InventoryItem.cs",
-              "RelativeDocumentMoniker": "Assets\\Scripts\\Inventory\\Data\\InventoryItem.cs",
-              "ToolTip": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Scripts\\Inventory\\Data\\InventoryItem.cs",
-              "RelativeToolTip": "Assets\\Scripts\\Inventory\\Data\\InventoryItem.cs",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-26T01:12:13.191Z"
+              "Title": "ui.txt",
+              "DocumentMoniker": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Resources\\TextAssets\\ui.txt",
+              "RelativeDocumentMoniker": "Assets\\Resources\\TextAssets\\ui.txt",
+              "ToolTip": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Resources\\TextAssets\\ui.txt",
+              "RelativeToolTip": "Assets\\Resources\\TextAssets\\ui.txt",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
+              "WhenOpened": "2025-06-26T07:52:17.271Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "PlayerController.cs",
               "DocumentMoniker": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Scripts\\Control\\PlayerController.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Control\\PlayerController.cs",
@@ -82,7 +82,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "GameEvents.cs",
               "DocumentMoniker": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Scripts\\System\\GameEvents.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\System\\GameEvents.cs",
@@ -94,7 +94,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "DebugConsole.cs",
               "DocumentMoniker": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Scripts\\DevTools\\DebugConsole.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\DevTools\\DebugConsole.cs",
@@ -106,7 +106,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "UIManager.cs",
               "DocumentMoniker": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Scripts\\UI\\UIManager.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\UI\\UIManager.cs",
@@ -130,15 +130,14 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "GameManager.cs",
-              "DocumentMoniker": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Scripts\\Managers\\GameManager.cs",
-              "RelativeDocumentMoniker": "Assets\\Scripts\\Managers\\GameManager.cs",
-              "ToolTip": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Scripts\\Managers\\GameManager.cs",
-              "RelativeToolTip": "Assets\\Scripts\\Managers\\GameManager.cs",
-              "ViewState": "AgIAABEAAAAAAAAAAAAAwLwAAAA4AAAAAAAAAA==",
+              "DocumentIndex": 2,
+              "Title": "InventoryItem.cs",
+              "DocumentMoniker": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Scripts\\Inventory\\Data\\InventoryItem.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Inventory\\Data\\InventoryItem.cs",
+              "ToolTip": "D:\\unity\\Unity_Projects\\Game Jam Tool Pack\\Assets\\Scripts\\Inventory\\Data\\InventoryItem.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Inventory\\Data\\InventoryItem.cs",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-19T03:01:21.917Z"
+              "WhenOpened": "2025-06-26T01:12:13.191Z"
             }
           ]
         }

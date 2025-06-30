@@ -72,7 +72,7 @@ GameEvents.OnSceneChanged += (newScene) => {
 - **状态管理**：定义7种UI状态(主菜单、暂停菜单等)并处理互斥关系
 - **动画系统**：支持两种动画实现方式(协程淡入淡出和Animator状态机)
 - **事件驱动**：通过GameEvents与其他模块通信
-![UI管理流程](Assets/Readme/diagrams/UI-manager.png)
+![UI管理流程](Assets/Readme/diagrams/ui-manager.png)
 
 ### 调试控制台（功能待实现）
 | 快捷键     | 功能描述                  |

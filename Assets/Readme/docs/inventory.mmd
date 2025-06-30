@@ -5,7 +5,7 @@ sequenceDiagram
     participant InventoryModel
     participant InventoryView
     
-    Player->>InputSystem: 按下I键
+    Player->>InputSystem: 按下B键
     InputSystem->>InventoryController: ToggleInventory()
     InventoryController->>InventoryView: SetVisible(true)
     InventoryView->>InventoryModel: 请求数据

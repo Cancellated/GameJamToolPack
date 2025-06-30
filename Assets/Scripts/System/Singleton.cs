@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace MyGame.System
+namespace MyGame
 {
     /// <summary>
     /// 通用MonoBehaviour单例基类。
