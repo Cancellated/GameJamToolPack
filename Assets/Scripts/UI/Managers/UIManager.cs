@@ -1,5 +1,6 @@
 using System.Collections;
-using MyGame.System;
+using MyGame;
+using MyGame.Events;
 using UnityEngine;
 
 namespace UI.Managers
