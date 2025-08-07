@@ -3,7 +3,7 @@ using System;
 using UI.Managers;
 using UnityEngine;
 
-namespace MyGame.System
+namespace MyGame.Events
 {
 
     /// <summary>
