@@ -25,6 +25,7 @@
 ._*
 Thumbs.db
 
+
 # Tool configuration directories
 .clinerules/
 .codex/
@@ -56,4 +57,7 @@ Thumbs.db
 .vscode/
 .windsurf/
 rules/
-#       
+.opencode.json
+.mcp.json
+AGENTS.md
+CLAUDE.md
