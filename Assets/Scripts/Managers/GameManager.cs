@@ -130,7 +130,7 @@ namespace MyGame.Managers
 
         #endregion
 
-        #region 游戏流程控制-注意：其他模块应通过GameEvents触发这些方法，而不是直接调用
+        #region 游戏流程控制-注意:其他模块应通过GameEvents触发这些方法,而不是直接调用
 
         /// <summary>
         /// 开始游戏，进入Playing状态。
