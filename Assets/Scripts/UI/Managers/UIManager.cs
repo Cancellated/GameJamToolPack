@@ -1,7 +1,7 @@
 using System.Collections;
-using MyGame.Events;
-using UnityEngine;
 using MyGame;
+using MyGame.System;
+using UnityEngine;
 
 namespace UI.Managers
 {
@@ -21,6 +21,8 @@ namespace UI.Managers
         public CanvasGroup loadingPanel;
         public CanvasGroup consolePanel;
         public CanvasGroup inventoryPanel;
+        public CanvasGroup settingsPanel;
+        public CanvasGroup aboutPanel;
 
         [Header("动画设置")]
         [Tooltip("UI淡入淡出动画时长（秒）")]
@@ -43,6 +45,8 @@ namespace UI.Managers
             Loading,
             Console,
             Inventory,
+            SettingsPanel,
+            AboutPanel,
         }
 
         public UIState currentState = UIState.None;
@@ -68,11 +72,31 @@ namespace UI.Managers
             GameEvents.OnHUDShow += ShowHUD;
             GameEvents.OnConsoleShow += ShowConsole;
             GameEvents.OnInventoryShow += ShowInventory;
+            GameEvents.OnSettingsPanelShow += ShowSettingsPanel;
+            GameEvents.OnAboutPanelShow += ShowAboutPanel;
             // 加载界面显隐处理方法
             GameEvents.OnSceneLoadStart += ShowLoading;
             GameEvents.OnSceneLoadComplete += HideLoading;
         }
 
+        #region 面板显示处理方法
+
+        /// <summary>
+        /// 显示或隐藏设置面板
+        /// </summary>
+        private void ShowSettingsPanel(bool show)
+        {
+            SetUIState(UIState.SettingsPanel, show);
+        }
+
+        /// <summary>
+        /// 显示或隐藏关于面板
+        /// </summary>
+        private void ShowAboutPanel(bool show)
+        {
+            SetUIState(UIState.AboutPanel, show);
+        }
+        #endregion
         private void OnDestroy()
         {
             // 注销事件监听
@@ -83,6 +107,8 @@ namespace UI.Managers
             GameEvents.OnHUDShow -= ShowHUD;
             GameEvents.OnConsoleShow -= ShowConsole;
             GameEvents.OnInventoryShow -= ShowInventory;
+            GameEvents.OnSettingsPanelShow -= ShowSettingsPanel;
+            GameEvents.OnAboutPanelShow -= ShowAboutPanel;
             GameEvents.OnSceneLoadStart -= ShowLoading;
             GameEvents.OnSceneLoadComplete -= HideLoading;
         }
@@ -102,6 +128,8 @@ namespace UI.Managers
             ShowCanvasGroup(hudPanel, false);
             ShowCanvasGroup(loadingPanel, false);
             ShowCanvasGroup(inventoryPanel, false);
+            ShowCanvasGroup(settingsPanel, false);
+            ShowCanvasGroup(aboutPanel, false);
             currentState = UIState.None;
         }
 
@@ -132,6 +160,16 @@ namespace UI.Managers
                     case UIState.Inventory:
                         SetUIState(UIState.MainMenu, false);
                         SetUIState(UIState.PauseMenu, false);
+                        break;
+                    case UIState.SettingsPanel:
+                        SetUIState(UIState.MainMenu, false);
+                        SetUIState(UIState.PauseMenu, false);
+                        SetUIState(UIState.ResultPanel, false);
+                        break;
+                    case UIState.AboutPanel:
+                        SetUIState(UIState.MainMenu, false);
+                        SetUIState(UIState.PauseMenu, false);
+                        SetUIState(UIState.ResultPanel, false);
                         break;
                     case UIState.Loading:
                         // 加载界面不与其他UI互斥
@@ -168,6 +206,12 @@ namespace UI.Managers
                     break;
                 case UIState.Loading:
                     ShowCanvasGroup(loadingPanel, show);
+                    break;
+                case UIState.SettingsPanel:
+                    ShowCanvasGroup(settingsPanel, show);
+                    break;
+                case UIState.AboutPanel:
+                    ShowCanvasGroup(aboutPanel, show);
                     break;
             }
         }
