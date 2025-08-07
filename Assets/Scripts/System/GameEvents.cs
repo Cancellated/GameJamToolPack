@@ -12,14 +12,6 @@ namespace MyGame.Events
     /// </summary>
     public static class GameEvents
     {
-        /// <summary>
-        /// 统一日志输出方法，自动添加[GameEvents]前缀
-        /// </summary>
-        /// <param name="message">日志消息</param>
-        private static void Log(string message)
-        {
-            Debug.Log($"[GameEvents] {message}");
-        }
         #region 游戏流程事件
 
         /// <summary>
@@ -52,7 +44,7 @@ namespace MyGame.Events
         /// </summary>
         public static void TriggerGameStart()
         {
-            Log("触发游戏开始事件");
+            Debug.Log("[GameEvents] 触发游戏开始事件");
             OnGameStart?.Invoke();
         }
 
@@ -61,7 +53,7 @@ namespace MyGame.Events
         /// </summary>
         public static void TriggerGamePause()
         {
-            Log("触发游戏暂停事件");
+            Debug.Log("[GameEvents] 触发游戏暂停事件");
             OnGamePause?.Invoke();
         }
 
@@ -70,7 +62,7 @@ namespace MyGame.Events
         /// </summary>
         public static void TriggerGameResume()
         {
-            Log("触发游戏继续事件");
+            Debug.Log("[GameEvents] 触发游戏继续事件");
             OnGameResume?.Invoke();
         }
 
@@ -80,7 +72,7 @@ namespace MyGame.Events
         /// <param name="isWin">true为胜利，false为失败</param>
         public static void TriggerGameOver(bool isWin)
         {
-            Log($"触发游戏结束事件，胜利：{isWin}");
+            Debug.Log($"[GameEvents] 触发游戏结束事件，胜利：{isWin}");
             OnGameOver?.Invoke(isWin);
         }
 
@@ -91,7 +83,7 @@ namespace MyGame.Events
         /// <param name="to">新状态</param>
         public static void TriggerGameStateChanged(GameState from, GameState to)
         {
-            Log($"游戏状态变更：{from} -> {to}");
+            Debug.Log($"[GameEvents] 游戏状态变更：{from} -> {to}");
             OnGameStateChanged?.Invoke(from, to);
         }
 
@@ -120,7 +112,7 @@ namespace MyGame.Events
         /// <param name="sceneName">场景名称</param>
         public static void TriggerSceneLoadStart(string sceneName)
         {
-            Log($"开始加载场景: {sceneName}");
+            Debug.Log($"[GameEvents] 开始加载场景: {sceneName}");
             OnSceneLoadStart?.Invoke(sceneName);
         }
         
@@ -130,7 +122,7 @@ namespace MyGame.Events
         /// <param name="sceneName">场景名称</param>
         public static void TriggerSceneLoadComplete(string sceneName)
         {
-            Log($"场景加载完成: {sceneName}");
+            Debug.Log($"[GameEvents] 场景加载完成: {sceneName}");
             OnSceneLoadComplete?.Invoke(sceneName);
         }
         
@@ -140,7 +132,7 @@ namespace MyGame.Events
         /// <param name="sceneName">场景名称</param>
         public static void TriggerSceneUnload(string sceneName)
         {
-            Log($"卸载场景: {sceneName}");
+            Debug.Log($"[GameEvents] 卸载场景: {sceneName}");
             OnSceneUnload?.Invoke(sceneName);
         }
 
@@ -154,7 +146,7 @@ namespace MyGame.Events
         public static event Action<bool> OnMainMenuShow;
         public static void TriggerMainMenuShow(bool show)
         {
-            Log($"主菜单显示：{show}");
+            Debug.Log($"[GameEvents] 主菜单显示：{show}");
             OnMainMenuShow?.Invoke(show);
         }
 
@@ -164,7 +156,7 @@ namespace MyGame.Events
         public static event Action<bool> OnPauseMenuShow;
         public static void TriggerPauseMenuShow(bool show)
         {
-            Log($"暂停菜单显示：{show}");
+            Debug.Log($"[GameEvents] 暂停菜单显示：{show}");
             OnPauseMenuShow?.Invoke(show);
         }
 
@@ -174,7 +166,7 @@ namespace MyGame.Events
         public static event Action<bool> OnResultPanelShow;
         public static void TriggerResultPanelShow(bool isWin)
         {
-            Log($"结算界面显示，胜利：{isWin}");
+            Debug.Log($"[GameEvents] 结算界面显示，胜利：{isWin}");
             OnResultPanelShow?.Invoke(isWin);
         }
 
@@ -184,7 +176,7 @@ namespace MyGame.Events
         public static event Action<bool> OnHUDShow;
         public static void TriggerHUDShow(bool show)
         {
-            Log($"HUD显示：{show}");
+            Debug.Log($"[GameEvents] HUD显示：{show}");
             OnHUDShow?.Invoke(show);
         }
         
@@ -194,7 +186,7 @@ namespace MyGame.Events
         public static event Action<bool> OnConsoleShow;
         public static void TriggerConsoleShow(bool show)
         {
-            Log($"控制台显示：{show}");
+            Debug.Log($"[GameEvents] 控制台显示：{show}");
             OnConsoleShow?.Invoke(show);
         }
         /// <summary>
@@ -203,30 +195,9 @@ namespace MyGame.Events
         public static event Action<bool> OnInventoryShow;
         public static void TriggerInventoryShow(bool show)
         {
-            Log($"背包显示：{show}");
+            Debug.Log($"[GameEvents] 背包显示：{show}");
             OnInventoryShow?.Invoke(show);
         }
-
-        /// <summary>
-        /// 显示或隐藏设置面板
-        /// </summary>
-        public static event Action<bool> OnSettingsPanelShow;
-        public static void TriggerSettingsPanelShow(bool show)
-        {
-            Log($"设置面板显示：{show}");
-            OnSettingsPanelShow?.Invoke(show);
-        }
-
-        /// <summary>
-        /// 显示或隐藏关于面板
-        /// </summary>
-        public static event Action<bool> OnAboutPanelShow;
-        public static void TriggerAboutPanelShow(bool show)
-        {
-            Log($"关于面板显示：{show}");
-            OnAboutPanelShow?.Invoke(show);
-        }
-
             #region UI切换事件
 
         /// <summary>
@@ -240,7 +211,7 @@ namespace MyGame.Events
         /// </summary>
         public static void TriggerMenuShow(UIManager.UIState state, bool show)
         {
-            Log($"菜单切换：{state} 显示：{show}");
+            Debug.Log($"[GameEvents] 菜单切换：{state} 显示：{show}");
             OnMenuShow?.Invoke(state, show);
         }
 
