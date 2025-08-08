@@ -238,7 +238,7 @@ namespace MyGame.DevTool
         {
             if (buttonPrefab == null) return;
             
-            var buttonObj = Instantiate(buttonPrefab, parent != null ? parent : transform);
+            var buttonObj = Instantiate(buttonPrefab, parent ?? transform);
             var button = buttonObj.GetComponent<Button>();
             var text = buttonObj.GetComponentInChildren<Text>();
             

@@ -55,6 +55,7 @@ Thumbs.db
 .vs/
 .vscode/
 .windsurf/
+.codebuddy/
 rules/
 .opencode.json
 .mcp.json

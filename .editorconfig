@@ -1,0 +1,25 @@
+# 根目录设置，所有子目录继承此配置
+root = true
+
+[*]
+# 通用规则
+charset = utf-8
+indent_style = space
+indent_size = 4
+end_of_line = crlf
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.cs]
+# C#特定规则
+# 忽略Unity生命周期函数的未使用警告
+# 保持其他未使用私有成员的警告
+# Unity常见生命周期函数列表
+# 可以根据项目实际使用的生命周期函数进行调整
+dotnet_diagnostic.IDE0051.suppress_warnings = Awake,Start,Update,FixedUpdate,LateUpdate,OnEnable,OnDisable,OnDestroy,OnCollisionEnter,OnCollisionExit,OnCollisionStay,OnTriggerEnter,OnTriggerExit,OnTriggerStay,OnMouseDown,OnMouseUp,OnMouseDrag,OnMouseEnter,OnMouseExit,OnValidate,OnBecameVisible,OnBecameInvisible,OnLevelWasLoaded,OnApplicationPause,OnApplicationFocus,OnApplicationQuit
+# 可以根据需要添加其他规则，如命名规范等
+# dotnet_naming_rule.private_members_with_underscore.symbols = private_fields
+# dotnet_naming_rule.private_members_with_underscore.style = prefix_underscore
+# dotnet_naming_rule.private_members_with_underscore.enabled = true
+# dotnet_naming_style.prefix_underscore.capitalization = camel_case
+# dotnet_naming_style.prefix_underscore.required_prefix = m_
