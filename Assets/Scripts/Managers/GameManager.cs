@@ -24,6 +24,8 @@ namespace MyGame.Managers
     /// </summary>
     public class GameManager : Singleton<GameManager>
     {
+        private const string LOG_MODULE = LogModules.GAMEMANAGER;
+
         private GameControl _inputActions;
         #region 字段与属性
 
