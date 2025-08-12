@@ -1,0 +1,8 @@
+{
+  "files.exclude": {
+    "**/*.meta": true,
+    ".vs/**": true,
+    ".trae/**": true,
+    ".vscode/**": true
+  }
+}

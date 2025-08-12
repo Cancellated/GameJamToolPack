@@ -1,9 +1,9 @@
 using MyGame.Events;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+
 
 namespace MyGame.Managers
 {
@@ -101,7 +101,7 @@ namespace MyGame.Managers
         {
             if (!IsValidTransition(State, newState))
             {
-                Debug.LogWarning($"非法状态切换：{State}->{newState}");
+                Logger.Warning(LOG_MODULE, $"非法状态切换：{State}->{newState}", this);
                 return false;
             }
 
@@ -143,7 +143,7 @@ namespace MyGame.Managers
                 return;
             // TODO: 初始化关卡、玩家等
             Time.timeScale = 1f;
-            Debug.Log("游戏开始");
+            Logger.Log(LOG_MODULE, "游戏开始", this);
         }
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace MyGame.Managers
                                                         //若不合法输出日志返回false，合法则切换状态并回true
                 return;
             Time.timeScale = 0f;
-            Debug.Log("游戏暂停");
+            Logger.Log(LOG_MODULE, "游戏暂停", this);
         }
 
         /// <summary>
@@ -166,7 +166,7 @@ namespace MyGame.Managers
             if (!TryChangeState(GameState.Playing))
                 return;
             Time.timeScale = 1f;
-            Debug.Log("游戏继续");
+            Logger.Log(LOG_MODULE, "游戏继续", this);
         }
 
         /// <summary>
@@ -178,7 +178,7 @@ namespace MyGame.Managers
             if (!TryChangeState(GameState.GameOver))    
                 return;
             Time.timeScale = 0f;
-            Debug.Log($"游戏结束，胜利：{isWin}");
+            Logger.Log(LOG_MODULE, $"游戏结束，胜利：{isWin}", this);
             // TODO: 显示结算界面等
         }
 
