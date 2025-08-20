@@ -25,18 +25,21 @@
 GameManager.Instance.ChangeState(GameState.Paused);
 ```
 
-## 🎮 操作控制
+## 📂 模块文档
 
-### 基础控制(以键鼠为例)
-| 按键       | 功能描述                  | 对应方法               |
-|------------|--------------------------|-----------------------|
-| WASD       | 角色移动                  | PlayerController.Move |
-| 空格       | 跳跃                      | PlayerController.Jump |
-| F          | 交互/拾取                 | PlayerController.Interact |
-| ESC        | 暂停菜单                  | GameManager.PauseGame |
+项目采用模块化设计，每个模块都有独立的文档：
 
+| 模块名称 | 路径 | 描述 |
+|----------|------|------|
+| **Control** | `Assets/Scripts/Control/` | 玩家输入和游戏控制逻辑 |
+| **DevTools** | `Assets/Scripts/DevTools/` | 调试工具和开发辅助功能 |
 
-### 背包系统控制
+> 更多模块文档将逐步拆分整理...
+
+### 操作控制
+详细的控制说明请参考 [Control模块文档](Assets/Scripts/Control/README.md)
+
+### 背包系统
 | 按键       | 功能描述                  | 对应方法               |
 |------------|--------------------------|-----------------------|
 | 鼠标左键   | 选择物品                  | InventorySlot.OnSlotClick |
@@ -74,14 +77,15 @@ GameEvents.OnSceneChanged += (newScene) => {
 - **事件驱动**：通过GameEvents与其他模块通信
 ![UI管理流程](Assets/Readme/diagrams/ui-manager.png)
 
-### 调试控制台（功能待实现）
+### 调试控制台
+调试控制台功能已集成到 **DevTools模块**，支持游戏内命令行调试和可视化调试面板。
+
 | 快捷键     | 功能描述                  |
 |------------|--------------------------|
 | ~          | 打开/关闭控制台           |
-| ↑↓        | 命令历史导航              |
 | Enter      | 执行命令                  |
 
-> 所有按键绑定可在`GameControl.inputsettings`中修改
+详细功能说明请参考 [DevTools模块文档](Assets/Scripts/DevTools/README.md)
 
 > 所有图表使用 Mermaid 设计，导出为 PNG 格式  
 > 最后更新: {2025.6.26}

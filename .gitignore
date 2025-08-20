@@ -24,3 +24,8 @@
 .DS_Store*
 ._*
 Thumbs.db
+
+# Visual Studio
+.vs/
+.vscode/
+*.vsconfig
