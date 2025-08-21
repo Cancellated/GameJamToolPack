@@ -21,6 +21,7 @@ using UnityEngine;
         
         // 警告日志
         public static void Warning(string module, string message, UnityEngine.Object context = null)
+
         {
             if (currentLogLevel < LogLevel.Warning) return;
             
@@ -34,6 +35,7 @@ using UnityEngine;
         
         // 错误日志
         public static void Error(string module, string message, UnityEngine.Object context = null)
+
         {
             if (currentLogLevel < LogLevel.Error) return;
             
@@ -47,6 +49,7 @@ using UnityEngine;
         
         // 带颜色的日志
         public static void LogColor(string module, string message, Color color, UnityEngine.Object context = null)
+
         {
             if (currentLogLevel < LogLevel.Info) return;
             
@@ -63,6 +66,7 @@ using UnityEngine;
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
         [System.Diagnostics.Conditional("DEVELOPMENT_BUILD")]
         public static void DebugLog(string module, string message, UnityEngine.Object context = null)
+
         {
             string formatted = $"[{module}] 🐞 {message}";
             

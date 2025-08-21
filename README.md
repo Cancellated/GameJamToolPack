@@ -33,6 +33,8 @@ GameManager.Instance.ChangeState(GameState.Paused);
 |----------|------|------|
 | **Control** | `Assets/Scripts/Control/` | 玩家输入和游戏控制逻辑 |
 | **DevTools** | `Assets/Scripts/DevTools/` | 调试工具和开发辅助功能 |
+| **GameData** | `Assets/Scripts/GameData/` | 游戏数据持久化和存档管理 |
+| **System** | `Assets/Scripts/System/` | 基础系统功能（事件系统、单例模式、日志系统） |
 
 > 更多模块文档将逐步拆分整理...
 
