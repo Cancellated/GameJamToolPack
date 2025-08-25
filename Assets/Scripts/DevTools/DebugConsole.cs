@@ -1,12 +1,11 @@
-using MyGame.Managers;
-using MyGame.Events;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
-using UI.Managers;
 using System.Linq;
+using MyGame.Managers;
+using MyGame.Events;
 
 namespace MyGame.DevTool
 {
@@ -65,7 +64,7 @@ namespace MyGame.DevTool
         #region 命令系统
         
         // 命令字典：键为命令名称，值为(执行方法, 描述)
-        private Dictionary<string, (Action action, string description)> _commands = new();
+        private readonly Dictionary<string, (Action action, string description)> _commands = new();
 
         /// <summary>
         /// 初始化组件
@@ -238,7 +237,7 @@ namespace MyGame.DevTool
         {
             if (buttonPrefab == null) return;
             
-            var buttonObj = Instantiate(buttonPrefab, parent ?? transform);
+            var buttonObj = Instantiate(buttonPrefab, parent != null ? parent : transform);
             var button = buttonObj.GetComponent<Button>();
             var text = buttonObj.GetComponentInChildren<Text>();
             

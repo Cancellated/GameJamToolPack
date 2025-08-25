@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Logger;
 
 
 namespace MyGame.Managers
@@ -27,6 +28,12 @@ namespace MyGame.Managers
         private const string LOG_MODULE = LogModules.GAMEMANAGER;
 
         private GameControl _inputActions;
+
+        /// <summary>
+        /// 输入操作资产。
+        /// </summary>
+        [SerializeField] private GameControl _inputActionsAsset;
+
         #region 字段与属性
 
         /// <summary>
@@ -45,6 +52,19 @@ namespace MyGame.Managers
         {
             base.Awake();
             State = GameState.Init;
+
+            // 初始化输入操作
+            if (_inputActionsAsset != null)
+            {
+                _inputActions = _inputActionsAsset;
+                _inputActions.Enable();
+            }
+            else
+            {
+                Log.Error(LOG_MODULE, "Input actions asset is not assigned!");
+                _inputActions = new GameControl();
+                _inputActions.Enable();
+            }
 
             // 注册事件监听
             GameEvents.OnGameStart += StartGame;
@@ -101,7 +121,7 @@ namespace MyGame.Managers
         {
             if (!IsValidTransition(State, newState))
             {
-                Logger.Warning(LOG_MODULE, $"非法状态切换：{State}->{newState}", this);
+                Log.Warning(LOG_MODULE, $"非法状态切换：{State}->{newState}", this);
                 return false;
             }
 
@@ -143,7 +163,7 @@ namespace MyGame.Managers
                 return;
             // TODO: 初始化关卡、玩家等
             Time.timeScale = 1f;
-            Logger.Log(LOG_MODULE, "游戏开始", this);
+            Log.Info(LOG_MODULE, "游戏开始", this);
         }
 
         /// <summary>
@@ -155,7 +175,7 @@ namespace MyGame.Managers
                                                         //若不合法输出日志返回false，合法则切换状态并回true
                 return;
             Time.timeScale = 0f;
-            Logger.Log(LOG_MODULE, "游戏暂停", this);
+            Log.Info(LOG_MODULE, "游戏暂停", this);
         }
 
         /// <summary>
@@ -166,7 +186,7 @@ namespace MyGame.Managers
             if (!TryChangeState(GameState.Playing))
                 return;
             Time.timeScale = 1f;
-            Logger.Log(LOG_MODULE, "游戏继续", this);
+            Log.Info(LOG_MODULE, "游戏继续", this);
         }
 
         /// <summary>
@@ -178,7 +198,7 @@ namespace MyGame.Managers
             if (!TryChangeState(GameState.GameOver))    
                 return;
             Time.timeScale = 0f;
-            Logger.Log(LOG_MODULE, $"游戏结束，胜利：{isWin}", this);
+            Log.Info(LOG_MODULE, $"游戏结束，胜利：{isWin}", this);
             // TODO: 显示结算界面等
         }
 

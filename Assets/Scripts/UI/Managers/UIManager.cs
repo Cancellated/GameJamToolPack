@@ -1,9 +1,8 @@
 using System.Collections;
-using MyGame;
 using MyGame.Events;
 using UnityEngine;
 
-namespace UI.Managers
+namespace MyGame.Managers
 {
     /// <summary>
     /// 全局UI管理器，负责调度和管理所有UI界面。
@@ -25,7 +24,7 @@ namespace UI.Managers
         public CanvasGroup aboutPanel;
 
         [Header("动画设置")]
-        [Tooltip("UI淡入淡出动画时长（秒）")]
+        [Tooltip("UI淡入淡出动画时长(秒)")]
         public float fadeDuration = 0.3f;
 
         [Header("动画组件")]
