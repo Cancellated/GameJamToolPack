@@ -60,6 +60,9 @@ namespace MyGame.Managers
             base.Awake();
             _inputActions = new GameControl();  // 初始化输入系统
             
+            // 尝试从UIPrefabManager获取UI面板引用
+            InitializeUIPanelsFromPrefabManager();
+            
             // 初始隐藏所有UI
             HideAllUI();
 
@@ -76,6 +79,31 @@ namespace MyGame.Managers
             // 加载界面显隐处理方法
             GameEvents.OnSceneLoadStart += ShowLoading;
             GameEvents.OnSceneLoadComplete += HideLoading;
+        }
+
+        /// <summary>
+        /// 从UIPrefabManager初始化UI面板引用
+        /// 如果Inspector中没有赋值，则尝试从预制体管理器获取
+        /// </summary>
+        private void InitializeUIPanelsFromPrefabManager()
+        {
+            // 确保UIPrefabManager已经初始化
+            if (UIPrefabManager.Instance == null)
+            {
+                Debug.LogWarning("[UIManager] UIPrefabManager实例未找到，无法从预制体管理器初始化UI面板");
+                return;
+            }
+
+            // 尝试从预制体管理器获取面板引用
+            if (mainMenu == null) mainMenu = UIPrefabManager.Instance.GetOrCreateCanvasGroup(UIState.MainMenu);
+            if (pauseMenu == null) pauseMenu = UIPrefabManager.Instance.GetOrCreateCanvasGroup(UIState.PauseMenu);
+            if (resultPanel == null) resultPanel = UIPrefabManager.Instance.GetOrCreateCanvasGroup(UIState.ResultPanel);
+            if (hudPanel == null) hudPanel = UIPrefabManager.Instance.GetOrCreateCanvasGroup(UIState.HUD);
+            if (loadingPanel == null) loadingPanel = UIPrefabManager.Instance.GetOrCreateCanvasGroup(UIState.Loading);
+            if (consolePanel == null) consolePanel = UIPrefabManager.Instance.GetOrCreateCanvasGroup(UIState.Console);
+            if (inventoryPanel == null) inventoryPanel = UIPrefabManager.Instance.GetOrCreateCanvasGroup(UIState.Inventory);
+            if (settingsPanel == null) settingsPanel = UIPrefabManager.Instance.GetOrCreateCanvasGroup(UIState.SettingsPanel);
+            if (aboutPanel == null) aboutPanel = UIPrefabManager.Instance.GetOrCreateCanvasGroup(UIState.AboutPanel);
         }
 
         #region 面板显示处理方法

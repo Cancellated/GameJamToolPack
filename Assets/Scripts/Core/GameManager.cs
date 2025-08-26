@@ -29,11 +29,6 @@ namespace MyGame.Managers
 
         private GameControl _inputActions;
 
-        /// <summary>
-        /// 输入操作资产。
-        /// </summary>
-        [SerializeField] private GameControl _inputActionsAsset;
-
         #region 字段与属性
 
         /// <summary>
@@ -54,17 +49,10 @@ namespace MyGame.Managers
             State = GameState.Init;
 
             // 初始化输入操作
-            if (_inputActionsAsset != null)
-            {
-                _inputActions = _inputActionsAsset;
-                _inputActions.Enable();
-            }
-            else
-            {
-                Log.Error(LOG_MODULE, "Input actions asset is not assigned!");
-                _inputActions = new GameControl();
-                _inputActions.Enable();
-            }
+            _inputActions = new GameControl();
+            _inputActions.Enable();
+            
+            Log.Info(LOG_MODULE, "Input actions已初始化.");
 
             // 注册事件监听
             GameEvents.OnGameStart += StartGame;

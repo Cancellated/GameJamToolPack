@@ -7,24 +7,24 @@ namespace Logger
     public static class LogModules
     {
         // 系统模块
-        public const string SYSTEM = "[System]";
-        public const string GAMEMANAGER = "[GameManager]";
-        public const string MANAGERBOOTSTRAP = "[ManagerBootstrap]";
+        public const string SYSTEM = "System";
+        public const string GAMEMANAGER = "GameManager";
+        public const string MANAGERBOOTSTRAP = "ManagerBootstrap";
 
         // UI模块
-        public const string UI = "[UI]";
+        public const string UI = "UI";
 
         // 游戏数据模块
-        public const string GAMEDATA = "[GameData]";
-        public const string SAVE = "[Save]";
+        public const string GAMEDATA = "GameData";
+        public const string SAVE = "Save";
 
         // 调试模块
-        public const string DEVTOOLS = "[DevTools]";
+        public const string DEVTOOLS = "DevTools";
 
         // 游戏逻辑模块
-        public const string PLAYER = "[Player]";
-        public const string AUDIO = "[Audio]";
-        public const string SCENE = "[Scene]";
-        public const string INVENTORY = "[Inventory]";
+        public const string PLAYER = "Player";
+        public const string AUDIO = "Audio";
+        public const string SCENE = "Scene";
+        public const string INVENTORY = "Inventory";
     }
 }
