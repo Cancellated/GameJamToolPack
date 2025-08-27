@@ -2,22 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 using System.Linq;
 using MyGame.Managers;
 using MyGame.Events;
 
 namespace MyGame.DevTool
-{
-    /// <summary>
-    /// 调试控制台组件，提供游戏内命令输入功能
-    /// </summary>
-    [AddComponentMenu("MyGame/Debug/DebugConsole")]
-    [DisallowMultipleComponent]
-    [RequireComponent(typeof(InputField))]
-    [RequireComponent(typeof(Text))]
-
-    
+{   
     public class DebugConsole : Singleton<DebugConsole>
     {
         //最大日志保留数
@@ -33,7 +24,7 @@ namespace MyGame.DevTool
             /// <summary>命令名称</summary>
             public string CommandName { get; }
             
-            /// <summary>命令描述</summary>
+            /// <summary>命令描述</summary> 
             public string Description { get; set; }
             
             /// <summary>
@@ -52,12 +43,13 @@ namespace MyGame.DevTool
         
         [Header("UI组件引用")]
         [Tooltip("命令输入框")]
-        public InputField inputField;
+        public TMP_InputField inputField;
         
         [Tooltip("输出文本框")]
-        public Text outputText;
-        //调试按钮
-        [SerializeField] private GameObject buttonPrefab;
+        public TMP_Text outputText;
+        
+        [Tooltip("滚动视图组件")]
+        public UnityEngine.UI.ScrollRect scrollRect;
 
         #endregion
 
@@ -76,6 +68,14 @@ namespace MyGame.DevTool
             
             if (outputText != null)
                 outputText.text = "调试控制台已启动。输入 help 查看命令。";
+            
+            // 绑定输入框事件处理器
+            if (inputField != null)
+            {
+                inputField.onEndEdit.AddListener(delegate { OnCommandEntered(); });
+                // 设置输入行为模式为提交时结束编辑
+                inputField.lineType = TMP_InputField.LineType.SingleLine;
+            }
         }
 
         /// <summary>
@@ -102,6 +102,21 @@ namespace MyGame.DevTool
         #endregion
 
         #region 命令方法
+        
+        /// <summary>
+        /// 切换控制台显示状态
+        /// </summary>
+        public void ToggleConsole()
+        {
+            gameObject.SetActive(!gameObject.activeSelf);
+            
+            if (gameObject.activeSelf)
+            {
+                inputField.Select();
+                inputField.ActivateInputField();
+            }
+        }
+        
         #region 帮助命令
         [DebugCommand("help", Description = "显示帮助信息")]
         private void HelpCommand()
@@ -189,18 +204,27 @@ namespace MyGame.DevTool
         /// <summary>
         /// 当输入命令时调用
         /// </summary>
-        public void OnCommandEntered()
+        /// <param name="input">输入框的当前文本内容（TMP_InputField的onEndEdit事件会传入）</param>
+        public void OnCommandEntered(string input = null)
         {
+            // 获取输入文本
             string cmd = inputField.text.Trim().ToLower();
-            inputField.text = "";
-            
-            if (_commands.TryGetValue(cmd, out var command))
+            if (string.IsNullOrEmpty(input))
             {
-                command.action();
-            }
-            else
-            {
-                Print("未知命令，输入 help 查看可用命令。");
+                // 清除输入框
+                inputField.text = "";
+                
+                if (_commands.TryGetValue(cmd, out var command))
+                {
+                    command.action();
+                }
+                else if (!string.IsNullOrEmpty(cmd))
+                {
+                    Print("未知命令，输入 help 查看可用命令。");
+                }
+                
+                // 重新激活输入框以便继续输入
+                inputField.ActivateInputField();
             }
         }
 
@@ -210,125 +234,32 @@ namespace MyGame.DevTool
         /// <param name="msg">要输出的消息</param>
         void Print(string msg)
         {
-                if (outputText != null) {
+            if (outputText != null) 
+            {
                 // 分割现有日志为行数组
                 var lines = outputText.text.Split('\n');
 
                 
                 // 如果超过最大行数，移除最早的行
-                if (lines.Length >= MAX_LOG_LINES) {
+                if (lines.Length >= MAX_LOG_LINES) 
+                {
                     lines = lines.Skip(1).ToArray();
                 }
                 
                 // 添加新日志并重新组合
                 outputText.text = string.Join("\n", lines) + $"\n{msg}";
+                
+                // 强制布局更新并滚动到底部
+                Canvas.ForceUpdateCanvases();
+                
+                if (scrollRect != null)
+                {
+                    scrollRect.verticalNormalizedPosition = 0f; // 0f 表示滚动到底部
+                }
             }
             Debug.Log($"[控制台] {msg}");
         }
         
-        #endregion
-
-        #region 控制台图形界面
-
-        /// <summary>
-        /// 添加调试按钮
-        /// </summary>
-        public void AddButton(string buttonName, Action onClick, Transform parent = null)
-        {
-            if (buttonPrefab == null) return;
-            
-            var buttonObj = Instantiate(buttonPrefab, parent != null ? parent : transform);
-            var button = buttonObj.GetComponent<Button>();
-            var text = buttonObj.GetComponentInChildren<Text>();
-            
-            if (text != null)
-                text.text = buttonName;
-                
-            button.onClick.AddListener(() => {
-                onClick?.Invoke();
-                Print($"已执行按钮: {buttonName}");
-            });
-        }
-
-        // 创建UI调试按钮面板
-        // 在CreateDebugButtons方法中添加布局组件
-        private void CreateDebugButtons()
-         {
-            // 创建滚动视图
-            var scrollView = new GameObject("ButtonPanel");
-            var scrollRect = scrollView.AddComponent<ScrollRect>();
-            
-            // 创建内容容器并添加垂直布局
-            var content = new GameObject("Content");
-            var layout = content.AddComponent<VerticalLayoutGroup>();
-            layout.childControlHeight = true;
-            layout.childForceExpandHeight = false;
-            layout.spacing = 5;
-            
-            // 创建功能分组
-            CreateButtonGroup(content.transform, "游戏控制", CreateGameStateDebugButtons);
-            CreateButtonGroup(content.transform, "UI控制", CreateUIDebugButtons);
-            // 设置滚动视图
-            scrollRect.content = content.GetComponent<RectTransform>();
-        }
-            /// <summary>
-            /// 创建游戏状态调试按钮
-            /// </summary>
-            private void CreateGameStateDebugButtons(Transform parent)
-            {
-                AddButton("重新开始", RestartCommand, parent);
-                AddButton("直接胜利", WinCommand, parent);
-                AddButton("直接失败", LoseCommand, parent);
-            }
-
-            /// <summary>
-            /// 创建UI调试按钮
-            /// </summary>
-            private void CreateUIDebugButtons(Transform parent)
-            {
-                AddButton("切换主菜单", ToggleMainMenu, parent);
-                AddButton("切换暂停菜单", TogglePauseMenu, parent);
-                AddButton("切换结算面板", ToggleResultPanel, parent);
-                AddButton("切换HUD", ToggleHUD, parent);
-            }
-        // 创建分组容器
-        private void CreateButtonGroup(Transform parent, string title, Action<Transform> createButtons) {
-            var group = new GameObject(title);
-            group.transform.SetParent(parent);
-            
-            // 添加布局组件
-            var layout = group.AddComponent<VerticalLayoutGroup>();
-            layout.padding = new RectOffset(5, 5, 5, 5);
-            
-            // 创建标题
-            var titleText = new GameObject("Title").AddComponent<Text>();
-            titleText.text = title;
-            titleText.transform.SetParent(group.transform);
-            
-            // 创建按钮网格
-            var buttonGrid = new GameObject("Buttons").AddComponent<GridLayoutGroup>();
-            buttonGrid.cellSize = new Vector2(120, 30);
-            buttonGrid.spacing = new Vector2(5, 5);
-            buttonGrid.transform.SetParent(group.transform);
-            
-            // 创建按钮
-            createButtons(buttonGrid.transform);
-        }
-
-        /// <summary>
-        /// 切换控制台显示状态
-        /// </summary>
-        public void ToggleConsole()
-        {
-            gameObject.SetActive(!gameObject.activeSelf);
-            
-            if (gameObject.activeSelf)
-            {
-                inputField.Select();
-                inputField.ActivateInputField();
-            }
-        }
-
         #endregion
     }
 }

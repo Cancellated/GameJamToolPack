@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Logger;
+using UnityEngine.InputSystem;
 
 
 namespace MyGame.Managers
@@ -27,7 +28,7 @@ namespace MyGame.Managers
     {
         private const string LOG_MODULE = LogModules.GAMEMANAGER;
 
-        private GameControl _inputActions;
+        public GameControl InputActions;
 
         #region 字段与属性
 
@@ -46,13 +47,9 @@ namespace MyGame.Managers
         protected override void Awake()
         {
             base.Awake();
+            InputActions = new GameControl();
+            InputActions.Enable();
             State = GameState.Init;
-
-            // 初始化输入操作
-            _inputActions = new GameControl();
-            _inputActions.Enable();
-            
-            Log.Info(LOG_MODULE, "Input actions已初始化.");
 
             // 注册事件监听
             GameEvents.OnGameStart += StartGame;
@@ -84,7 +81,7 @@ namespace MyGame.Managers
         private void Update()
         {
             // 检测键盘ESC键和手柄Start键(在Inputsystem中配置的暂停键)
-            if (_inputActions.GamePlay.Pause.triggered)
+            if (InputActions.GamePlay.Pause.triggered)
             {
                 if (State == GameState.Playing)
                 {

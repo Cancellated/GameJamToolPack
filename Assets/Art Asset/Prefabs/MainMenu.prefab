@@ -1151,6 +1151,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9022035701471842644}
   - component: {fileID: 4167779693471221436}
+  - component: {fileID: 3645513260836479695}
   m_Layer: 0
   m_Name: MainMenu
   m_TagString: Untagged
@@ -1195,6 +1196,18 @@ MonoBehaviour:
   defaultGameScene: GameLevel1
   settingsPanel: {fileID: 8220119215579911089}
   aboutPanel: {fileID: 5409774489170739449}
+--- !u!225 &3645513260836479695
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7450258346413390553}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &7955533204686211351
 GameObject:
   m_ObjectHideFlags: 0
