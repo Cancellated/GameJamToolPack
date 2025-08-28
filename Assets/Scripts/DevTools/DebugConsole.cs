@@ -249,10 +249,11 @@ namespace MyGame.DevTool
                 // 添加新日志并重新组合
                 outputText.text = string.Join("\n", lines) + $"\n{msg}";
                 
-                // 强制布局更新并滚动到底部
+                // 强制布局更新
                 Canvas.ForceUpdateCanvases();
                 
-                if (scrollRect != null)
+                // 当Scroll Rect存在且内容需要滚动时执行滚动到底部
+                if (scrollRect != null && outputText.preferredHeight > outputText.rectTransform.rect.height)
                 {
                     scrollRect.verticalNormalizedPosition = 0f; // 0f 表示滚动到底部
                 }
