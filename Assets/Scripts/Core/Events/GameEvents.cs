@@ -1,6 +1,7 @@
 using MyGame.Managers; // 引入游戏状态枚举
 using System;
 using UnityEngine;
+using Logger;
 
 namespace MyGame.Events
 {
@@ -11,86 +12,61 @@ namespace MyGame.Events
     /// </summary>
     public static class GameEvents
     {
-        /// <summary>
-        /// 统一日志输出方法，自动添加[GameEvents]前缀
-        /// </summary>
-        /// <param name="message">日志消息</param>
-        private static void Log(string message)
-        {
-            Debug.Log($"[GameEvents] {message}");
-        }
+        const string module = LogModules.GAMEEVENTS;
         #region 游戏流程事件
 
         /// <summary>
         /// 游戏开始事件。
         /// </summary>
         public static event Action OnGameStart;
+        
+        public static void TriggerGameStart()
+        {
+            Log.Info(module, "触发游戏开始事件");
+            OnGameStart?.Invoke();
+        }
 
         /// <summary>
         /// 游戏暂停事件。
         /// </summary>
         public static event Action OnGamePause;
+        
+        public static void TriggerGamePause()
+        {
+            Log.Info(module, "触发游戏暂停事件");
+            OnGamePause?.Invoke();
+        }
 
         /// <summary>
         /// 游戏继续事件。
         /// </summary>
         public static event Action OnGameResume;
+        
+        public static void TriggerGameResume()
+        {
+            Log.Info(module, "触发游戏继续事件");
+            OnGameResume?.Invoke();
+        }
 
         /// <summary>
         /// 游戏结束事件，参数为true表示胜利，false表示失败。
         /// </summary>
         public static event Action<bool> OnGameOver;
+        
+        public static void TriggerGameOver(bool isWin)
+        {
+            Log.Info(module, $"触发游戏结束事件，胜利：{isWin}");
+            OnGameOver?.Invoke(isWin);
+        }
 
         /// <summary>
         /// 游戏状态变更事件。
         /// </summary>
         public static event Action<GameState, GameState> OnGameStateChanged;
-
-        /// <summary>
-        /// 触发游戏开始事件。
-        /// </summary>
-        public static void TriggerGameStart()
-        {
-            Log("触发游戏开始事件");
-            OnGameStart?.Invoke();
-        }
-
-        /// <summary>
-        /// 触发游戏暂停事件。
-        /// </summary>
-        public static void TriggerGamePause()
-        {
-            Log("触发游戏暂停事件");
-            OnGamePause?.Invoke();
-        }
-
-        /// <summary>
-        /// 触发游戏继续事件。
-        /// </summary>
-        public static void TriggerGameResume()
-        {
-            Log("触发游戏继续事件");
-            OnGameResume?.Invoke();
-        }
-
-        /// <summary>
-        /// 触发游戏结束事件。
-        /// </summary>
-        /// <param name="isWin">true为胜利，false为失败</param>
-        public static void TriggerGameOver(bool isWin)
-        {
-            Log($"触发游戏结束事件，胜利：{isWin}");
-            OnGameOver?.Invoke(isWin);
-        }
-
-        /// <summary>
-        /// 触发游戏状态变更事件。
-        /// </summary>
-        /// <param name="from">原状态</param>
-        /// <param name="to">新状态</param>
+        
         public static void TriggerGameStateChanged(GameState from, GameState to)
         {
-            Log($"游戏状态变更：{from} -> {to}");
+            Log.Info(module, $"游戏状态变更：{from} -> {to}");
             OnGameStateChanged?.Invoke(from, to);
         }
 
@@ -103,43 +79,31 @@ namespace MyGame.Events
         /// </summary>
         public static event Action<string> OnSceneLoadStart;
         
+        public static void TriggerSceneLoadStart(string sceneName)
+        {
+            Log.Info(module, $"开始加载场景: {sceneName}");
+            OnSceneLoadStart?.Invoke(sceneName);
+        }
+        
         /// <summary>
         /// 场景加载完成事件
         /// </summary>
         public static event Action<string> OnSceneLoadComplete;
+        
+        public static void TriggerSceneLoadComplete(string sceneName)
+        {
+            Log.Info(module, $"场景加载完成: {sceneName}");
+            OnSceneLoadComplete?.Invoke(sceneName);
+        }
         
         /// <summary>
         /// 场景卸载事件
         /// </summary>
         public static event Action<string> OnSceneUnload;
         
-        /// <summary>
-        /// 触发场景加载开始事件
-        /// </summary>
-        /// <param name="sceneName">场景名称</param>
-        public static void TriggerSceneLoadStart(string sceneName)
-        {
-            Log($"开始加载场景: {sceneName}");
-            OnSceneLoadStart?.Invoke(sceneName);
-        }
-        
-        /// <summary>
-        /// 触发场景加载完成事件
-        /// </summary>
-        /// <param name="sceneName">场景名称</param>
-        public static void TriggerSceneLoadComplete(string sceneName)
-        {
-            Log($"场景加载完成: {sceneName}");
-            OnSceneLoadComplete?.Invoke(sceneName);
-        }
-        
-        /// <summary>
-        /// 触发场景卸载事件
-        /// </summary>
-        /// <param name="sceneName">场景名称</param>
         public static void TriggerSceneUnload(string sceneName)
         {
-            Log($"卸载场景: {sceneName}");
+            Log.Info(module, $"卸载场景: {sceneName}");
             OnSceneUnload?.Invoke(sceneName);
         }
 
@@ -151,9 +115,10 @@ namespace MyGame.Events
         /// 显示或隐藏主菜单
         /// </summary>
         public static event Action<bool> OnMainMenuShow;
+        
         public static void TriggerMainMenuShow(bool show)
         {
-            Log($"主菜单显示：{show}");
+            Log.Info(module, $"主菜单显示：{show}");
             OnMainMenuShow?.Invoke(show);
         }
 
@@ -161,9 +126,10 @@ namespace MyGame.Events
         /// 显示或隐藏暂停菜单
         /// </summary>
         public static event Action<bool> OnPauseMenuShow;
+        
         public static void TriggerPauseMenuShow(bool show)
         {
-            Log($"暂停菜单显示：{show}");
+            Log.Info(module, $"暂停菜单显示：{show}");
             OnPauseMenuShow?.Invoke(show);
         }
 
@@ -171,9 +137,10 @@ namespace MyGame.Events
         /// 显示结算界面（参数：true胜利，false失败）
         /// </summary>
         public static event Action<bool> OnResultPanelShow;
+        
         public static void TriggerResultPanelShow(bool isWin)
         {
-            Log($"结算界面显示，胜利：{isWin}");
+            Log.Info(module, $"结算界面显示，胜利：{isWin}");
             OnResultPanelShow?.Invoke(isWin);
         }
 
@@ -181,9 +148,10 @@ namespace MyGame.Events
         /// 显示或隐藏HUD
         /// </summary>
         public static event Action<bool> OnHUDShow;
+        
         public static void TriggerHUDShow(bool show)
         {
-            Log($"HUD显示：{show}");
+            Log.Info(module, $"HUD显示：{show}");
             OnHUDShow?.Invoke(show);
         }
         
@@ -191,18 +159,21 @@ namespace MyGame.Events
         /// 显示或隐藏控制台
         /// </summary>
         public static event Action<bool> OnConsoleShow;
+        
         public static void TriggerConsoleShow(bool show)
         {
-            Log($"控制台显示：{show}");
+            Log.Info(module, $"控制台显示：{show}");
             OnConsoleShow?.Invoke(show);
         }
+        
         /// <summary>
         /// 显示或隐藏背包
         /// </summary>
         public static event Action<bool> OnInventoryShow;
+        
         public static void TriggerInventoryShow(bool show)
         {
-            Log($"背包显示：{show}");
+            Log.Info(module, $"背包显示：{show}");
             OnInventoryShow?.Invoke(show);
         }
 
@@ -210,9 +181,10 @@ namespace MyGame.Events
         /// 显示或隐藏设置面板
         /// </summary>
         public static event Action<bool> OnSettingsPanelShow;
+        
         public static void TriggerSettingsPanelShow(bool show)
         {
-            Log($"设置面板显示：{show}");
+            Log.Info(module, $"设置面板显示：{show}");
             OnSettingsPanelShow?.Invoke(show);
         }
 
@@ -220,9 +192,10 @@ namespace MyGame.Events
         /// 显示或隐藏关于面板
         /// </summary>
         public static event Action<bool> OnAboutPanelShow;
+        
         public static void TriggerAboutPanelShow(bool show)
         {
-            Log($"关于面板显示：{show}");
+            Log.Info(module, $"关于面板显示：{show}");
             OnAboutPanelShow?.Invoke(show);
         }
 
@@ -232,14 +205,10 @@ namespace MyGame.Events
         /// UI状态切换事件（互斥显示）
         /// </summary>
         public static event Action<UIManager.UIState, bool> OnMenuShow;
-
-
-        /// <summary>
-        /// 触发UI状态切换事件
-        /// </summary>
+        
         public static void TriggerMenuShow(UIManager.UIState state, bool show)
         {
-            Log($"菜单切换：{state} 显示：{show}");
+            Log.Info(module, $"菜单切换：{state} 显示：{show}");
             OnMenuShow?.Invoke(state, show);
         }
 

@@ -9,6 +9,10 @@ namespace Logger
         // 系统模块
         public const string SYSTEM = "System";
         public const string GAMEMANAGER = "GameManager";
+        public const string GAMEEVENTS = "GameEvents";
+        public const string SCENE = "Scene";
+        public const string UIMANAGER = "UIManager";
+        public const string DEBUGCONSOLE = "DebugConsole";
         public const string MANAGERBOOTSTRAP = "ManagerBootstrap";
 
         // UI模块
@@ -24,7 +28,6 @@ namespace Logger
         // 游戏逻辑模块
         public const string PLAYER = "Player";
         public const string AUDIO = "Audio";
-        public const string SCENE = "Scene";
         public const string INVENTORY = "Inventory";
     }
 }

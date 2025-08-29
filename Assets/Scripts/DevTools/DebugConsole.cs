@@ -6,11 +6,13 @@ using TMPro;
 using System.Linq;
 using MyGame.Managers;
 using MyGame.Events;
+using Logger;
 
 namespace MyGame.DevTool
 {   
     public class DebugConsole : Singleton<DebugConsole>
     {
+        private const string LOG_MODULE = LogModules.DEBUGCONSOLE;
         //最大日志保留数
         private const int MAX_LOG_LINES = 100;
         #region 特性定义
@@ -51,6 +53,10 @@ namespace MyGame.DevTool
         [Tooltip("滚动视图组件")]
         public UnityEngine.UI.ScrollRect scrollRect;
 
+        [Header("层级设置")]
+        [Tooltip("控制台Canvas的Sorting Order。值越高，显示层级越高，不易被其他UI遮挡。")]
+        public int canvasSortingOrder = 1000; // 设置较高的默认值，确保控制台显示在大多数UI上层
+
         #endregion
 
         #region 命令系统
@@ -75,6 +81,24 @@ namespace MyGame.DevTool
                 inputField.onEndEdit.AddListener(delegate { OnCommandEntered(); });
                 // 设置输入行为模式为提交时结束编辑
                 inputField.lineType = TMP_InputField.LineType.SingleLine;
+            }  
+            // 设置Canvas排序层级
+            SetCanvasSortingOrder();
+        }
+
+        /// <summary>
+        /// 设置Canvas的Sorting Order，确保控制台显示在其他UI上层
+        /// </summary>
+        private void SetCanvasSortingOrder()
+        {
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas != null)
+            {
+                canvas.sortingOrder = canvasSortingOrder;
+            }
+            else
+            {
+                Log.Warning(LOG_MODULE, "未找到父级Canvas组件，无法设置排序层级。", this);
             }
         }
 
@@ -258,7 +282,7 @@ namespace MyGame.DevTool
                     scrollRect.verticalNormalizedPosition = 0f; // 0f 表示滚动到底部
                 }
             }
-            Debug.Log($"[控制台] {msg}");
+            Log.Info(LOG_MODULE, msg, this);
         }
         
         #endregion

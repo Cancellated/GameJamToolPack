@@ -1,5 +1,6 @@
 using System.Collections;
 using MyGame.Events;
+using UI.Loading;
 using UnityEngine;
 
 namespace MyGame.Managers
@@ -22,6 +23,7 @@ namespace MyGame.Managers
         public CanvasGroup inventoryPanel;
         public CanvasGroup settingsPanel;
         public CanvasGroup aboutPanel;
+        public CanvasGroup debugConsole;
 
         [Header("动画设置")]
         [Tooltip("UI淡入淡出动画时长(秒)")]
@@ -285,6 +287,18 @@ namespace MyGame.Managers
         private void ShowLoading(string sceneName)
         {
             SetUIState(UIState.Loading, true);
+            
+            // 查找Loading组件并调用其回调方法
+            Loading loadingComponent = null;
+            if (loadingPanel != null)
+            {
+                loadingComponent = loadingPanel.GetComponent<Loading>();
+            }
+            if (loadingComponent != null)
+            {
+                loadingComponent.OnSceneLoadStarted(sceneName);
+                loadingComponent.SetVisible(true);
+            }
         }
 
         /// <summary>
@@ -292,6 +306,18 @@ namespace MyGame.Managers
         /// </summary>
         private void HideLoading(string sceneName)
         {
+            // 查找Loading组件并调用其回调方法
+            Loading loadingComponent = null;
+            if (loadingPanel != null)
+            {
+                loadingComponent = loadingPanel.GetComponent<Loading>();
+            }
+            if (loadingComponent != null)
+            {
+                loadingComponent.OnSceneLoadCompleted(sceneName);
+                loadingComponent.SetVisible(false);
+            }
+            
             SetUIState(UIState.Loading, false);
         }
                 #endregion

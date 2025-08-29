@@ -1,6 +1,6 @@
 using MyGame.Events;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using MyGame.Managers;
 
 namespace UI.MainMenu
 {
@@ -26,9 +26,6 @@ namespace UI.MainMenu
         #endregion
 
         #region 生命周期
-
-        // 抑制未使用方法警告
-        #pragma warning disable IDE0051
         private void Awake()
         {
             // 初始隐藏设置和关于面板
@@ -115,9 +112,7 @@ namespace UI.MainMenu
         /// </summary>
         private void OnGameStart()
         {
-            // 加载游戏场景
-            GameEvents.TriggerSceneLoadStart(defaultGameScene);
-            SceneManager.LoadSceneAsync(defaultGameScene);
+            SceneSwitcher.RequestLoadScene(defaultGameScene);
         }
 
         /// <summary>
