@@ -2,6 +2,7 @@ using MyGame.Managers; // 引入游戏状态枚举
 using System;
 using UnityEngine;
 using Logger;
+using MyGame.UI;
 
 namespace MyGame.Events
 {
@@ -134,17 +135,6 @@ namespace MyGame.Events
         }
 
         /// <summary>
-        /// 显示结算界面（参数：true胜利，false失败）
-        /// </summary>
-        public static event Action<bool> OnResultPanelShow;
-        
-        public static void TriggerResultPanelShow(bool isWin)
-        {
-            Log.Info(module, $"结算界面显示，胜利：{isWin}");
-            OnResultPanelShow?.Invoke(isWin);
-        }
-
-        /// <summary>
         /// 显示或隐藏HUD
         /// </summary>
         public static event Action<bool> OnHUDShow;
@@ -204,9 +194,9 @@ namespace MyGame.Events
         /// <summary>
         /// UI状态切换事件（互斥显示）
         /// </summary>
-        public static event Action<UIManager.UIState, bool> OnMenuShow;
+        public static event Action<UIType, bool> OnMenuShow;
         
-        public static void TriggerMenuShow(UIManager.UIState state, bool show)
+        public static void TriggerMenuShow(UIType state, bool show)
         {
             Log.Info(module, $"菜单切换：{state} 显示：{show}");
             OnMenuShow?.Invoke(state, show);

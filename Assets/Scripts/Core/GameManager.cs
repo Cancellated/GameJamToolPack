@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEngine;
 using Logger;
 using UnityEngine.InputSystem;
+using MyGame.DevTool;
 
 
 namespace MyGame.Managers
@@ -15,6 +16,7 @@ namespace MyGame.Managers
     public enum GameState
     {
         Init,
+        Menu,
         Playing,
         Paused,
         GameOver
@@ -75,7 +77,7 @@ namespace MyGame.Managers
         /// </summary>
         private void Start()
         {
-            StartGame();
+            StartMenu();
         }
 
         private void Update()
@@ -124,10 +126,11 @@ namespace MyGame.Managers
             // 定义合法状态转换关系：左边的状态可以转换到右边的状态
             var validTransitions = new Dictionary<GameState, GameState[]>
             {
-                [GameState.Init] = new[] { GameState.Playing },
+                [GameState.Init] = new[] { GameState.Menu },
+                [GameState.Menu] = new[] { GameState.Playing },
                 [GameState.Playing] = new[] { GameState.Paused, GameState.GameOver },
-                [GameState.Paused] = new[] { GameState.Playing, GameState.GameOver },
-                [GameState.GameOver] = new[] { GameState.Init }
+                [GameState.Paused] = new[] { GameState.Playing, GameState.GameOver, GameState.Menu },
+                [GameState.GameOver] = new[] { GameState.Menu }
             };
 
             // 检查当前状态是否有合法的转换到下一个状态
@@ -138,6 +141,15 @@ namespace MyGame.Managers
         #endregion
 
         #region 游戏流程控制-注意：其他模块应通过GameEvents触发这些方法，而不是直接调用
+
+        public void StartMenu()
+        {
+            if (!TryChangeState(GameState.Menu))
+                return;
+            // TODO: 初始化菜单
+            Time.timeScale = 0f;
+            Log.Info(LOG_MODULE, "进入菜单", this);
+        }
 
         /// <summary>
         /// 开始游戏，进入Playing状态。
@@ -186,22 +198,6 @@ namespace MyGame.Managers
             Log.Info(LOG_MODULE, $"游戏结束，胜利：{isWin}", this);
             // TODO: 显示结算界面等
         }
-
-        #endregion
-
-        #region 控制台调试方法
-
-        /// <summary>
-        /// 控制台下通过ContextMenu按钮快速切换状态。
-        /// </summary>
-        [ContextMenu("测试/重开游戏")]
-        public void TestRestartGame() => GameEvents.TriggerGameStart();
-
-        [ContextMenu("测试/胜利结束")]
-        public void TestWinGame() => GameEvents.TriggerGameOver(true);
-
-        [ContextMenu("测试/失败结束")]
-        public void TestLoseGame() => GameEvents.TriggerGameOver(false);
 
         #endregion
     }

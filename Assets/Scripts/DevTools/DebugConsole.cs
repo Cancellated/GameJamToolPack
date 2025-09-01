@@ -7,14 +7,20 @@ using System.Linq;
 using MyGame.Managers;
 using MyGame.Events;
 using Logger;
+using UnityEngine.InputSystem;
+using MyGame.UI;
 
 namespace MyGame.DevTool
 {   
-    public class DebugConsole : Singleton<DebugConsole>
+    public class DebugConsole : BaseUI, IUIPanel
     {
+        public static DebugConsole Instance { get; private set; }
+        
         private const string LOG_MODULE = LogModules.DEBUGCONSOLE;
         //最大日志保留数
         private const int MAX_LOG_LINES = 100;
+        //按键监听
+        private GameControl inputActions;
         #region 特性定义
         
         /// <summary>
@@ -56,7 +62,6 @@ namespace MyGame.DevTool
         [Header("层级设置")]
         [Tooltip("控制台Canvas的Sorting Order。值越高，显示层级越高，不易被其他UI遮挡。")]
         public int canvasSortingOrder = 1000; // 设置较高的默认值，确保控制台显示在大多数UI上层
-
         #endregion
 
         #region 命令系统
@@ -65,25 +70,67 @@ namespace MyGame.DevTool
         private readonly Dictionary<string, (Action action, string description)> _commands = new();
 
         /// <summary>
+        /// 获取命令字典（供DebugCommands类使用）
+        /// </summary>
+        /// <returns>命令名称和描述的字典</returns>
+        public Dictionary<string, string> GetCommands()
+        {
+            Dictionary<string, string> commandDescriptions = new();
+            foreach (var cmd in _commands)
+            {
+                commandDescriptions[cmd.Key] = cmd.Value.description;
+            }
+            return commandDescriptions;
+        }
+
+        /// <summary>
         /// 初始化组件
         /// </summary>
-        override protected void Awake()
+        protected override void Awake()
         {
             base.Awake();
-            InitializeCommands();
             
-            if (outputText != null)
-                outputText.text = "调试控制台已启动。输入 help 查看命令。";
-            
-            // 绑定输入框事件处理器
-            if (inputField != null)
+            // 单例模式实现
+            if (Instance == null)
             {
-                inputField.onEndEdit.AddListener(delegate { OnCommandEntered(); });
-                // 设置输入行为模式为提交时结束编辑
-                inputField.lineType = TMP_InputField.LineType.SingleLine;
-            }  
-            // 设置Canvas排序层级
-            SetCanvasSortingOrder();
+                Instance = this;
+                DontDestroyOnLoad(gameObject);
+                InitializeCommands();
+                inputActions = new GameControl();
+                // 确保canvasGroup已初始化
+                if (m_canvasGroup == null)
+                {
+                    m_canvasGroup = GetComponent<CanvasGroup>();
+                }
+
+                if (m_canvasGroup != null)
+                {
+                    m_canvasGroup.alpha = 0;
+                    m_canvasGroup.interactable = false;
+                    m_canvasGroup.blocksRaycasts = false;
+                }
+                
+                if (outputText != null)
+                    outputText.text = "调试控制台已启动。输入 help 查看命令。";
+                
+                // 绑定输入框事件处理器
+                if (inputField != null)
+                {
+                    inputField.onEndEdit.AddListener(delegate { OnCommandEntered(); });
+                    // 设置输入行为模式为提交时结束编辑
+                    inputField.lineType = TMP_InputField.LineType.SingleLine;
+                }
+                // 设置Canvas排序层级
+                SetCanvasSortingOrder();
+                
+                // 初始隐藏状态
+                Hide();
+            }
+            else
+            {
+                Destroy(gameObject);
+                return;
+            }
         }
 
         /// <summary>
@@ -107,16 +154,26 @@ namespace MyGame.DevTool
         /// </summary>
         void InitializeCommands()
         {
-            // 使用反射获取所有标记了DebugCommand特性的方法
-            foreach (var method in GetType().GetMethods(
-                BindingFlags.Instance | BindingFlags.NonPublic))
+            // 查找场景中的DebugCommands实例
+            DebugCommands debugCommands = FindObjectOfType<DebugCommands>();
+            if (debugCommands == null)
+            {
+                // 如果没有找到实例，创建一个新的
+                GameObject commandsObj = new("DebugCommands");
+                debugCommands = commandsObj.AddComponent<DebugCommands>();
+                DontDestroyOnLoad(commandsObj);
+            }
+            
+            // 使用反射获取DebugCommands类中所有标记了DebugCommand特性的方法
+            foreach (var method in typeof(DebugCommands).GetMethods(
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
             {
                 var attr = method.GetCustomAttribute<DebugCommandAttribute>();
                 if (attr != null)
                 {
                     // 将方法添加到命令字典
                     _commands[attr.CommandName] = (
-                        () => method.Invoke(this, null),
+                        () => method.Invoke(debugCommands, null),
                         attr.Description
                     );
                 }
@@ -125,105 +182,58 @@ namespace MyGame.DevTool
         
         #endregion
 
-        #region 命令方法
-        
-        /// <summary>
-        /// 切换控制台显示状态
-        /// </summary>
-        public void ToggleConsole()
+        #region 按键监听
+        void Update()
         {
-            gameObject.SetActive(!gameObject.activeSelf);
-            
-            if (gameObject.activeSelf)
+            if (inputActions != null && inputActions.GamePlay.Console.triggered)
             {
-                inputField.Select();
-                inputField.ActivateInputField();
+                ToggleShowConsole();
             }
         }
-        
-        #region 帮助命令
-        [DebugCommand("help", Description = "显示帮助信息")]
-        private void HelpCommand()
-        {
-            var helpText = "可用命令:\n";
-            foreach (var cmd in _commands)
-            {
-                helpText += $"{cmd.Key}: {cmd.Value.description}\n";
-            }
-            Print(helpText);
-        }
-        #endregion
-        #region 游戏核心状态调试命令
-        // 重新开始游戏命令
-        [DebugCommand("restart", Description = "重新开始游戏")]
-        private void RestartCommand()
-        {
-            GameEvents.TriggerGameStart();
-            Print("已重开游戏");
-        }
-
-        // 直接胜利命令
-        [DebugCommand("win", Description = "直接胜利")]
-        private void WinCommand()
-        {
-            GameEvents.TriggerGameOver(true);
-            Print("已触发胜利");
-        }
-
-        // 直接失败命令
-        [DebugCommand("lose", Description = "直接失败")]
-        private void LoseCommand()
-        {
-            GameEvents.TriggerGameOver(false);
-            Print("已触发失败");
-        }
-        #endregion
-
-        #region UI调试命令
-        [DebugCommand("toggleallui", Description = "切换所有UI界面显隐")]
-        private void ToggleAllUI()
-        {
-            bool shouldShow = UIManager.Instance.currentState == UIManager.UIState.None;
-            GameEvents.TriggerMenuShow(shouldShow ? UIManager.UIState.MainMenu : UIManager.UIState.None, shouldShow);
-            Print($"所有UI已{(shouldShow ? "显示" : "隐藏")}");
-        }
-
-        [DebugCommand("togglemainmenu", Description = "切换主菜单显隐")]
-        private void ToggleMainMenu()
-        {
-            bool shouldShow = UIManager.Instance.currentState != UIManager.UIState.MainMenu;
-            GameEvents.TriggerMenuShow(shouldShow ? UIManager.UIState.MainMenu : UIManager.UIState.None, shouldShow);
-            Print($"主菜单已{(shouldShow ? "显示" : "隐藏")}");
-        }
-
-        [DebugCommand("togglepausemenu", Description = "切换暂停菜单显隐")]
-        private void TogglePauseMenu()
-        {
-            bool shouldShow = UIManager.Instance.currentState != UIManager.UIState.PauseMenu;
-            GameEvents.TriggerMenuShow(shouldShow ? UIManager.UIState.PauseMenu : UIManager.UIState.None, shouldShow);
-            Print($"暂停菜单已{(shouldShow ? "显示" : "隐藏")}");
-        }
-
-        [DebugCommand("toggleresultpanel", Description = "切换结算面板显隐")]
-        private void ToggleResultPanel()
-        {
-            bool shouldShow = UIManager.Instance.currentState != UIManager.UIState.ResultPanel;
-            GameEvents.TriggerMenuShow(shouldShow ? UIManager.UIState.ResultPanel : UIManager.UIState.None, shouldShow);
-            Print($"结算面板已{(shouldShow ? "显示" : "隐藏")}");
-        }
-
-        [DebugCommand("togglehud", Description = "切换HUD显隐")]
-        private void ToggleHUD()
-        {
-            bool shouldShow = UIManager.Instance.currentState != UIManager.UIState.HUD;
-            GameEvents.TriggerMenuShow(shouldShow ? UIManager.UIState.HUD : UIManager.UIState.None, shouldShow);
-            Print($"HUD已{(shouldShow ? "显示" : "隐藏")}");
-        }
-        #endregion
-        
         #endregion
 
         #region 公共方法
+        /// <summary>
+        /// 监听按键显隐控制台
+        /// </summary>
+        public void ToggleShowConsole()
+        {
+            // 不再直接操作CanvasGroup，而是触发事件让UIManager处理
+            GameEvents.TriggerConsoleShow(!IsVisible);
+        }
+        
+        // 重写BaseUI的Show方法
+        public override void Show()
+        {
+            m_canvasGroup.alpha = 1;
+            m_canvasGroup.interactable = true;
+            m_canvasGroup.blocksRaycasts = true;
+            IsVisible = true;
+        }
+        
+        // 重写BaseUI的Hide方法
+        public override void Hide()
+        {
+            m_canvasGroup.alpha = 0;
+            m_canvasGroup.interactable = false;
+            m_canvasGroup.blocksRaycasts = false;
+            IsVisible = false;
+        }
+        
+        // 生命周期回调
+        protected override void OnShow()
+        {
+            base.OnShow();
+            // 控制台显示时的逻辑
+            Log.Info(LOG_MODULE, "显示DebugConsole", this);
+        }
+        
+        protected override void OnHide()
+        {
+            base.OnHide();
+            // 控制台隐藏时的逻辑
+            Log.Info(LOG_MODULE, "隐藏DebugConsole", this);
+        }
         
         /// <summary>
         /// 当输入命令时调用
@@ -256,7 +266,7 @@ namespace MyGame.DevTool
         /// 输出信息到控制台
         /// </summary>
         /// <param name="msg">要输出的消息</param>
-        void Print(string msg)
+        internal void Print(string msg)
         {
             if (outputText != null) 
             {
