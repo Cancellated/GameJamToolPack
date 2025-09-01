@@ -105,16 +105,6 @@ namespace MyGame.UI
             if (_sceneToUIPanelMap.TryGetValue(sceneName, out var panelIds))
             {
                 Log.Info(module, $"开始加载场景 '{sceneName}' 的UI面板，共 {panelIds.Count} 个面板");
-                
-                // 调用UIManager加载UI面板
-                foreach (var panelId in panelIds)
-                {
-                    var uiInstance = UIManager.Instance.LoadUIPanel(panelId);
-                    if (uiInstance != null)
-                    {
-                        _currentSceneUIInstances.Add(uiInstance);
-                    }
-                }
             }
         }
         

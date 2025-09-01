@@ -4,8 +4,6 @@ using MyGame.Events;
 using MyGame.UI;
 using MyGame.UI.Loading;
 using UnityEngine;
-using Logger;
-using static Logger.LogModules;
 
 namespace MyGame.Managers
 {
@@ -18,8 +16,7 @@ namespace MyGame.Managers
         #region UI引用
 
         [Header("UI面板引用")]
-        [Tooltip("拖入实现了IUIPanel接口的GameObject")]
-        public List<GameObject> uiPanels = new();
+        public List<IUIPanel> uiPanels = new();
 
         [Header("动画设置")]
         [Tooltip("UI淡入淡出动画时长(秒)")]
@@ -31,18 +28,16 @@ namespace MyGame.Managers
 
         public UIType currentState = UIType.None;
         private GameControl _inputActions;
-        private Dictionary<UIType, IUIPanel> _panelMap;
-        
+        private Dictionary<UIType, IUIPanel> _panelMap = new();
+
         #endregion
 
-        const string module = LogModules.UIMANAGER;
         #region 生命周期
 
         protected override void Awake()
         {
             base.Awake();
-            _inputActions = GameManager.Instance.InputActions;
-            _panelMap = new Dictionary<UIType, IUIPanel>();
+            _inputActions = new GameControl();  // 初始化输入系统
             
             // 初始化面板映射
             InitializePanelMap();
@@ -61,24 +56,18 @@ namespace MyGame.Managers
             GameEvents.OnAboutPanelShow += ShowAboutPanel;
             // 加载界面显隐处理方法
             GameEvents.OnSceneLoadStart += ShowLoading;
-            GameEvents.OnSceneLoadComplete += OnSceneLoadComplete;
-            // 场景卸载处理
-            GameEvents.OnSceneUnload += OnSceneUnload;
+            GameEvents.OnSceneLoadComplete += HideLoading;
         }
 
         private void InitializePanelMap()
         {
             _panelMap.Clear();
-            foreach (var panelObj in uiPanels)
+            foreach (var panel in uiPanels)
             {
-                if (panelObj != null)
+                if (panel != null && !_panelMap.ContainsKey(panel.PanelType))
                 {
-                    var panel = panelObj.GetComponent<IUIPanel>();
-                    if (panel != null && !_panelMap.ContainsKey(panel.PanelType))
-                    {
-                        _panelMap.Add(panel.PanelType, panel);
-                        panel.Initialize();
-                    }
+                    _panelMap.Add(panel.PanelType, panel);
+                    panel.Initialize();
                 }
             }
         }
@@ -113,6 +102,7 @@ namespace MyGame.Managers
             GameEvents.OnSettingsPanelShow -= ShowSettingsPanel;
             GameEvents.OnAboutPanelShow -= ShowAboutPanel;
             GameEvents.OnSceneLoadStart -= ShowLoading;
+            GameEvents.OnSceneLoadComplete -= HideLoading;
         }
 
         #endregion
@@ -168,6 +158,7 @@ namespace MyGame.Managers
                         SetUIState(UIType.ResultPanel, false);
                         break;
                     case UIType.AboutPanel:
+                        SetUIState(UIType.MainMenu, false);
                         SetUIState(UIType.PauseMenu, false);
                         SetUIState(UIType.ResultPanel, false);
                         break;
@@ -195,7 +186,7 @@ namespace MyGame.Managers
 
         #endregion
 
-        #region UI事件响应
+        #region UI事件响应(独特UI处理)
 
         private void ShowMainMenu(bool show)
         {
@@ -207,6 +198,12 @@ namespace MyGame.Managers
             SetUIState(UIType.PauseMenu, show);
         }
 
+        private void ShowResultPanel(bool isWin)
+        {
+            SetUIState(UIType.ResultPanel, true);
+            // 可在此处根据isWin显示不同内容
+        }
+
         private void ShowHUD(bool show)
         {
             SetUIState(UIType.HUD, show);
@@ -216,7 +213,10 @@ namespace MyGame.Managers
         {
             SetUIState(UIType.Console, show);
         }
-
+        /// <summary>
+        /// 显示或隐藏背包界面
+        /// 特殊动画应在对应的BaseUI子类中通过重写Show/Hide方法实现
+        /// </summary>
         private void ShowInventory(bool show)
         {
             SetUIState(UIType.Inventory, show);
@@ -250,14 +250,11 @@ namespace MyGame.Managers
         }
 
         /// <summary>
-        /// 处理场景加载完成事件
+        /// 隐藏加载界面
         /// </summary>
-        private void OnSceneLoadComplete(string sceneName)
+        private void HideLoading(string sceneName)
         {
-            // 重新初始化面板映射，确保获取新场景中的UI
-            InitializePanelMap();
-
-            // 隐藏加载界面
+            // 查找Loading组件并调用其回调方法
             if (_panelMap.TryGetValue(UIType.Loading, out var loadingPanel))
             {
                 var loadingScreen = loadingPanel as LoadingScreen;
@@ -265,50 +262,9 @@ namespace MyGame.Managers
                 {
                     loadingScreen.OnSceneLoadCompleted(sceneName);
                 }
-                SetUIState(UIType.Loading, false);
             }
-
-            // 根据加载的场景类型显示相应的UI
-            UpdateUIByScene(sceneName);
-        }
-
-        /// <summary>
-        /// 处理场景卸载事件
-        /// </summary>
-        private void OnSceneUnload(string sceneName)
-        {
-            // 清空面板映射，因为当前场景中的UI将被销毁
-            _panelMap.Clear();
-            Log.Info(module, $"场景 '{sceneName}' 卸载，清空UI面板映射");
-        }
-
-        /// <summary>
-        /// 根据场景更新UI显示状态
-        /// </summary>
-        /// <param name="sceneName">当前场景名称</param>
-        private void UpdateUIByScene(string sceneName)
-        {
-            // 隐藏所有UI
-            HideAllUI();
-
-            // 根据不同场景显示不同的UI
-            if (sceneName == "MainMenu")
-            {
-                // 主菜单场景显示主菜单
-                GameEvents.TriggerMainMenuShow(true);
-            }
-            else if (sceneName == "Level Select")
-            {
-                // 关卡选择场景显示关卡选择UI
-                // 这里可以根据实际情况添加关卡选择UI的显示逻辑
-            }
-            else
-            {
-                // 游戏场景显示HUD
-                GameEvents.TriggerHUDShow(true);
-            }
-
-            Log.Info(module, $"场景 '{sceneName}' 加载完成，已更新UI状态");
+            
+            SetUIState(UIType.Loading, false);
         }
 
         #endregion
