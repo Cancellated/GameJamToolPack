@@ -10,6 +10,7 @@ namespace Logger
         public const string SYSTEM = "System";
         public const string GAMEMANAGER = "GameManager";
         public const string GAMEEVENTS = "GameEvents";
+        public const string INPUT = "Input";
         public const string SCENE = "Scene";
         public const string UIMANAGER = "UIManager";
         public const string DEBUGCONSOLE = "DebugConsole";

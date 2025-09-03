@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using MyGame.Events;
+using MyGame.Managers;
 using MyGame.UI;
 using MyGame.UI.Loading;
 using UnityEngine;
@@ -27,7 +28,6 @@ namespace MyGame.Managers
         #region 状态管理
 
         public UIType currentState = UIType.None;
-        private GameControl _inputActions;
         private Dictionary<UIType, IUIPanel> _panelMap = new();
 
         #endregion
@@ -37,7 +37,6 @@ namespace MyGame.Managers
         protected override void Awake()
         {
             base.Awake();
-            _inputActions = new GameControl();  // 初始化输入系统
             
             // 初始化面板映射
             InitializePanelMap();
@@ -132,8 +131,16 @@ namespace MyGame.Managers
             // 处理互斥关系
             if (show)
             {
-                _inputActions.GamePlay.Disable();
-                _inputActions.UI.Enable();
+                // 使用InputManager切换输入模式
+                if (InputManager.Instance != null)
+                {
+                    // 对于需要完全UI控制的界面，切换到UI模式
+                    if (state != UIType.Console && state != UIType.Loading)
+                    {
+                        InputManager.Instance.SwitchToUIMode();
+                    }
+                }
+                
                 switch (state)
                 {
                     case UIType.MainMenu:
@@ -169,6 +176,14 @@ namespace MyGame.Managers
                         break;
                 }
             }
+            else if (currentState == state && currentState != UIType.None && currentState != UIType.Loading && currentState != UIType.Console)
+            {
+                // 当关闭最后一个UI时，切换回游戏玩法模式
+                if (InputManager.Instance != null)
+                {
+                    InputManager.Instance.SwitchToGamePlayMode();
+                }
+            }
 
             // 更新当前状态
             if (show) currentState = state;
@@ -196,12 +211,6 @@ namespace MyGame.Managers
         private void ShowPauseMenu(bool show)
         {
             SetUIState(UIType.PauseMenu, show);
-        }
-
-        private void ShowResultPanel(bool isWin)
-        {
-            SetUIState(UIType.ResultPanel, true);
-            // 可在此处根据isWin显示不同内容
         }
 
         private void ShowHUD(bool show)

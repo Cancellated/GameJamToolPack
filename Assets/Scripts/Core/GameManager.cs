@@ -6,6 +6,7 @@ using UnityEngine;
 using Logger;
 using UnityEngine.InputSystem;
 using MyGame.DevTool;
+using MyGame.Managers;
 
 
 namespace MyGame.Managers
@@ -30,8 +31,6 @@ namespace MyGame.Managers
     {
         private const string LOG_MODULE = LogModules.GAMEMANAGER;
 
-        public GameControl InputActions;
-
         #region 字段与属性
 
         /// <summary>
@@ -49,8 +48,6 @@ namespace MyGame.Managers
         protected override void Awake()
         {
             base.Awake();
-            InputActions = new GameControl();
-            InputActions.Enable();
             State = GameState.Init;
 
             // 注册事件监听
@@ -83,7 +80,8 @@ namespace MyGame.Managers
         private void Update()
         {
             // 检测键盘ESC键和手柄Start键(在Inputsystem中配置的暂停键)
-            if (InputActions.GamePlay.Pause.triggered)
+            if (InputManager.Instance != null && InputManager.Instance.InputActions != null && 
+                InputManager.Instance.InputActions.GamePlay.Pause.triggered)
             {
                 if (State == GameState.Playing)
                 {
