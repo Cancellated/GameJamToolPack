@@ -24,11 +24,6 @@ namespace MyGame.UI
         bool IsVisible { get; }
         
         /// <summary>
-        /// 面板ID，用于标识不同的面板
-        /// </summary>
-        string PanelId { get; }
-        
-        /// <summary>
         /// 面板类型，用于UIManager进行状态管理
         /// </summary>
         UIType PanelType { get; }

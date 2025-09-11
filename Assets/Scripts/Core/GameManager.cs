@@ -4,25 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Logger;
-using UnityEngine.InputSystem;
-using MyGame.DevTool;
-using MyGame.Managers;
-
 
 namespace MyGame.Managers
 {
-    /// <summary>
-    /// 游戏流程状态枚举。
-    /// </summary>
-    public enum GameState
-    {
-        Init,
-        Menu,
-        Playing,
-        Paused,
-        GameOver
-    }
-
     /// <summary>
     /// 游戏管理器，负责控制游戏主流程和状态切换。
     /// 继承自通用单例基类，保证全局唯一。
@@ -198,5 +182,17 @@ namespace MyGame.Managers
         }
 
         #endregion
+    }
+
+    /// <summary>
+    /// 游戏流程状态枚举。
+    /// </summary>
+    public enum GameState
+    {
+        Init,
+        Menu,
+        Playing,
+        Paused,
+        GameOver
     }
 }

@@ -154,7 +154,7 @@ namespace MyGame.DevTool
         public void ToggleShowConsole()
         {
             // 不再直接操作CanvasGroup，而是触发事件让UIManager处理
-            GameEvents.TriggerConsoleShow(!IsVisible);
+            GameEvents.TriggerMenuShow(UIType.Console, !IsVisible);
         }
         
         // 重写BaseUI的Show方法

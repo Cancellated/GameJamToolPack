@@ -91,7 +91,6 @@
     <Compile Include="Assets\Scripts\Logger\Log.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\Controller\InventoryController.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\CameraController.cs" />
-    <Compile Include="Assets\Scripts\UI\Font\FontManager.cs" />
     <Compile Include="Assets\Scripts\Core\Events\GameEvents.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark03.cs" />
     <Compile Include="Assets\Scripts\UI\Loading\LoadingScreen.cs" />

@@ -22,18 +22,10 @@ namespace MyGame.UI
         [Tooltip("淡入淡出动画时长(秒)")]
         [SerializeField] protected float m_fadeDuration = 0.3f;
         
-        [Tooltip("面板ID")]
-        [SerializeField] protected string m_panelId = "";
-        
         /// <summary>
         /// 是否显示面板
         /// </summary>
         public bool IsVisible { get; protected set; }
-        
-        /// <summary>
-        /// 面板ID，用于标识不同的面板
-        /// </summary>
-        public string PanelId { get { return string.IsNullOrEmpty(m_panelId) ? gameObject.name : m_panelId; } }
         
         /// <summary>
         /// 面板类型，用于UIManager进行状态管理

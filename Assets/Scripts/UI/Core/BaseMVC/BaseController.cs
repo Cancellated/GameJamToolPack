@@ -12,11 +12,6 @@ namespace MyGame.UI
         #region 字段和属性
         
         /// <summary>
-        /// 控制器ID
-        /// </summary>
-        public string ControllerId { get; private set; }
-        
-        /// <summary>
         /// 是否初始化
         /// </summary>
         public bool IsInitialized { get; private set; }
@@ -30,7 +25,6 @@ namespace MyGame.UI
         /// </summary>
         public BaseController()
         {
-            ControllerId = Guid.NewGuid().ToString();
             IsInitialized = false;
         }
         

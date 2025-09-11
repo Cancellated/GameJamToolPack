@@ -108,7 +108,7 @@ namespace MyGame.UI.Control
             {
                 Log.Info(LOG_MODULE, "暂停菜单按键被按下");
                 // 触发暂停菜单显示事件
-                GameEvents.TriggerPauseMenuShow(true);
+                GameEvents.TriggerMenuShow(UIType.PauseMenu, true);
             }
         }
 
@@ -121,7 +121,7 @@ namespace MyGame.UI.Control
             {
                 Log.Info(LOG_MODULE, "物品栏按键被按下");
                 // 触发物品栏显示事件
-                GameEvents.TriggerInventoryShow(true);
+                GameEvents.TriggerMenuShow(UIType.Inventory, true);
             }
         }
 
@@ -134,7 +134,7 @@ namespace MyGame.UI.Control
             {
                 Log.Info(LOG_MODULE, "控制台按键被按下");
                 // 触发控制台显示事件
-                GameEvents.TriggerConsoleShow(true);
+                GameEvents.TriggerMenuShow(UIType.Console, true);
             }
         }
         #endregion
@@ -146,7 +146,7 @@ namespace MyGame.UI.Control
         public void ShowMainMenu()
         {
             Log.Info(LOG_MODULE, "显示主菜单");
-            GameEvents.TriggerMainMenuShow(true);
+            GameEvents.TriggerMenuShow(UIType.MainMenu, true);
         }
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace MyGame.UI.Control
         public void HideMainMenu()
         {
             Log.Info(LOG_MODULE, "隐藏主菜单");
-            GameEvents.TriggerMainMenuShow(false);
+            GameEvents.TriggerMenuShow(UIType.MainMenu, false);
         }
 
         /// <summary>
@@ -164,7 +164,7 @@ namespace MyGame.UI.Control
         public void ShowSettingsPanel()
         {
             Log.Info(LOG_MODULE, "显示设置面板");
-            GameEvents.TriggerSettingsPanelShow(true);
+            GameEvents.TriggerMenuShow(UIType.SettingsPanel, true);
         }
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace MyGame.UI.Control
         public void HideSettingsPanel()
         {
             Log.Info(LOG_MODULE, "隐藏设置面板");
-            GameEvents.TriggerSettingsPanelShow(false);
+            GameEvents.TriggerMenuShow(UIType.SettingsPanel, false);
         }
 
         /// <summary>
@@ -182,7 +182,7 @@ namespace MyGame.UI.Control
         public void ShowAboutPanel()
         {
             Log.Info(LOG_MODULE, "显示关于面板");
-            GameEvents.TriggerAboutPanelShow(true);
+            GameEvents.TriggerMenuShow(UIType.AboutPanel, true);
         }
 
         /// <summary>
@@ -191,7 +191,7 @@ namespace MyGame.UI.Control
         public void HideAboutPanel()
         {
             Log.Info(LOG_MODULE, "隐藏关于面板");
-            GameEvents.TriggerAboutPanelShow(false);
+            GameEvents.TriggerMenuShow(UIType.AboutPanel, false);
         }
         #endregion
     }

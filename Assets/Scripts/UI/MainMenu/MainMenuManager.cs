@@ -53,6 +53,7 @@ namespace MyGame.UI.MainMenu
         /// </summary>
         public void OnStartGameButtonClick()
         {
+            GameEvents.TriggerMenuShow(UIType.MainMenu, false);
             // 触发游戏开始事件
             GameEvents.TriggerGameStart();
         }
@@ -62,7 +63,7 @@ namespace MyGame.UI.MainMenu
         /// </summary>
         public void ShowSettingsPanel()
         {
-            GameEvents.TriggerSettingsPanelShow(true);
+            GameEvents.TriggerMenuShow(UIType.SettingsPanel, true);
         }
 
         /// <summary>
@@ -70,7 +71,7 @@ namespace MyGame.UI.MainMenu
         /// </summary>
         public void HideSettingsPanel()
         {
-            GameEvents.TriggerSettingsPanelShow(false);
+            GameEvents.TriggerMenuShow(UIType.SettingsPanel, false);
         }
 
         /// <summary>
@@ -78,7 +79,7 @@ namespace MyGame.UI.MainMenu
         /// </summary>
         public void ShowAboutPanel()
         {
-            GameEvents.TriggerAboutPanelShow(true);
+            GameEvents.TriggerMenuShow(UIType.AboutPanel, true);
         }
 
         /// <summary>
@@ -86,7 +87,7 @@ namespace MyGame.UI.MainMenu
         /// </summary>
         public void HideAboutPanel()
         {
-            GameEvents.TriggerAboutPanelShow(false);
+            GameEvents.TriggerMenuShow(UIType.AboutPanel, false);
         }
 
         /// <summary>
@@ -122,12 +123,12 @@ namespace MyGame.UI.MainMenu
             if (sceneName == defaultGameScene)
             {
                 // 游戏场景加载完成后，隐藏主菜单
-                GameEvents.TriggerMainMenuShow(false);
+                GameEvents.TriggerMenuShow(UIType.MainMenu, false);
             }
             else if (sceneName == "MainMenu")
             {
                 // 主菜单场景加载完成后，显示主菜单
-                GameEvents.TriggerMainMenuShow(true);
+                GameEvents.TriggerMenuShow(UIType.MainMenu, true);
             }
         }
 

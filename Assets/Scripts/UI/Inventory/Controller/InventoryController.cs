@@ -4,6 +4,7 @@ using Inventory.view;
 using MyGame.Events;
 using System;
 using MyGame;
+using MyGame.UI;
 
 
 namespace Inventory.controller
@@ -50,7 +51,7 @@ namespace Inventory.controller
             // 使用InputSystem检测快捷键
             if (_inputActions.GamePlay.Inventory.triggered)
             {
-                GameEvents.TriggerInventoryShow(true);
+                GameEvents.TriggerMenuShow(UIType.Inventory, true);
             }
         }
         #endregion

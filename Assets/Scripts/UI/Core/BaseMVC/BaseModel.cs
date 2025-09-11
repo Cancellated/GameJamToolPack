@@ -12,11 +12,6 @@ namespace MyGame.UI
         #region 字段和属性
         
         /// <summary>
-        /// 模型ID
-        /// </summary>
-        public string ModelId { get; private set; }
-        
-        /// <summary>
         /// 是否初始化
         /// </summary>
         public bool IsInitialized { get; private set; }
@@ -30,7 +25,6 @@ namespace MyGame.UI
         /// </summary>
         public BaseModel()
         {
-            ModelId = Guid.NewGuid().ToString();
             IsInitialized = false;
         }
         

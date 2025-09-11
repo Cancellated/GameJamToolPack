@@ -113,96 +113,16 @@ namespace MyGame.Events
         #region UI事件
 
         /// <summary>
-        /// 显示或隐藏主菜单
-        /// </summary>
-        public static event Action<bool> OnMainMenuShow;
-        
-        public static void TriggerMainMenuShow(bool show)
-        {
-            Log.Info(module, $"主菜单显示：{show}");
-            OnMainMenuShow?.Invoke(show);
-        }
-
-        /// <summary>
-        /// 显示或隐藏暂停菜单
-        /// </summary>
-        public static event Action<bool> OnPauseMenuShow;
-        
-        public static void TriggerPauseMenuShow(bool show)
-        {
-            Log.Info(module, $"暂停菜单显示：{show}");
-            OnPauseMenuShow?.Invoke(show);
-        }
-
-        /// <summary>
-        /// 显示或隐藏HUD
-        /// </summary>
-        public static event Action<bool> OnHUDShow;
-        
-        public static void TriggerHUDShow(bool show)
-        {
-            Log.Info(module, $"HUD显示：{show}");
-            OnHUDShow?.Invoke(show);
-        }
-        
-        /// <summary>
-        /// 显示或隐藏控制台
-        /// </summary>
-        public static event Action<bool> OnConsoleShow;
-        
-        public static void TriggerConsoleShow(bool show)
-        {
-            Log.Info(module, $"控制台显示：{show}");
-            OnConsoleShow?.Invoke(show);
-        }
-        
-        /// <summary>
-        /// 显示或隐藏背包
-        /// </summary>
-        public static event Action<bool> OnInventoryShow;
-        
-        public static void TriggerInventoryShow(bool show)
-        {
-            Log.Info(module, $"背包显示：{show}");
-            OnInventoryShow?.Invoke(show);
-        }
-
-        /// <summary>
-        /// 显示或隐藏设置面板
-        /// </summary>
-        public static event Action<bool> OnSettingsPanelShow;
-        
-        public static void TriggerSettingsPanelShow(bool show)
-        {
-            Log.Info(module, $"设置面板显示：{show}");
-            OnSettingsPanelShow?.Invoke(show);
-        }
-
-        /// <summary>
-        /// 显示或隐藏关于面板
-        /// </summary>
-        public static event Action<bool> OnAboutPanelShow;
-        
-        public static void TriggerAboutPanelShow(bool show)
-        {
-            Log.Info(module, $"关于面板显示：{show}");
-            OnAboutPanelShow?.Invoke(show);
-        }
-
-            #region UI切换事件
-
-        /// <summary>
-        /// UI状态切换事件（互斥显示）
+        /// UI状态切换事件（统一管理所有UI的显示/隐藏）
         /// </summary>
         public static event Action<UIType, bool> OnMenuShow;
         
-        public static void TriggerMenuShow(UIType state, bool show)
+        public static void TriggerMenuShow(UIType menu, bool show)
         {
-            Log.Info(module, $"菜单切换：{state} 显示：{show}");
-            OnMenuShow?.Invoke(state, show);
+            Log.Info(module, $"UI切换：{menu} 显示：{show}");
+            OnMenuShow?.Invoke(menu, show);
         }
 
-            #endregion
         #endregion
     }
 }

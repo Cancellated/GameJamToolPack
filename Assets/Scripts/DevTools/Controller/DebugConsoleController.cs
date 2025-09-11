@@ -1,7 +1,5 @@
 using UnityEngine;
-using MyGame.Events;
 using Logger;
-using MyGame.Managers;
 
 namespace MyGame.DevTool
 {
@@ -42,15 +40,6 @@ namespace MyGame.DevTool
             {
                 Log.Error(LOG_MODULE, "未找到DebugConsoleView组件");
             }
-            
-            // 订阅游戏事件
-            GameEvents.OnConsoleShow += ToggleConsole;
-        }
-        
-        private void OnDestroy()
-        {
-            // 取消订阅事件
-            GameEvents.OnConsoleShow -= ToggleConsole;
         }
         
         /// <summary>
@@ -72,25 +61,6 @@ namespace MyGame.DevTool
                     view.Print("未知命令，输入 help 查看可用命令。");
                 }
                 Log.Warning(LOG_MODULE, "未知命令: " + commandText);
-            }
-        }
-        
-        /// <summary>
-        /// 切换控制台显示状态
-        /// </summary>
-        /// <param name="show">是否显示</param>
-        private void ToggleConsole(bool show)
-        {
-            if (view == null)
-                return;
-            
-            if (show)
-            {
-                view.Show();
-            }
-            else
-            {
-                view.Hide();
             }
         }
         

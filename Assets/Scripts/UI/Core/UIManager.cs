@@ -19,10 +19,6 @@ namespace MyGame.Managers
         [Header("UI面板引用")]
         public List<IUIPanel> uiPanels = new();
 
-        [Header("动画设置")]
-        [Tooltip("UI淡入淡出动画时长(秒)")]
-        public float fadeDuration = 0.3f;
-
         #endregion
 
         #region 状态管理
@@ -45,14 +41,7 @@ namespace MyGame.Managers
             HideAllUI();
 
             // 注册UI相关事件监听
-            GameEvents.OnMenuShow += OnMenuShow;    //这个是通用窗口显隐处理
-            GameEvents.OnMainMenuShow += ShowMainMenu;
-            GameEvents.OnPauseMenuShow += ShowPauseMenu;
-            GameEvents.OnHUDShow += ShowHUD;
-            GameEvents.OnConsoleShow += ShowConsole;
-            GameEvents.OnInventoryShow += ShowInventory;
-            GameEvents.OnSettingsPanelShow += ShowSettingsPanel;
-            GameEvents.OnAboutPanelShow += ShowAboutPanel;
+            GameEvents.OnMenuShow += OnMenuShow;    // UI显隐处理
             // 加载界面显隐处理方法
             GameEvents.OnSceneLoadStart += ShowLoading;
             GameEvents.OnSceneLoadComplete += HideLoading;
@@ -93,13 +82,6 @@ namespace MyGame.Managers
         {
             // 注销事件监听
             GameEvents.OnMenuShow -= OnMenuShow;
-            GameEvents.OnMainMenuShow -= ShowMainMenu;
-            GameEvents.OnPauseMenuShow -= ShowPauseMenu;
-            GameEvents.OnHUDShow -= ShowHUD;
-            GameEvents.OnConsoleShow -= ShowConsole;
-            GameEvents.OnInventoryShow -= ShowInventory;
-            GameEvents.OnSettingsPanelShow -= ShowSettingsPanel;
-            GameEvents.OnAboutPanelShow -= ShowAboutPanel;
             GameEvents.OnSceneLoadStart -= ShowLoading;
             GameEvents.OnSceneLoadComplete -= HideLoading;
         }
