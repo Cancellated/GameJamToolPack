@@ -83,6 +83,7 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshSpawner.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\View\InventorySlot.cs" />
     <Compile Include="Assets\Scripts\Core\Singleton\Singleton.cs" />
+    <Compile Include="Assets\Scripts\UI\Loading\LoadingScreenController.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark02.cs" />
     <Compile Include="Assets\Scripts\DevTools\Controller\DebugConsoleController.cs" />
     <Compile Include="Assets\Scripts\Core\InputManager.cs" />

@@ -241,10 +241,4 @@ namespace MyGame.UI
         
         #endregion
     }
-    
-    /// <summary>
-    /// 非泛型版本的BaseUI，保持向后兼容性
-    /// </summary>
-    public abstract class BaseUI : BaseUIView<object>
-    { }    
 }

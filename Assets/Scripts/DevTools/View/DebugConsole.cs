@@ -36,7 +36,7 @@ namespace MyGame.DevTool
     /// <summary>
     /// 调试控制台视图，负责UI展示和用户输入事件捕获
     /// </summary>
-    public class DebugConsole : BaseUI, IUIPanel
+    public class DebugConsole : BaseUIView<DebugConsoleController>, IUIPanel
     {
         private const string LOG_MODULE = LogModules.DEBUGCONSOLE;
         //最大日志保留数
