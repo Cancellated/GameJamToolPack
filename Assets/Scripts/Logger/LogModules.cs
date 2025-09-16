@@ -15,6 +15,7 @@ namespace Logger
         public const string UIMANAGER = "UIManager";
         public const string DEBUGCONSOLE = "DebugConsole";
         public const string MANAGERBOOTSTRAP = "ManagerBootstrap";
+        public const string LOADING = "Loading";
 
         // UI模块
         public const string UI = "UI";

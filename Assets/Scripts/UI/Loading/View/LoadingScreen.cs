@@ -1,9 +1,9 @@
-using System.Collections;
 using UnityEngine;
 using Logger;
-using MyGame.UI;
 
-namespace MyGame.UI.Loading
+using MyGame.UI.Loading.Controller;
+
+namespace MyGame.UI.Loading.View
 {
     /// <summary>
     /// 加载界面组件
@@ -11,7 +11,7 @@ namespace MyGame.UI.Loading
     /// </summary>
     public class LoadingScreen : BaseUIView<LoadingScreenController>
     {
-        private const string module = "Loading";
+        private const string module = LogModules.LOADING;
         
         /// <summary>
         /// 初始化加载界面
@@ -32,7 +32,7 @@ namespace MyGame.UI.Loading
         protected override void TryBindController()
         {
             // 创建控制器实例
-            LoadingScreenController controller = new();
+            Controller.LoadingScreenController controller = new();
             
             // 初始化控制器
             controller.Initialize();

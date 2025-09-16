@@ -1,60 +1,45 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using System.Linq;
 using MyGame.Managers;
 using MyGame.Events;
 using Logger;
-using UnityEngine.InputSystem;
 using MyGame.UI;
 
-namespace MyGame.DevTool
-{   
-    /// <summary>
-    /// 调试命令特性，用于标记命令方法
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Method)]
-    public class DebugCommand : Attribute
-    {
-        /// <summary>命令名称</summary>
-        public string CommandName { get; }
-        
-        /// <summary>命令描述</summary> 
-        public string Description { get; set; }
-        
-        /// <summary>
-        /// 创建调试命令特性
-        /// </summary>
-        /// <param name="name">命令名称</param>
-        public DebugCommand(string name)
-        {
-            CommandName = name;
-        }
-    }
 
+namespace MyGame.DevTool
+{
     /// <summary>
     /// 调试控制台视图，负责UI展示和用户输入事件捕获
     /// </summary>
-    public class DebugConsole : BaseUIView<DebugConsoleController>, IUIPanel
+    public class DebugConsole : BaseUIView<DebugConsoleController>
     {
         private const string LOG_MODULE = LogModules.DEBUGCONSOLE;
         //最大日志保留数
         private const int MAX_LOG_LINES = 100;
         //按键监听
         private GameControl inputActions;
-        
-        private DebugConsoleController m_Controller;
 
+        private DebugConsoleController m_Controller;
+        private static DebugConsole s_instance;
+
+        /// <summary>
+        /// 静态实例，用于全局访问
+        /// </summary>
+        public static DebugConsole Instance
+        {
+            get { return s_instance; }
+        }
         #region UI引用
-        
+
         [Header("UI组件引用")]
         [Tooltip("命令输入框")]
         public TMP_InputField inputField;
-        
+
         [Tooltip("输出文本框")]
         public TMP_Text outputText;
-        
+
         [Tooltip("滚动视图组件")]
         public UnityEngine.UI.ScrollRect scrollRect;
 
@@ -71,7 +56,10 @@ namespace MyGame.DevTool
         protected override void Awake()
         {
             base.Awake();
-            
+
+            // 设置静态实例
+            s_instance = this;
+
             // 查找并关联控制器
             m_Controller = FindObjectOfType<DebugConsoleController>();
             if (m_Controller == null)
@@ -79,9 +67,14 @@ namespace MyGame.DevTool
                 Log.Error(LOG_MODULE, "DebugConsoleController not found. Creating new one.", this);
                 m_Controller = gameObject.AddComponent<DebugConsoleController>();
             }
-            
+
             // 设置控制器的视图引用
             m_Controller.SetView(this);
+
+            // 明确设置面板类型为Console，确保在UIManager识别前已设置
+            Log.Info(LOG_MODULE, "在Awake方法中设置DebugConsole.PanelType为Console");
+            m_panelType = UIType.Console;
+            Log.Info(LOG_MODULE, "当前面板类型: " + m_panelType);
 
             // 获取InputManager的输入系统实例
             if (InputManager.Instance != null)
@@ -96,7 +89,7 @@ namespace MyGame.DevTool
                 inputActions.Enable();
                 Log.Info(LOG_MODULE, "创建并启用新的InputActions实例", this);
             }
-            
+
             // 确保canvasGroup已初始化
             if (m_canvasGroup == null)
             {
@@ -109,10 +102,10 @@ namespace MyGame.DevTool
                 m_canvasGroup.interactable = false;
                 m_canvasGroup.blocksRaycasts = false;
             }
-            
+
             if (outputText != null)
                 outputText.text = "调试控制台已启动。输入 help 查看命令。";
-            
+
             // 绑定输入框事件处理器
             if (inputField != null)
             {
@@ -120,10 +113,10 @@ namespace MyGame.DevTool
                 // 设置输入行为模式为提交时结束编辑
                 inputField.lineType = TMP_InputField.LineType.SingleLine;
             }
-            
+
             // 设置Canvas排序层级
             SetCanvasSortingOrder();
-            
+
             // 初始隐藏状态
             Hide();
         }
@@ -144,6 +137,21 @@ namespace MyGame.DevTool
             }
         }
 
+        /// <summary>
+        /// 初始化面板，显式实现IUIPanel接口
+        /// 确保面板类型被正确设置为Console
+        /// </summary>
+        public override void Initialize()
+        {
+            Log.Info(LOG_MODULE, "DebugConsole.Initialize() 被调用");
+            // 显式设置面板类型为Console，确保在UIManager中被正确识别
+            m_panelType = UIType.Console;
+            Log.Info(LOG_MODULE, "DebugConsole.PanelType 设置为: " + m_panelType);
+
+            // 调用基类的初始化方法
+            base.Initialize();
+        }
+
         #endregion
 
         #region 公共方法
@@ -156,25 +164,55 @@ namespace MyGame.DevTool
             // 不再直接操作CanvasGroup，而是触发事件让UIManager处理
             GameEvents.TriggerMenuShow(UIType.Console, !IsVisible);
         }
-        
+
         // 重写BaseUI的Show方法
         public override void Show()
         {
-            m_canvasGroup.alpha = 1;
-            m_canvasGroup.interactable = true;
-            m_canvasGroup.blocksRaycasts = true;
+            Log.Info(LOG_MODULE, "显示调试控制台", this);
+            Log.Info(LOG_MODULE, "当前GameObject状态: " + gameObject.activeSelf, this);
+
+            // 确保游戏对象被激活
+            if (!gameObject.activeSelf)
+            {
+                gameObject.SetActive(true);
+                Log.Info(LOG_MODULE, "游戏对象已被激活", this);
+            }
+
+            if (m_canvasGroup != null)
+            {
+                m_canvasGroup.alpha = 1f;
+                m_canvasGroup.interactable = true;
+                m_canvasGroup.blocksRaycasts = true;
+                Log.Info(LOG_MODULE, "设置CanvasGroup状态 - alpha: " + m_canvasGroup.alpha + ", interactable: " + m_canvasGroup.interactable + ", blocksRaycasts: " + m_canvasGroup.blocksRaycasts, this);
+            }
+
             IsVisible = true;
         }
-        
+
         // 重写BaseUI的Hide方法
         public override void Hide()
         {
-            m_canvasGroup.alpha = 0;
-            m_canvasGroup.interactable = false;
-            m_canvasGroup.blocksRaycasts = false;
+            Log.Info(LOG_MODULE, "隐藏调试控制台", this);
+            Log.Info(LOG_MODULE, "当前GameObject状态: " + gameObject.activeSelf, this);
+
+            // 确保游戏对象被禁用
+            if (gameObject.activeSelf)
+            {
+                gameObject.SetActive(false);
+                Log.Info(LOG_MODULE, "游戏对象已被禁用", this);
+            }
+
+            if (m_canvasGroup != null)
+            {
+                m_canvasGroup.alpha = 0f;
+                m_canvasGroup.interactable = false;
+                m_canvasGroup.blocksRaycasts = false;
+                Log.Info(LOG_MODULE, "设置CanvasGroup状态 - alpha: " + m_canvasGroup.alpha + ", interactable: " + m_canvasGroup.interactable + ", blocksRaycasts: " + m_canvasGroup.blocksRaycasts, this);
+            }
+
             IsVisible = false;
         }
-        
+
         /// <summary>
         /// 当输入命令时调用
         /// </summary>
@@ -187,13 +225,13 @@ namespace MyGame.DevTool
             {
                 // 清除输入框
                 inputField.text = "";
-                
+
                 // 将命令转发给控制器处理
                 if (m_Controller != null)
                 {
                     m_Controller.HandleCommand(cmd);
                 }
-                
+
                 // 重新激活输入框以便继续输入
                 inputField.ActivateInputField();
             }
@@ -205,24 +243,24 @@ namespace MyGame.DevTool
         /// <param name="msg">要显示的消息</param>
         public void DisplayText(string msg)
         {
-            if (outputText != null) 
+            if (outputText != null)
             {
                 // 分割现有日志为行数组
                 var lines = outputText.text.Split('\n');
 
-                
+
                 // 如果超过最大行数，移除最早的行
-                if (lines.Length >= MAX_LOG_LINES) 
+                if (lines.Length >= MAX_LOG_LINES)
                 {
                     lines = lines.Skip(1).ToArray();
                 }
-                
+
                 // 添加新日志并重新组合
                 outputText.text = string.Join("\n", lines) + $"\n{msg}";
-                
+
                 // 强制布局更新
                 Canvas.ForceUpdateCanvases();
-                
+
                 // 当Scroll Rect存在且内容需要滚动时执行滚动到底部
                 if (scrollRect != null && outputText.preferredHeight > outputText.rectTransform.rect.height)
                 {
@@ -231,7 +269,7 @@ namespace MyGame.DevTool
             }
             Log.Info(LOG_MODULE, msg, this);
         }
-        
+
         /// <summary>
         /// 在控制台中显示文本消息（DisplayText的别名方法）
         /// </summary>
@@ -240,7 +278,28 @@ namespace MyGame.DevTool
         {
             DisplayText(msg);
         }
-        
         #endregion
+    }
+
+    /// <summary>
+    /// 调试命令特性，用于标记命令方法
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method)]
+    public class DebugCommand : Attribute
+    {
+        /// <summary>命令名称</summary>
+        public string CommandName { get; }
+        
+        /// <summary>命令描述</summary> 
+        public string Description { get; set; }
+        
+        /// <summary>
+        /// 创建调试命令特性
+        /// </summary>
+        /// <param name="name">命令名称</param>
+        public DebugCommand(string name)
+        {
+            CommandName = name;
+        }
     }
 }

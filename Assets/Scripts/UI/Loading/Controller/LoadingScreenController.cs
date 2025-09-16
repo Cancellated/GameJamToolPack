@@ -1,17 +1,19 @@
-using MyGame.Events;
 using MyGame.Managers;
 using Logger;
 using UnityEngine;
+using MyGame.UI.Loading.Model;
+using MyGame.Events;
+using MyGame.UI.Loading.View;
 
-namespace MyGame.UI.Loading
+namespace MyGame.UI.Loading.Controller
 {
     /// <summary>
     /// 加载界面控制器
     /// 负责处理加载界面的逻辑、事件响应和与视图的交互
     /// </summary>
-    public class LoadingScreenController : BaseController<LoadingScreen, object>
+    public class LoadingScreenController : BaseController<LoadingScreen, LoadingScreenModel>
     {
-        private const string module = "Loading";
+        private const string module = LogModules.LOADING;
 
         #region 初始化和清理
         /// <summary>
@@ -20,6 +22,14 @@ namespace MyGame.UI.Loading
         /// </summary>
         public override void Initialize()
         {
+            // 创建并初始化模型
+            if (m_model == null)
+            {
+                m_model = new LoadingScreenModel();
+                m_model.Initialize();
+                SetModel(m_model);
+            }
+            
             base.Initialize();
         }
 
@@ -47,6 +57,12 @@ namespace MyGame.UI.Loading
             // 取消订阅所有事件
             GameEvents.OnSceneLoadStart -= HandleSceneLoadStart;
             GameEvents.OnSceneLoadComplete -= HandleSceneLoadComplete;
+            
+            // 清理模型资源
+            if (m_model != null)
+            {
+                m_model.Cleanup();
+            }
         }
 
         #endregion
@@ -60,6 +76,13 @@ namespace MyGame.UI.Loading
         /// <param name="sceneName">要加载的场景名称</param>
         private void HandleSceneLoadStart(string sceneName)
         {
+            // 更新模型数据
+            if (m_model != null)
+            {
+                m_model.StartLoading(sceneName);
+            }
+            
+            // 通知视图更新
             if (m_view != null)
             {
                 m_view.OnSceneLoadStarted(sceneName);
@@ -73,6 +96,13 @@ namespace MyGame.UI.Loading
         /// <param name="sceneName">已加载完成的场景名称</param>
         private void HandleSceneLoadComplete(string sceneName)
         {
+            // 更新模型数据
+            if (m_model != null)
+            {
+                m_model.CompleteLoading();
+            }
+            
+            // 通知视图更新
             if (m_view != null)
             {
                 m_view.OnSceneLoadCompleted(sceneName);
@@ -81,7 +111,7 @@ namespace MyGame.UI.Loading
 
         #endregion
 
-        #region 视图设置回调
+        #region 视图和模型设置回调
 
         /// <summary>
         /// 视图设置后的回调
@@ -91,6 +121,16 @@ namespace MyGame.UI.Loading
         {
             Log.Info(module, "加载界面视图已设置");
             // 可以在这里进行视图相关的初始化操作
+        }
+        
+        /// <summary>
+        /// 模型设置后的回调
+        /// 在这里可以进行模型相关的初始化操作
+        /// </summary>
+        protected override void OnModelSet()
+        {
+            Log.Info(module, "加载界面模型已设置");
+            // 可以在这里进行模型相关的初始化操作
         }
 
         #endregion

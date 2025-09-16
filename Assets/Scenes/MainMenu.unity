@@ -531,7 +531,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u8BF7\u8F93\u5165\u6587\u672C"
+  m_text: "\u8F93\u5165 help \u67E5\u770B\u547D\u4EE4"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d33d670ee2985354a9fe1cc6ca3294b2, type: 2}
   m_sharedMaterial: {fileID: -90259130224651543, guid: d33d670ee2985354a9fe1cc6ca3294b2,
@@ -711,6 +711,7 @@ GameObject:
   - component: {fileID: 903428387}
   - component: {fileID: 903428386}
   - component: {fileID: 903428385}
+  - component: {fileID: 903428391}
   - component: {fileID: 903428389}
   - component: {fileID: 903428390}
   m_Layer: 0
@@ -817,8 +818,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_canvasGroup: {fileID: 903428390}
   m_panelType: 6
-  m_fadeDuration: 0
-  m_panelId: 
+  m_fadeDuration: 0.001
   inputField: {fileID: 1998353154}
   outputText: {fileID: 1050424019}
   scrollRect: {fileID: 1050424022}
@@ -835,6 +835,19 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &903428391
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 903428384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3b20364727d49a4895a2a84e5ce4990, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  view: {fileID: 903428389}
 --- !u!1 &958160688
 GameObject:
   m_ObjectHideFlags: 0
@@ -1743,7 +1756,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77069464b375a4244a86c5197dbd04f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fadeDuration: 0.3
+  uiPanelWrappers:
+  - panel: {fileID: 903428386}
   currentState: 0
 --- !u!114 &2018898478
 MonoBehaviour:
