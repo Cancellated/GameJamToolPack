@@ -63,10 +63,10 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventHandler.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\Model\InventoryItem.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeA.cs" />
-    <Compile Include="Assets\Scripts\UI\MainMenu\About\AboutMenu.cs" />
     <Compile Include="Assets\Scripts\Logger\LogModules.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\EnvMapAnimator.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_A.cs" />
+    <Compile Include="Assets\Scripts\UI\Settings\Model\SettingsModel.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01_UGUI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\SimpleScript.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark04.cs" />
@@ -74,7 +74,6 @@
     <Compile Include="Assets\Scripts\Player\PlayerController.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\ChatController.cs" />
     <Compile Include="Assets\Scripts\UI\Control\UIController.cs" />
-    <Compile Include="Assets\Scripts\UI\Core\UIEnum.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_DigitValidator.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_FrameRateCounter.cs" />
     <Compile Include="Assets\Scripts\GameData\GameData.cs" />
@@ -87,12 +86,15 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark02.cs" />
     <Compile Include="Assets\Scripts\DevTools\Controller\DebugConsoleController.cs" />
     <Compile Include="Assets\Scripts\Core\InputManager.cs" />
+    <Compile Include="Assets\Scripts\UI\MainMenu\Controller\MainMenuController.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\Model\InventoryModel.cs" />
     <Compile Include="Assets\Scripts\UI\Core\IUIPanel.cs" />
     <Compile Include="Assets\Scripts\Logger\Log.cs" />
+    <Compile Include="Assets\Scripts\UI\Core\UIType.cs" />
     <Compile Include="Assets\Scripts\UI\Loading\View\LoadingScreen.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\Controller\InventoryController.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\CameraController.cs" />
+    <Compile Include="Assets\Scripts\UI\MainMenu\View\MainMenuView.cs" />
     <Compile Include="Assets\Scripts\Core\Events\GameEvents.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark03.cs" />
     <Compile Include="Assets\Scripts\UI\Core\BaseMVC\BaseModel.cs" />
@@ -119,16 +121,18 @@
     <Compile Include="Assets\Settings\Input System\GameControl.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\Model\ItemData.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexZoom.cs" />
+    <Compile Include="Assets\Scripts\UI\Settings\View\SettingsPanelView.cs" />
     <Compile Include="Assets\Scripts\Core\Scene\SceneSwitcher.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_B.cs" />
     <Compile Include="Assets\Scripts\UI\Core\UIManager.cs" />
-    <Compile Include="Assets\Scripts\UI\MainMenu\MainMenuManager.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\SkewTextExample.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\WarpTextExample.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshProFloatingText.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\ShaderPropAnimator.cs" />
     <Compile Include="Assets\Scripts\DevTools\Model\DebugCommandModel.cs" />
     <Compile Include="Assets\Scripts\UI\Core\BaseMVC\BaseView.cs" />
+    <Compile Include="Assets\Scripts\UI\MainMenu\Model\MainMenuModel.cs" />
+    <Compile Include="Assets\Scripts\UI\Settings\Controller\SettingsPanelController.cs" />
     <Compile Include="Assets\Scripts\GameData\GameSettings.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextInfoDebugTool.cs" />
   </ItemGroup>

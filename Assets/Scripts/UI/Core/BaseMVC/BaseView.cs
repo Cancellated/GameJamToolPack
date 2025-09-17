@@ -8,7 +8,7 @@ namespace MyGame.UI
     /// UI面板基类，实现IUIPanel接口并提供基础功能
     /// 适配MVC架构，作为View层的基类
     /// </summary>
-    public abstract class BaseUIView<TController> : MonoBehaviour, IUIPanel where TController : class
+    public abstract class BaseView<TController> : MonoBehaviour, IUIPanel where TController : class
     {
         #region 字段和属性
         

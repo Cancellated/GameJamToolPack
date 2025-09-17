@@ -7,7 +7,7 @@ namespace MyGame.UI
     /// MVC架构中的控制器基类
     /// 负责处理用户输入、更新模型和通知视图更新
     /// </summary>
-    public abstract class BaseController
+    public abstract class BaseController : MonoBehaviour
     {
         #region 字段和属性
         

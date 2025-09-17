@@ -13,13 +13,11 @@ namespace MyGame.DevTool
     /// <summary>
     /// 调试控制台视图，负责UI展示和用户输入事件捕获
     /// </summary>
-    public class DebugConsole : BaseUIView<DebugConsoleController>
+    public class DebugConsole : BaseView<DebugConsoleController>
     {
         private const string LOG_MODULE = LogModules.DEBUGCONSOLE;
         //最大日志保留数
         private const int MAX_LOG_LINES = 100;
-        //按键监听
-        private GameControl inputActions;
 
         private DebugConsoleController m_Controller;
         private static DebugConsole s_instance;
@@ -55,53 +53,13 @@ namespace MyGame.DevTool
         /// </summary>
         protected override void Awake()
         {
+            // 设置面板类型为Console
+            m_panelType = UIType.Console;
+            
             base.Awake();
 
             // 设置静态实例
             s_instance = this;
-
-            // 查找并关联控制器
-            m_Controller = FindObjectOfType<DebugConsoleController>();
-            if (m_Controller == null)
-            {
-                Log.Error(LOG_MODULE, "DebugConsoleController not found. Creating new one.", this);
-                m_Controller = gameObject.AddComponent<DebugConsoleController>();
-            }
-
-            // 设置控制器的视图引用
-            m_Controller.SetView(this);
-
-            // 明确设置面板类型为Console，确保在UIManager识别前已设置
-            Log.Info(LOG_MODULE, "在Awake方法中设置DebugConsole.PanelType为Console");
-            m_panelType = UIType.Console;
-            Log.Info(LOG_MODULE, "当前面板类型: " + m_panelType);
-
-            // 获取InputManager的输入系统实例
-            if (InputManager.Instance != null)
-            {
-                inputActions = InputManager.Instance.InputActions;
-                Log.Info(LOG_MODULE, "成功获取InputManager的InputActions实例", this);
-            }
-            else
-            {
-                // 如果无法获取InputManager的实例，则创建新的输入系统实例作为备选
-                inputActions = new GameControl();
-                inputActions.Enable();
-                Log.Info(LOG_MODULE, "创建并启用新的InputActions实例", this);
-            }
-
-            // 确保canvasGroup已初始化
-            if (m_canvasGroup == null)
-            {
-                m_canvasGroup = GetComponent<CanvasGroup>();
-            }
-
-            if (m_canvasGroup != null)
-            {
-                m_canvasGroup.alpha = 0;
-                m_canvasGroup.interactable = false;
-                m_canvasGroup.blocksRaycasts = false;
-            }
 
             if (outputText != null)
                 outputText.text = "调试控制台已启动。输入 help 查看命令。";
@@ -116,9 +74,26 @@ namespace MyGame.DevTool
 
             // 设置Canvas排序层级
             SetCanvasSortingOrder();
+        }
 
-            // 初始隐藏状态
-            Hide();
+        /// <summary>
+        /// 尝试绑定控制器
+        /// </summary>
+        protected override void TryBindController()
+        {
+            // 查找并关联控制器
+            m_Controller = FindObjectOfType<DebugConsoleController>();
+            if (m_Controller == null)
+            {
+                Log.Error(LOG_MODULE, "未找到DebugConsoleController组件，已添加新组件", this);
+                m_Controller = gameObject.AddComponent<DebugConsoleController>();
+            }
+
+            // 设置控制器的视图引用
+            m_Controller.SetView(this);
+
+            // 绑定控制器到视图
+            BindController(m_Controller);
         }
 
         /// <summary>
@@ -139,37 +114,20 @@ namespace MyGame.DevTool
 
         /// <summary>
         /// 初始化面板，显式实现IUIPanel接口
-        /// 确保面板类型被正确设置为Console
         /// </summary>
         public override void Initialize()
         {
-            Log.Info(LOG_MODULE, "DebugConsole.Initialize() 被调用");
-            // 显式设置面板类型为Console，确保在UIManager中被正确识别
-            m_panelType = UIType.Console;
-            Log.Info(LOG_MODULE, "DebugConsole.PanelType 设置为: " + m_panelType);
 
-            // 调用基类的初始化方法
-            base.Initialize();
+            Log.Info(LOG_MODULE, "DebugConsole.PanelType 设置为: " + m_panelType);
         }
 
         #endregion
 
         #region 公共方法
-
-        /// <summary>
-        /// 监听按键显隐控制台
-        /// </summary>
-        public void ToggleShowConsole()
-        {
-            // 不再直接操作CanvasGroup，而是触发事件让UIManager处理
-            GameEvents.TriggerMenuShow(UIType.Console, !IsVisible);
-        }
-
-        // 重写BaseUI的Show方法
+        // 重写Show方法-控制台不需要动画控制显隐
         public override void Show()
         {
             Log.Info(LOG_MODULE, "显示调试控制台", this);
-            Log.Info(LOG_MODULE, "当前GameObject状态: " + gameObject.activeSelf, this);
 
             // 确保游戏对象被激活
             if (!gameObject.activeSelf)
@@ -183,7 +141,6 @@ namespace MyGame.DevTool
                 m_canvasGroup.alpha = 1f;
                 m_canvasGroup.interactable = true;
                 m_canvasGroup.blocksRaycasts = true;
-                Log.Info(LOG_MODULE, "设置CanvasGroup状态 - alpha: " + m_canvasGroup.alpha + ", interactable: " + m_canvasGroup.interactable + ", blocksRaycasts: " + m_canvasGroup.blocksRaycasts, this);
             }
 
             IsVisible = true;
@@ -193,13 +150,11 @@ namespace MyGame.DevTool
         public override void Hide()
         {
             Log.Info(LOG_MODULE, "隐藏调试控制台", this);
-            Log.Info(LOG_MODULE, "当前GameObject状态: " + gameObject.activeSelf, this);
 
             // 确保游戏对象被禁用
             if (gameObject.activeSelf)
             {
                 gameObject.SetActive(false);
-                Log.Info(LOG_MODULE, "游戏对象已被禁用", this);
             }
 
             if (m_canvasGroup != null)
@@ -207,7 +162,6 @@ namespace MyGame.DevTool
                 m_canvasGroup.alpha = 0f;
                 m_canvasGroup.interactable = false;
                 m_canvasGroup.blocksRaycasts = false;
-                Log.Info(LOG_MODULE, "设置CanvasGroup状态 - alpha: " + m_canvasGroup.alpha + ", interactable: " + m_canvasGroup.interactable + ", blocksRaycasts: " + m_canvasGroup.blocksRaycasts, this);
             }
 
             IsVisible = false;

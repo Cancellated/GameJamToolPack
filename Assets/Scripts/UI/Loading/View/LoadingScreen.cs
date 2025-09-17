@@ -9,9 +9,9 @@ namespace MyGame.UI.Loading.View
     /// 加载界面组件
     /// MVC架构中的View层，负责显示加载界面的UI元素和动画效果
     /// </summary>
-    public class LoadingScreen : BaseUIView<LoadingScreenController>
+    public class LoadingScreen : BaseView<LoadingScreenController>
     {
-        private const string module = LogModules.LOADING;
+        private const string LOG_MODULE = LogModules.LOADING;
         
         /// <summary>
         /// 初始化加载界面
@@ -31,8 +31,8 @@ namespace MyGame.UI.Loading.View
         /// </summary>
         protected override void TryBindController()
         {
-            // 创建控制器实例
-            Controller.LoadingScreenController controller = new();
+            // 正确的方法：在GameObject上添加控制器组件
+            Controller.LoadingScreenController controller = gameObject.AddComponent<Controller.LoadingScreenController>();
             
             // 初始化控制器
             controller.Initialize();
@@ -42,8 +42,6 @@ namespace MyGame.UI.Loading.View
             
             // 绑定控制器到视图
             BindController(controller);
-            
-            Log.Info(module, "加载界面已绑定控制器");
         }
         
         /// <summary>
@@ -52,7 +50,7 @@ namespace MyGame.UI.Loading.View
         /// </summary>
         protected override void OnControllerBound()
         {
-            Log.Info(module, "加载界面控制器已绑定");
+            // 控制器绑定后的初始化逻辑
         }
         
         /// <summary>
@@ -61,7 +59,7 @@ namespace MyGame.UI.Loading.View
         /// </summary>
         protected override void OnControllerUnbound()
         {
-            Log.Info(module, "加载界面控制器已解绑");
+            // 控制器解绑后的清理逻辑
         }
         
         /// <summary>
@@ -70,7 +68,6 @@ namespace MyGame.UI.Loading.View
         /// </summary>
         public override void Initialize()
         {
-            Log.Info(module, "初始化加载界面");
             // 可以在这里进行额外的初始化逻辑
         }
         
@@ -80,7 +77,6 @@ namespace MyGame.UI.Loading.View
         /// </summary>
         public override void Cleanup()
         {
-            Log.Info(module, "清理加载界面资源");
             base.Cleanup();
         }
         
@@ -90,7 +86,6 @@ namespace MyGame.UI.Loading.View
         /// </summary>
         public override void Show()
         {
-            Log.Info(module, "显示加载界面");
             base.Show();
         }
         
@@ -100,32 +95,8 @@ namespace MyGame.UI.Loading.View
         /// </summary>
         public override void Hide()
         {
-            Log.Info(module, "隐藏加载界面");
+            Log.Info(LOG_MODULE, "隐藏加载界面");
             base.Hide();
-        }
-        
-        /// <summary>
-        /// 当场景开始加载时的回调
-        /// 由控制器调用，用于更新UI显示
-        /// </summary>
-        /// <param name="sceneName">要加载的场景名称</param>
-        public void OnSceneLoadStarted(string sceneName)
-        {
-            Log.Info(module, $"场景加载开始: {sceneName}");
-            // 可以在这里添加加载动画的启动逻辑
-            // 例如：显示加载进度条、播放加载动画等
-        }
-        
-        /// <summary>
-        /// 当场景加载完成时的回调
-        /// 由控制器调用，用于更新UI显示
-        /// </summary>
-        /// <param name="sceneName">已加载完成的场景名称</param>
-        public void OnSceneLoadCompleted(string sceneName)
-        {
-            Log.Info(module, $"场景加载完成: {sceneName}");
-            // 可以在这里添加加载动画的结束逻辑
-            // 例如：隐藏进度条、停止动画等
         }
     }
 }

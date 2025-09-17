@@ -19,6 +19,8 @@ namespace Logger
 
         // UI模块
         public const string UI = "UI";
+        public const string MAINMENU = "MainMenu";
+        public const string SETTINGS = "Settings";
 
         // 游戏数据模块
         public const string GAMEDATA = "GameData";

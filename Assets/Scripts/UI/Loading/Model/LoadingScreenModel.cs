@@ -10,7 +10,7 @@ namespace MyGame.UI.Loading.Model
     /// </summary>
     public class LoadingScreenModel : BaseModel
     {
-        private const string module = LogModules.LOADING;
+        private const string LOG_MODULE = LogModules.LOADING;
         
         private string m_currentLoadingScene = string.Empty;
         private float m_loadingProgress = 0f;
@@ -70,7 +70,6 @@ namespace MyGame.UI.Loading.Model
         /// </summary>
         protected override void OnInitialize()
         {
-            Log.Info(module, "初始化加载界面模型");
             Reset();
         }
         
@@ -79,7 +78,6 @@ namespace MyGame.UI.Loading.Model
         /// </summary>
         protected override void OnCleanup()
         {
-            Log.Info(module, "清理加载界面模型资源");
             Reset();
         }
         
@@ -113,8 +111,7 @@ namespace MyGame.UI.Loading.Model
             CurrentLoadingScene = sceneName;
             LoadingProgress = 0f;
             IsLoading = true;
-            
-            Log.Info(module, $"开始加载场景: {sceneName}");
+            Log.Info(LOG_MODULE, $"开始加载场景: {sceneName}");
         }
         
         /// <summary>
@@ -124,8 +121,6 @@ namespace MyGame.UI.Loading.Model
         {
             LoadingProgress = 1f;
             IsLoading = false;
-            
-            Log.Info(module, $"场景加载完成: {CurrentLoadingScene}");
         }
     }
 }

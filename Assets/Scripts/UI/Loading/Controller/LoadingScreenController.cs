@@ -13,7 +13,7 @@ namespace MyGame.UI.Loading.Controller
     /// </summary>
     public class LoadingScreenController : BaseController<LoadingScreen, LoadingScreenModel>
     {
-        private const string module = LogModules.LOADING;
+        private const string LOG_MODULE = LogModules.LOADING;
 
         #region 初始化和清理
         /// <summary>
@@ -39,8 +39,6 @@ namespace MyGame.UI.Loading.Controller
         /// </summary>
         protected override void OnInitialize()
         {
-            Log.Info(module, "初始化加载界面控制器");
-            
             // 订阅场景加载相关事件
             GameEvents.OnSceneLoadStart += HandleSceneLoadStart;
             GameEvents.OnSceneLoadComplete += HandleSceneLoadComplete;
@@ -52,17 +50,12 @@ namespace MyGame.UI.Loading.Controller
         /// </summary>
         protected override void OnCleanup()
         {
-            Log.Info(module, "清理加载界面控制器");
-            
             // 取消订阅所有事件
             GameEvents.OnSceneLoadStart -= HandleSceneLoadStart;
             GameEvents.OnSceneLoadComplete -= HandleSceneLoadComplete;
             
             // 清理模型资源
-            if (m_model != null)
-            {
-                m_model.Cleanup();
-            }
+            m_model?.Cleanup();
         }
 
         #endregion
@@ -77,16 +70,9 @@ namespace MyGame.UI.Loading.Controller
         private void HandleSceneLoadStart(string sceneName)
         {
             // 更新模型数据
-            if (m_model != null)
-            {
-                m_model.StartLoading(sceneName);
-            }
-            
-            // 通知视图更新
-            if (m_view != null)
-            {
-                m_view.OnSceneLoadStarted(sceneName);
-            }
+            m_model?.StartLoading(sceneName);
+            Log.Info(LOG_MODULE, "开始加载场景，加载界面已响应");
+            GameEvents.TriggerMenuShow(UIType.Loading, true);
         }
 
         /// <summary>
@@ -97,16 +83,8 @@ namespace MyGame.UI.Loading.Controller
         private void HandleSceneLoadComplete(string sceneName)
         {
             // 更新模型数据
-            if (m_model != null)
-            {
-                m_model.CompleteLoading();
-            }
-            
-            // 通知视图更新
-            if (m_view != null)
-            {
-                m_view.OnSceneLoadCompleted(sceneName);
-            }
+            m_model?.CompleteLoading();
+            GameEvents.TriggerMenuShow(UIType.Loading, false);
         }
 
         #endregion
@@ -119,7 +97,6 @@ namespace MyGame.UI.Loading.Controller
         /// </summary>
         protected override void OnViewSet()
         {
-            Log.Info(module, "加载界面视图已设置");
             // 可以在这里进行视图相关的初始化操作
         }
         
@@ -129,7 +106,6 @@ namespace MyGame.UI.Loading.Controller
         /// </summary>
         protected override void OnModelSet()
         {
-            Log.Info(module, "加载界面模型已设置");
             // 可以在这里进行模型相关的初始化操作
         }
 

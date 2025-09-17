@@ -17,6 +17,7 @@ namespace MyGame.Managers
     /// </summary>
     public class UIManager : Singleton<UIManager>
     {
+        public const string module = LogModules.UIMANAGER;
         #region UI引用
 
         [System.Serializable]
@@ -62,8 +63,6 @@ namespace MyGame.Managers
             
             // 注册UI相关事件监听
             GameEvents.OnMenuShow += OnMenuShow;    // UI显隐处理
-            GameEvents.OnSceneLoadStart += ShowLoading;    // 加载界面显隐处理
-            GameEvents.OnSceneLoadComplete += HideLoading;
         }
         
         /// <summary>
@@ -75,6 +74,11 @@ namespace MyGame.Managers
             InitializePanelMap();
             // 初始隐藏所有UI
             HideAllUI();
+            // 当主菜单面板存在时才显示主菜单
+            if (_panelMap.ContainsKey(UIType.MainMenu))
+            {
+                SetUIState(UIType.MainMenu, true);
+            }
         }
 
         /// <summary>
@@ -83,7 +87,7 @@ namespace MyGame.Managers
         /// </summary>
         private void InitializePanelMap()
         {
-            Log.Info("UIManager", "开始初始化面板映射");
+            Log.Info(module, "开始初始化面板映射");
             
             // 清空现有映射和面板列表
             _panelMap.Clear();
@@ -94,7 +98,7 @@ namespace MyGame.Managers
             {
                 if (wrapper == null)
                 {
-                    Log.Warning("UIManager", "包装器为空");
+                    Log.Warning(module, "包装器为空");
                     continue;
                 }
 
@@ -109,10 +113,10 @@ namespace MyGame.Managers
             }
             
             // 输出最终映射内容
-            Log.Info("UIManager", "面板映射初始化完成，共包含 " + _panelMap.Count + " 个面板类型");
+            Log.Info(module, "面板映射初始化完成，共包含 " + _panelMap.Count + " 个面板类型");
             foreach (var kvp in _panelMap)
             {
-                Log.Info("UIManager", "面板类型: " + kvp.Key + "，面板实例: " + kvp.Value.GetType().Name);
+                Log.Info(module, "面板类型: " + kvp.Key + "，面板实例: " + kvp.Value.GetType().Name);
             }
         }
         
@@ -120,8 +124,6 @@ namespace MyGame.Managers
         {
             // 注销事件监听
             GameEvents.OnMenuShow -= OnMenuShow;
-            GameEvents.OnSceneLoadStart -= ShowLoading;
-            GameEvents.OnSceneLoadComplete -= HideLoading;
         }
 
         #endregion
@@ -139,7 +141,7 @@ namespace MyGame.Managers
             // 1. 首先检查是否直接指定了IUIPanel
             if (wrapper.iUIPanel != null)
             {
-                Log.Info("UIManager", "使用直接指定的IUIPanel: " + wrapper.iUIPanel.GetType().Name);
+                Log.Info(module, "使用直接指定的IUIPanel: " + wrapper.iUIPanel.GetType().Name);
                 return wrapper.iUIPanel;
             }
             
@@ -149,29 +151,29 @@ namespace MyGame.Managers
                 if (wrapper.panel is IUIPanel)
                 {
                     IUIPanel panel = wrapper.panel as IUIPanel;
-                    Log.Info("UIManager", "面板实现了IUIPanel接口: " + panel.GetType().Name);
+                    Log.Info(module, "面板实现了IUIPanel接口: " + panel.GetType().Name);
                     return panel;
                 }
                 
                 // 3. 如果MonoBehaviour没有实现IUIPanel接口，则尝试从同一GameObject上查找IUIPanel组件
                 else
                 {
-                    Log.Info("UIManager", "尝试从GameObject上查找IUIPanel组件: " + wrapper.panel.name);
+                    Log.Info(module, "尝试从GameObject上查找IUIPanel组件: " + wrapper.panel.name);
                     if (wrapper.panel.TryGetComponent<IUIPanel>(out var foundPanel))
                     {
-                        Log.Info("UIManager", "成功找到同一GameObject上的IUIPanel组件: " + foundPanel.GetType().Name);
+                        Log.Info(module, "成功找到同一GameObject上的IUIPanel组件: " + foundPanel.GetType().Name);
                         return foundPanel;
                     }
                     else
                     {
-                        Log.Info("UIManager", "未找到同一GameObject上的IUIPanel组件");
+                        Log.Info(module, "未找到同一GameObject上的IUIPanel组件");
                         return null;
                     }
                 }
             }
             
             // 包装器的panel字段为空
-            Log.Warning("UIManager", "包装器的panel字段为空");
+            Log.Warning(module, "包装器的panel字段为空");
             return null;
         }
         
@@ -186,77 +188,19 @@ namespace MyGame.Managers
             // 检查面板类型是否已存在于映射中
             if (!_panelMap.ContainsKey(panel.PanelType))
             {
-                Log.Info("UIManager", "添加面板到映射: " + panel.PanelType + " (" + panel.GetType().Name + ")");
+                Log.Info(module, "添加面板到映射: " + panel.PanelType + " (" + panel.GetType().Name + ")");
                 _panelMap.Add(panel.PanelType, panel);
                 panel.Initialize();
             }
             else
             {
-                Log.Info("UIManager", "面板类型已存在于映射中: " + panel.PanelType + " (" + panel.GetType().Name + ")");
+                Log.Info(module, "面板类型已存在于映射中: " + panel.PanelType + " (" + panel.GetType().Name + ")");
             }
         }
 
         #endregion
 
         #region UI控制核心方法
-
-        /// <summary>
-        /// 注册一个新的UI面板到管理器
-        /// 用于手动添加面板，特别是那些在初始化阶段未被识别的面板
-        /// </summary>
-        /// <param name="type">面板类型</param>
-        /// <param name="panel">面板实例</param>
-        public void RegisterPanel(UIType type, IUIPanel panel)
-        {
-            if (panel == null)
-            {
-                Log.Error("UIManager", "尝试注册空的面板实例");
-                return;
-            }
-            
-            // 确保面板类型被正确设置
-            // 通过反射设置m_panelType字段
-            try
-            {
-                var panelTypeField = panel.GetType().GetField("m_panelType", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-                if (panelTypeField != null)
-                {
-                    panelTypeField.SetValue(panel, type);
-                    Log.Info("UIManager", "通过反射设置面板类型为: " + type + " (" + panel.GetType().Name + ")");
-                }
-            }
-            catch (System.Exception e)
-            {
-                Log.Warning("UIManager", "设置面板类型时发生异常: " + e.Message);
-            }
-            
-            // 检查并添加到映射
-            if (!_panelMap.ContainsKey(type))
-            {
-                Log.Info("UIManager", "手动注册面板到映射: " + type + " (" + panel.GetType().Name + ")");
-                _panelMap.Add(type, panel);
-                
-                // 确保面板在UI面板列表中
-                if (!uiPanels.Contains(panel))
-                {
-                    uiPanels.Add(panel);
-                }
-            }
-            else
-            {
-                Log.Info("UIManager", "面板类型已存在于映射中: " + type + " (" + panel.GetType().Name + ")");
-            }
-        }
-        
-        /// <summary>
-        /// 检查特定类型的面板是否已注册
-        /// </summary>
-        /// <param name="type">要检查的面板类型</param>
-        /// <returns>如果面板已注册，则返回true；否则返回false</returns>
-        public bool HasPanel(UIType type)
-        {
-            return _panelMap.ContainsKey(type);
-        }
         
         /// <summary>
         /// 隐藏所有UI界面(控制台除外)
@@ -343,26 +287,26 @@ namespace MyGame.Managers
             else if (currentState == state) currentState = UIType.None;
 
             // 根据状态显示/隐藏对应UI
-            Log.Info("UIManager", "尝试显示/隐藏UI类型: " + state + ", show: " + show);
+            Log.Info(module, "尝试显示/隐藏UI类型: " + state + ", show: " + show);
             
             if (_panelMap.TryGetValue(state, out var panel))
             {
-                Log.Info("UIManager", "找到对应面板: " + panel.ToString());
+                Log.Info(module, "找到对应面板: " + panel.ToString());
                 
                 if (show)
                 {
-                    Log.Info("UIManager", "调用面板的Show方法");
+                    Log.Info(module, "调用面板的Show方法");
                     panel.Show();
                 }
                 else
                 {
-                    Log.Info("UIManager", "调用面板的Hide方法");
+                    Log.Info(module, "调用面板的Hide方法");
                     panel.Hide();
                 }
             }
             else
             {
-                Log.Error("UIManager", "未找到对应UI类型的面板: " + state);
+                Log.Error(module, "未找到对应UI类型的面板: " + state);
             }
         }
 
@@ -376,44 +320,6 @@ namespace MyGame.Managers
 
         #endregion
 
-        #region 加载界面处理方法
-
-        /// <summary>
-        /// 显示加载界面
-        /// </summary>
-        private void ShowLoading(string sceneName)
-        {
-            SetUIState(UIType.Loading, true);
-            
-            // 查找Loading组件并调用其回调方法
-            if (_panelMap.TryGetValue(UIType.Loading, out var loadingPanel))
-            {
-                var loadingScreen = loadingPanel as LoadingScreen;
-                if (loadingScreen != null)
-                {
-                    loadingScreen.OnSceneLoadStarted(sceneName);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 隐藏加载界面
-        /// </summary>
-        private void HideLoading(string sceneName)
-        {
-            // 查找Loading组件并调用其回调方法
-            if (_panelMap.TryGetValue(UIType.Loading, out var loadingPanel))
-            {
-                var loadingScreen = loadingPanel as LoadingScreen;
-                if (loadingScreen != null)
-                {
-                    loadingScreen.OnSceneLoadCompleted(sceneName);
-                }
-            }
-            
-            SetUIState(UIType.Loading, false);
-        }
-
-        #endregion
+ 
     }
 }
