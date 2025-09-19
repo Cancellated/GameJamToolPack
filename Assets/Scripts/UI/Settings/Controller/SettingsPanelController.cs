@@ -1,15 +1,14 @@
-using Logger;
-using MyGame.UI;
-using MyGame.Events;
-using MyGame.UI.Settings.Model;
 using UnityEngine;
 using MyGame.UI.Settings.View;
+using MyGame.UI.Settings.Model;
+using MyGame.UI;
+using Logger;
 
 namespace MyGame.UI.Settings.Controller
 {
     /// <summary>
     /// 设置面板控制器
-    /// 负责处理设置面板的业务逻辑和数据管理
+    /// 负责处理设置面板的业务逻辑
     /// </summary>
     public class SettingsPanelController : BaseController<SettingsPanelView, SettingsModel>
     {
@@ -26,16 +25,8 @@ namespace MyGame.UI.Settings.Controller
         /// </summary>
         public override void Initialize()
         {
+            Log.Info(LOG_MODULE, "初始化设置面板控制器");
             base.Initialize();
-            
-            if (m_model != null)
-            {
-                m_model.Initialize();
-                // 初始化视图显示当前设置
-                UpdateViewFromModel();
-            }
-            
-            Log.Info(LOG_MODULE, "设置面板控制器初始化完成");
         }
 
         /// <summary>
@@ -43,95 +34,149 @@ namespace MyGame.UI.Settings.Controller
         /// </summary>
         public override void Cleanup()
         {
-            Log.Info(LOG_MODULE, "设置面板控制器清理资源");
+            Log.Info(LOG_MODULE, "清理设置面板控制器");
+            UnbindModelEvents();
             base.Cleanup();
         }
 
-        #endregion
-
-        #region 视图和模型设置
-
         /// <summary>
-        /// 设置视图引用
+        /// 当视图设置后调用
         /// </summary>
-        /// <param name="view">设置面板视图</param>
-        public override void SetView(SettingsPanelView view)
+        protected override void OnViewSet()
         {
-            if (m_view != null && m_view != view)
-            {
-                m_view.UnbindController();
-            }
-            
-            m_view = view;
-            
-            if (m_view != null)
-            {
-                m_view.BindController(this);
-                if (m_model != null)
-                {
-                    UpdateViewFromModel();
-                }
-            }
+            base.OnViewSet();
+            Log.Info(LOG_MODULE, "视图已设置");
         }
 
         /// <summary>
-        /// 设置模型引用
+        /// 当模型设置后调用
         /// </summary>
-        /// <param name="model">设置面板模型</param>
-        public override void SetModel(SettingsModel model)
+        protected override void OnModelSet()
         {
-            if (m_model != null && m_model != model)
-            {
-                // 移除旧模型的事件监听
-                m_model.OnPropertyChanged -= OnModelPropertyChanged;
-            }
-            
-            m_model = model;
+            base.OnModelSet();
+            Log.Info(LOG_MODULE, "模型已设置");
             
             if (m_model != null)
             {
-                // 添加新模型的事件监听
-                m_model.OnPropertyChanged += OnModelPropertyChanged;
-                m_model.Initialize();
+                BindModelEvents();
+                
+                // 初始化视图显示当前设置
                 if (m_view != null)
                 {
-                    UpdateViewFromModel();
+                    UpdateViewWithCurrentSettings();
                 }
             }
         }
 
         #endregion
 
-        #region 事件处理
+        #region 模型事件绑定
 
         /// <summary>
-        /// 模型属性变更事件处理
+        /// 绑定模型事件
         /// </summary>
-        /// <param name="propertyName">变更的属性名称</param>
-        private void OnModelPropertyChanged(string propertyName)
+        private void BindModelEvents()
         {
-            // 这里可以根据具体的属性变更来更新视图
-            Log.Info(LOG_MODULE, $"设置模型属性变更: {propertyName}");
+            if (m_model != null)
+            {
+                // 使用ObservableModel的通用OnPropertyChanged事件
+                m_model.OnPropertyChanged += HandleModelPropertyChanged;
+            }
+        }
+
+        /// <summary>
+        /// 解绑模型事件
+        /// </summary>
+        private void UnbindModelEvents()
+        {
+            if (m_model != null)
+            {
+                m_model.OnPropertyChanged -= HandleModelPropertyChanged;
+            }
+        }
+
+        /// <summary>
+        /// 处理模型属性变化事件
+        /// </summary>
+        /// <param name="propertyName">变化的属性名</param>
+        private void HandleModelPropertyChanged(string propertyName)
+        {
+            if (m_view == null)
+                return;
+
+            Log.Info(LOG_MODULE, $"检测到模型属性变化: {propertyName}");
+
+            switch (propertyName)
+            {
+                case nameof(SettingsModel.MusicVolume):
+                    m_view.UpdateMusicVolumeSlider(m_model.MusicVolume);
+                    break;
+                case nameof(SettingsModel.SfxVolume):
+                    m_view.UpdateSfxVolumeSlider(m_model.SfxVolume);
+                    break;
+                case nameof(SettingsModel.QualityLevel):
+                    m_view.UpdateQualityDropdown(m_model.QualityLevel);
+                    break;
+                case nameof(SettingsModel.Fullscreen):
+                    m_view.UpdateFullscreenToggle(m_model.Fullscreen);
+                    break;
+                case nameof(SettingsModel.ResolutionIndex):
+                    m_view.UpdateResolutionDropdown(m_model.ResolutionIndex);
+                    break;
+                case nameof(SettingsModel.InvertYAxis):
+                    m_view.UpdateInvertYAxisToggle(m_model.InvertYAxis);
+                    break;
+            }
         }
 
         #endregion
 
-        #region 业务逻辑
+        #region 页面切换方法
 
         /// <summary>
-        /// 关闭设置面板
+        /// 切换到指定页面
         /// </summary>
-        public void ClosePanel()
+        /// <param name="page">页面类型</param>
+        public void SwitchToPage(SettingsPanelView.SettingsPage page)
         {
-            Log.Info(LOG_MODULE, "关闭设置面板");
-            // 触发返回主菜单事件
-            GameEvents.TriggerMenuShow(UIType.MainMenu, true);
+            if (m_view != null)
+            {
+                m_view.SwitchPage(page);
+            }
         }
+
+        /// <summary>
+        /// 切换到图形设置页面
+        /// </summary>
+        public void SwitchToGraphicsPage()
+        {
+            SwitchToPage(SettingsPanelView.SettingsPage.Graphics);
+        }
+
+        /// <summary>
+        /// 切换到声音设置页面
+        /// </summary>
+        public void SwitchToAudioPage()
+        {
+            SwitchToPage(SettingsPanelView.SettingsPage.Audio);
+        }
+
+        /// <summary>
+        /// 切换到控制设置页面
+        /// </summary>
+        public void SwitchToControlsPage()
+        {
+            SwitchToPage(SettingsPanelView.SettingsPage.Controls);
+        }
+
+        #endregion
+
+        #region 设置更新方法
 
         /// <summary>
         /// 更新音乐音量
         /// </summary>
-        /// <param name="volume">音量值 (0-1)</param>
+        /// <param name="volume">音量值</param>
         public void UpdateMusicVolume(float volume)
         {
             if (m_model != null)
@@ -144,7 +189,7 @@ namespace MyGame.UI.Settings.Controller
         /// <summary>
         /// 更新音效音量
         /// </summary>
-        /// <param name="volume">音量值 (0-1)</param>
+        /// <param name="volume">音量值</param>
         public void UpdateSfxVolume(float volume)
         {
             if (m_model != null)
@@ -206,38 +251,46 @@ namespace MyGame.UI.Settings.Controller
             }
         }
 
-        /// <summary>
-        /// 保存设置
-        /// </summary>
-        public void SaveSettings()
-        {
-            if (m_model != null)
-            {
-                m_model.SaveSettings();
-                Log.Info(LOG_MODULE, "设置已保存");
-            }
-        }
+        #endregion
+
+        #region 设置操作方法
 
         /// <summary>
         /// 应用设置
         /// </summary>
         public void ApplySettings()
         {
-            if (m_model != null)
-            {
-                m_model.ApplySettings();
-                Log.Info(LOG_MODULE, "设置已应用");
-            }
+            Log.Info(LOG_MODULE, "应用设置");
+            m_model?.ApplySettings();
         }
 
         /// <summary>
-        /// 从模型更新视图
+        /// 保存设置
         /// </summary>
-        private void UpdateViewFromModel()
+        public void SaveSettings()
         {
-            if (m_view == null || m_model == null)
+            Log.Info(LOG_MODULE, "保存设置");
+            if (m_model != null)
+            {
+                m_model.SaveSettings();
+                m_model.ApplySettings();
+            }
+        }
+
+        #endregion
+
+        #region 辅助方法
+
+        /// <summary>
+        /// 用当前设置更新视图
+        /// </summary>
+        private void UpdateViewWithCurrentSettings()
+        {
+            if (m_model == null || m_view == null)
                 return;
 
+            Log.Info(LOG_MODULE, "用当前设置更新视图");
+            
             m_view.UpdateMusicVolumeSlider(m_model.MusicVolume);
             m_view.UpdateSfxVolumeSlider(m_model.SfxVolume);
             m_view.UpdateQualityDropdown(m_model.QualityLevel);
@@ -245,7 +298,6 @@ namespace MyGame.UI.Settings.Controller
             m_view.UpdateResolutionDropdown(m_model.ResolutionIndex);
             m_view.UpdateInvertYAxisToggle(m_model.InvertYAxis);
         }
-
         #endregion
     }
 }

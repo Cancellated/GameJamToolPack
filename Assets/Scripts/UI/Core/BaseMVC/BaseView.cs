@@ -203,7 +203,8 @@ namespace MyGame.UI
             {
                 float t = elapsedTime / m_fadeDuration;
                 m_canvasGroup.alpha = Mathf.Lerp(startAlpha, 1f, t);
-                elapsedTime += Time.deltaTime;
+                // 使用不受时间缩放影响的deltaTime，确保在timeScale为0时动画仍能正常进行
+                elapsedTime += Time.unscaledDeltaTime;
                 yield return null;
             }
             
@@ -227,7 +228,8 @@ namespace MyGame.UI
             {
                 float t = elapsedTime / m_fadeDuration;
                 m_canvasGroup.alpha = Mathf.Lerp(startAlpha, 0f, t);
-                elapsedTime += Time.deltaTime;
+                // 使用不受时间缩放影响的deltaTime，确保在timeScale为0时动画仍能正常进行
+                elapsedTime += Time.unscaledDeltaTime;
                 yield return null;
             }
             

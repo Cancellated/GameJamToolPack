@@ -21,6 +21,10 @@ namespace Logger
         public const string UI = "UI";
         public const string MAINMENU = "MainMenu";
         public const string SETTINGS = "Settings";
+        public const string ABOUT = "About";
+        public const string PAUSEMENU = "PauseMenu";
+        public const string HUD = "HUD";
+        
 
         // 游戏数据模块
         public const string GAMEDATA = "GameData";

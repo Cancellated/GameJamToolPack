@@ -129,7 +129,7 @@ namespace MyGame.Managers
             if (!TryChangeState(GameState.Menu))
                 return;
             // TODO: 初始化菜单
-            Time.timeScale = 0f;
+            Time.timeScale = 1f;
             Log.Info(LOG_MODULE, "进入菜单", this);
         }
 

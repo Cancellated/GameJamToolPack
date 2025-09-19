@@ -81,7 +81,12 @@ namespace MyGame.UI.MainMenu.View
         /// </summary>
         public override void Show()
         {
-            base.Show();
+            if (m_canvasGroup != null)
+            {
+                m_canvasGroup.alpha = 1f;
+                m_canvasGroup.interactable = true;
+                m_canvasGroup.blocksRaycasts = true;
+            }
             Log.Info(LOG_MODULE, "显示主菜单面板");
         }
 
@@ -90,7 +95,13 @@ namespace MyGame.UI.MainMenu.View
         /// </summary>
         public override void Hide()
         {
-            base.Hide();
+            // 主菜单直接显隐
+            if (m_canvasGroup != null)
+            {
+                m_canvasGroup.alpha = 0f;
+                m_canvasGroup.interactable = false;
+                m_canvasGroup.blocksRaycasts = false;
+            }
         }
 
         /// <summary>

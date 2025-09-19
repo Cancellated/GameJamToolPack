@@ -238,11 +238,10 @@ namespace MyGame.Managers
                 switch (state)
                 {
                     case UIType.MainMenu:
-                        SetUIState(UIType.PauseMenu, false);
-                        SetUIState(UIType.HUD, false);
+                        SetUIState(UIType.SettingsPanel, false);
+                        SetUIState(UIType.AboutPanel, false);
                         break;
                     case UIType.PauseMenu:
-                        SetUIState(UIType.MainMenu, false);
                         SetUIState(UIType.ResultPanel, false);
                         break;
                     case UIType.ResultPanel:

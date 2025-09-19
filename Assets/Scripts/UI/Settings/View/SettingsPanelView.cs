@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using Logger;
 using MyGame.UI.Settings.Controller;
+using MyGame.UI.Components;
 using System.Collections.Generic;
 
 namespace MyGame.UI.Settings.View
@@ -12,6 +13,20 @@ namespace MyGame.UI.Settings.View
     /// </summary>
     public class SettingsPanelView : BaseView<SettingsPanelController>
     {
+        #region 枚举
+
+        /// <summary>
+        /// 设置页面类型
+        /// </summary>
+        public enum SettingsPage
+        {
+            Graphics,
+            Audio,
+            Controls
+        }
+
+        #endregion
+
         #region 字段
 
         [Header("UI References")]
@@ -20,6 +35,35 @@ namespace MyGame.UI.Settings.View
 
         [Tooltip("返回按钮")]
         [SerializeField] private Button m_backButton;
+
+        #region 分页相关UI
+
+        [Header("Page Navigation")]
+        [Tooltip("页面容器")]
+        [SerializeField] private Transform m_pagesContainer;
+
+        [Tooltip("图形设置页面")]
+        [SerializeField] private GameObject m_graphicsPage;
+
+        [Tooltip("声音设置页面")]
+        [SerializeField] private GameObject m_audioPage;
+
+        [Tooltip("控制设置页面")]
+        [SerializeField] private GameObject m_controlsPage;
+
+        [Tooltip("图形设置按钮")]
+        [SerializeField] private Button m_graphicsButton;
+
+        [Tooltip("声音设置按钮")]
+        [SerializeField] private Button m_audioButton;
+
+        [Tooltip("控制设置按钮")]
+        [SerializeField] private Button m_controlsButton;
+
+        [Tooltip("当前选中的页面指示器")]
+        [SerializeField] private Image m_pageIndicator;
+
+        #endregion
 
         [Header("Audio Settings")]
         [Tooltip("音乐音量滑块")]
@@ -33,14 +77,14 @@ namespace MyGame.UI.Settings.View
         [SerializeField] private TMP_Dropdown m_qualityDropdown;
 
         [Tooltip("全屏开关")]
-        [SerializeField] private Toggle m_fullscreenToggle;
+        [SerializeField] private ToggleSwitch m_fullscreenToggle;
 
         [Tooltip("分辨率下拉框")]
         [SerializeField] private TMP_Dropdown m_resolutionDropdown;
 
         [Header("Gameplay Settings")]
         [Tooltip("Y轴反转开关")]
-        [SerializeField] private Toggle m_invertYAxisToggle;
+        [SerializeField] private ToggleSwitch m_invertYAxisToggle;
 
         [Header("Action Buttons")]
         [Tooltip("应用按钮")]
@@ -50,6 +94,7 @@ namespace MyGame.UI.Settings.View
         [SerializeField] private Button m_saveButton;
 
         private const string LOG_MODULE = LogModules.SETTINGS;
+        private SettingsPage m_currentPage = SettingsPage.Graphics;
 
         #endregion
 
@@ -88,8 +133,32 @@ namespace MyGame.UI.Settings.View
                 m_saveButton.onClick.AddListener(OnSaveButtonClick);
             }
 
+            // 绑定分页按钮事件
+            BindPageNavigationEvents();
+
             // 绑定设置控件事件
             BindSettingsEvents();
+        }
+
+        /// <summary>
+        /// 绑定分页导航事件
+        /// </summary>
+        private void BindPageNavigationEvents()
+        {
+            if (m_graphicsButton != null)
+            {
+                m_graphicsButton.onClick.AddListener(() => SwitchPage(SettingsPage.Graphics));
+            }
+
+            if (m_audioButton != null)
+            {
+                m_audioButton.onClick.AddListener(() => SwitchPage(SettingsPage.Audio));
+            }
+
+            if (m_controlsButton != null)
+            {
+                m_controlsButton.onClick.AddListener(() => SwitchPage(SettingsPage.Controls));
+            }
         }
 
         /// <summary>
@@ -116,7 +185,7 @@ namespace MyGame.UI.Settings.View
 
             if (m_fullscreenToggle != null)
             {
-                m_fullscreenToggle.onValueChanged.AddListener(OnFullscreenChanged);
+                m_fullscreenToggle.onValueChanged += OnFullscreenChanged;
             }
 
             if (m_resolutionDropdown != null)
@@ -127,7 +196,7 @@ namespace MyGame.UI.Settings.View
             // 游戏设置
             if (m_invertYAxisToggle != null)
             {
-                m_invertYAxisToggle.onValueChanged.AddListener(OnInvertYAxisChanged);
+                m_invertYAxisToggle.onValueChanged += OnInvertYAxisChanged;
             }
         }
 
@@ -284,6 +353,84 @@ namespace MyGame.UI.Settings.View
             InitializeResolutionDropdown();
             // 初始化画质选项
             InitializeQualityDropdown();
+            // 初始化分页
+            InitializePages();
+        }
+
+        /// <summary>
+        /// 初始化分页
+        /// </summary>
+        private void InitializePages()
+        {
+            // 默认显示图形设置页面
+            SwitchPage(SettingsPage.Graphics);
+        }
+
+        /// <summary>
+        /// 切换页面
+        /// </summary>
+        /// <param name="page">要切换的页面类型</param>
+        public void SwitchPage(SettingsPage page)
+        {
+            Log.Info(LOG_MODULE, $"切换到页面: {page}");
+            
+            // 隐藏所有页面
+            if (m_graphicsPage != null)
+                m_graphicsPage.SetActive(false);
+            if (m_audioPage != null)
+                m_audioPage.SetActive(false);
+            if (m_controlsPage != null)
+                m_controlsPage.SetActive(false);
+
+            // 显示选中的页面
+            switch (page)
+            {
+                case SettingsPage.Graphics:
+                    if (m_graphicsPage != null)
+                        m_graphicsPage.SetActive(true);
+                    break;
+                case SettingsPage.Audio:
+                    if (m_audioPage != null)
+                        m_audioPage.SetActive(true);
+                    break;
+                case SettingsPage.Controls:
+                    if (m_controlsPage != null)
+                        m_controlsPage.SetActive(true);
+                    break;
+            }
+
+            // 更新当前页面
+            m_currentPage = page;
+            
+            // 更新页面指示器位置
+            UpdatePageIndicator();
+        }
+
+        /// <summary>
+        /// 更新页面指示器位置
+        /// </summary>
+        private void UpdatePageIndicator()
+        {
+            if (m_pageIndicator == null)
+                return;
+
+            // 根据当前页面更新指示器位置
+            // 这里可以根据实际UI布局调整指示器的位置计算逻辑
+            switch (m_currentPage)
+            {
+                case SettingsPage.Graphics:
+                    if (m_graphicsButton != null)
+                        m_pageIndicator.transform.position = m_graphicsButton.transform.position;
+                    break;
+                case SettingsPage.Audio:
+                    if (m_audioButton != null)
+                        m_pageIndicator.transform.position = m_audioButton.transform.position;
+                    break;
+                case SettingsPage.Controls:
+                    if (m_controlsButton != null)
+                        m_pageIndicator.transform.position = m_controlsButton.transform.position;
+                    break;
+            }
         }
 
         #endregion
@@ -375,7 +522,7 @@ namespace MyGame.UI.Settings.View
                 return;
 
             m_resolutionDropdown.ClearOptions();
-            List<string> resolutionOptions = new List<string>();
+            List<string> resolutionOptions = new();
             Resolution[] resolutions = Screen.resolutions;
 
             int currentResolutionIndex = 0;
