@@ -63,6 +63,9 @@ namespace MyGame.UI.Settings.View
         [Tooltip("当前选中的页面指示器")]
         [SerializeField] private Image m_pageIndicator;
 
+        [Tooltip("页面指示器相对于按钮的垂直偏移量（正值向下移动）")]
+        [SerializeField] private float m_indicatorVerticalOffset = 40f;
+
         #endregion
 
         [Header("Audio Settings")]
@@ -409,28 +412,42 @@ namespace MyGame.UI.Settings.View
         /// <summary>
         /// 更新页面指示器位置
         /// </summary>
+        /// <summary>
+        /// 更新页面指示器的位置，根据当前选中的页面
+        /// </summary>
         private void UpdatePageIndicator()
         {
             if (m_pageIndicator == null)
                 return;
 
-            // 根据当前页面更新指示器位置
-            // 这里可以根据实际UI布局调整指示器的位置计算逻辑
             switch (m_currentPage)
             {
                 case SettingsPage.Graphics:
-                    if (m_graphicsButton != null)
-                        m_pageIndicator.transform.position = m_graphicsButton.transform.position;
+                    SetIndicatorPosition(m_graphicsButton);
                     break;
+
                 case SettingsPage.Audio:
-                    if (m_audioButton != null)
-                        m_pageIndicator.transform.position = m_audioButton.transform.position;
+                    SetIndicatorPosition(m_audioButton);
                     break;
+
                 case SettingsPage.Controls:
-                    if (m_controlsButton != null)
-                        m_pageIndicator.transform.position = m_controlsButton.transform.position;
+                    SetIndicatorPosition(m_controlsButton);
                     break;
             }
+        }
+
+        /// <summary>
+        /// 设置页面指示器相对于指定按钮的位置
+        /// </summary>
+        /// <param name="targetButton">目标按钮</param>
+        private void SetIndicatorPosition(Button targetButton)
+        {
+            if (targetButton == null || m_pageIndicator == null)
+                return;
+
+            Vector3 indicatorPosition = targetButton.transform.position;
+            indicatorPosition.y -= m_indicatorVerticalOffset; // 将指示器移到按钮下方
+            m_pageIndicator.transform.position = indicatorPosition;
         }
 
         #endregion

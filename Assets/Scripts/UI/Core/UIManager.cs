@@ -253,12 +253,10 @@ namespace MyGame.Managers
                         SetUIState(UIType.PauseMenu, false);
                         break;
                     case UIType.SettingsPanel:
-                        SetUIState(UIType.MainMenu, false);
                         SetUIState(UIType.PauseMenu, false);
                         SetUIState(UIType.ResultPanel, false);
                         break;
                     case UIType.AboutPanel:
-                        SetUIState(UIType.MainMenu, false);
                         SetUIState(UIType.PauseMenu, false);
                         SetUIState(UIType.ResultPanel, false);
                         break;
