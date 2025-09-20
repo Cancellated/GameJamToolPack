@@ -326,10 +326,6 @@ namespace MyGame.UI.Settings.View
         public override void Show()
         {
             Log.Info(LOG_MODULE, "显示设置面板");
-            if (m_settingsPanel != null)
-            {
-                m_settingsPanel.SetActive(true);
-            }
             base.Show();
         }
 
@@ -339,10 +335,6 @@ namespace MyGame.UI.Settings.View
         public override void Hide()
         {
             Log.Info(LOG_MODULE, "隐藏设置面板");
-            if (m_settingsPanel != null)
-            {
-                m_settingsPanel.SetActive(false);
-            }
             base.Hide();
         }
 

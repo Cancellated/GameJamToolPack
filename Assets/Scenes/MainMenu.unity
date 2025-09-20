@@ -8841,6 +8841,7 @@ MonoBehaviour:
   m_audioButton: {fileID: 1203628717}
   m_controlsButton: {fileID: 1041006354}
   m_pageIndicator: {fileID: 2139592834}
+  m_indicatorVerticalOffset: 40
   m_musicVolumeSlider: {fileID: 1015462126}
   m_sfxVolumeSlider: {fileID: 1769941638}
   m_qualityDropdown: {fileID: 1819525446}

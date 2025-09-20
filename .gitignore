@@ -17,6 +17,8 @@
 *.pidb
 *.booproj
 *.svd
+*.csproj
+*.sln
 
 # OS generated
 .DS_Store*
@@ -26,4 +28,5 @@ Thumbs.db
 # Visual Studio
 .vs/
 .vscode/
+.trae/
 *.vsconfig
