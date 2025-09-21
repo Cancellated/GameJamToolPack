@@ -188,7 +188,7 @@ namespace MyGame.UI.Settings.View
 
             if (m_fullscreenToggle != null)
             {
-                m_fullscreenToggle.onValueChanged += OnFullscreenChanged;
+                m_fullscreenToggle.OnValueChanged += OnFullscreenChanged;
             }
 
             if (m_resolutionDropdown != null)
@@ -199,7 +199,7 @@ namespace MyGame.UI.Settings.View
             // 游戏设置
             if (m_invertYAxisToggle != null)
             {
-                m_invertYAxisToggle.onValueChanged += OnInvertYAxisChanged;
+                m_invertYAxisToggle.OnValueChanged += OnInvertYAxisChanged;
             }
         }
 
@@ -490,7 +490,7 @@ namespace MyGame.UI.Settings.View
         {
             if (m_fullscreenToggle != null)
             {
-                m_fullscreenToggle.isOn = isFullscreen;
+                m_fullscreenToggle.IsOn = isFullscreen;
             }
         }
 
@@ -514,7 +514,7 @@ namespace MyGame.UI.Settings.View
         {
             if (m_invertYAxisToggle != null)
             {
-                m_invertYAxisToggle.isOn = invertYAxis;
+                m_invertYAxisToggle.IsOn = invertYAxis;
             }
         }
 

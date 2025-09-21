@@ -34,6 +34,9 @@ namespace MyGame.UI.Components
         
         [Tooltip("开关文本组件")]
         [SerializeField] private Text m_statusText;
+        
+        [Tooltip("滑块位置调整因子，用于微调滑块的最终位置")]
+        [SerializeField] private float m_positionAdjustment = 0f;
         #endregion
 
         #region 字段
@@ -48,14 +51,14 @@ namespace MyGame.UI.Components
         private float m_animStartTime;
         
         // 定义值变化事件
-        public event Action<bool> onValueChanged;
+        public event Action<bool> OnValueChanged;
         #endregion
 
         #region 属性
         /// <summary>
         /// 获取或设置开关状态
         /// </summary>
-        public bool isOn
+        public bool IsOn
         {
             get { return m_isOn; }
             set
@@ -66,7 +69,7 @@ namespace MyGame.UI.Components
                     UpdateSwitchVisuals(m_isOn, false);
                     
                     // 触发值变化事件
-                    onValueChanged?.Invoke(m_isOn);
+                    OnValueChanged?.Invoke(m_isOn);
                 }
             }
         }
@@ -84,10 +87,21 @@ namespace MyGame.UI.Components
             // 初始化滑块位置
             if (m_knobRectTransform != null)
             {
-                m_knobStartPosition = m_knobRectTransform.anchoredPosition;
+                // 计算起始和结束位置
+                float halfBackgroundWidth = m_backgroundImage.rectTransform.rect.width / 2f;
+                float halfKnobWidth = m_knobRectTransform.rect.width / 2f;
+                
+                // 起始位置：背景的最右侧减去滑块宽度的一半（关闭状态在左边）
+                m_knobStartPosition = new Vector2(
+
+                    -halfBackgroundWidth + halfKnobWidth + m_positionAdjustment,
+                    m_knobRectTransform.anchoredPosition.y
+                );
+                
+                // 结束位置：背景的最左侧加上滑块宽度的一半（开启状态在右边）
                 m_knobEndPosition = new Vector2(
-                    m_backgroundImage.rectTransform.rect.width - m_knobRectTransform.rect.width,
-                    m_knobStartPosition.y
+                    halfBackgroundWidth - halfKnobWidth + m_positionAdjustment,
+                    m_knobRectTransform.anchoredPosition.y
                 );
             }
             
@@ -101,7 +115,7 @@ namespace MyGame.UI.Components
         public void OnPointerClick(PointerEventData eventData)
         {
             // 切换开关状态
-            isOn = !isOn;
+            IsOn = !IsOn;
         }
 
         /// <summary>
@@ -128,6 +142,7 @@ namespace MyGame.UI.Components
             {
                 if (instant || m_animationSpeed <= 0)
                 {
+                    // 修正：开启状态在右侧，关闭状态在左侧
                     m_knobRectTransform.anchoredPosition = isOnState ? m_knobEndPosition : m_knobStartPosition;
                     m_isAnimating = false;
                 }
@@ -150,17 +165,17 @@ namespace MyGame.UI.Components
                 float t = Mathf.Clamp01(elapsed / m_animationSpeed);
                 
                 // 使用平滑的插值函数
-                t = m_isOn ? SmoothStep(0, 1, t) : SmoothStep(1, 0, t);
+                t = SmoothStep(0, 1, t);
                 
                 // 更新滑块位置
-                m_knobRectTransform.anchoredPosition = Vector2.Lerp(
-                    m_knobStartPosition, 
-                    m_knobEndPosition, 
-                    t
-                );
+                // - 当m_isOn为true时，从左侧位置(关闭)移动到右侧位置(开启)
+                // - 当m_isOn为false时，从右侧位置(开启)移动到左侧位置(关闭)
+                Vector2 startPos = IsOn ? m_knobStartPosition : m_knobEndPosition;
+                Vector2 endPos = IsOn ? m_knobEndPosition : m_knobStartPosition;
+                m_knobRectTransform.anchoredPosition = Vector2.Lerp(startPos, endPos, t);
                 
                 // 动画完成
-                if (t >= 1 || t <= 0)
+                if (t >= 1)
                 {
                     m_isAnimating = false;
                 }
