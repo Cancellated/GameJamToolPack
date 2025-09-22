@@ -110,6 +110,82 @@ namespace MyGame.Events
 
         #endregion
 
+        #region 存档相关事件
+
+        /// <summary>
+        /// 新游戏创建事件
+        /// </summary>
+        public static event Action OnNewGameCreated;
+        
+        public static void TriggerNewGameCreated()
+        {
+            Log.Info(module, "触发新游戏创建事件");
+            OnNewGameCreated?.Invoke();
+        }
+
+        /// <summary>
+        /// 游戏数据保存完成事件
+        /// </summary>
+        public static event Action<string> OnGameSaved;
+        
+        public static void TriggerGameSaved(string slotName)
+        {
+            Log.Info(module, $"触发游戏数据保存完成事件: {slotName}");
+            OnGameSaved?.Invoke(slotName);
+        }
+
+        /// <summary>
+        /// 游戏数据加载完成事件
+        /// </summary>
+        public static event Action<string> OnGameLoaded;
+        
+        public static void TriggerGameLoaded(string slotName)
+        {
+            Log.Info(module, $"触发游戏数据加载完成事件: {slotName}");
+            OnGameLoaded?.Invoke(slotName);
+        }
+
+        /// <summary>
+        /// 游戏数据删除完成事件
+        /// </summary>
+        public static event Action<string> OnGameDeleted;
+        
+        public static void TriggerGameDeleted(string slotName)
+        {
+            Log.Info(module, $"触发游戏数据删除完成事件: {slotName}");
+            OnGameDeleted?.Invoke(slotName);
+        }
+
+        #endregion
+
+        #region 设置相关事件
+
+        /// <summary>
+        /// 设置应用完成事件
+        /// 当游戏设置被应用到游戏时触发
+        /// </summary>
+        public static event Action OnSettingsApplied;
+        
+        public static void TriggerSettingsApplied()
+        {
+            Log.Info(module, "触发设置应用完成事件");
+            OnSettingsApplied?.Invoke();
+        }
+        
+        /// <summary>
+        /// 设置保存完成事件
+        /// 当游戏设置被保存时触发
+        /// </summary>
+        public static event Action OnSettingsSaved;
+        
+        public static void TriggerSettingsSaved()
+        {
+            Log.Info(module, "触发设置保存完成事件");
+            OnSettingsSaved?.Invoke();
+        }
+        
+        #endregion
+
         #region UI事件
 
         /// <summary>

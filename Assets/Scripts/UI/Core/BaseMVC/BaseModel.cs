@@ -87,11 +87,11 @@ namespace MyGame.UI
         /// 数据变更事件
         /// </summary>
         public event Action<string> OnPropertyChanged;
-        
+
         #endregion
-        
+
         #region 保护方法
-        
+
         /// <summary>
         /// 通知属性变更
         /// </summary>
@@ -100,8 +100,6 @@ namespace MyGame.UI
         {
             OnPropertyChanged?.Invoke(propertyName);
         }
-        
-        /// <summary>
         /// 设置属性值并通知变更
         /// </summary>
         /// <typeparam name="T">属性类型</typeparam>

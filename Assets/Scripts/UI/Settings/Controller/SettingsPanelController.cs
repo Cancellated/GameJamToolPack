@@ -105,28 +105,9 @@ namespace MyGame.UI.Settings.Controller
                 return;
 
             Log.Info(LOG_MODULE, $"检测到模型属性变化: {propertyName}");
-
-            switch (propertyName)
-            {
-                case nameof(SettingsModel.MusicVolume):
-                    m_view.UpdateMusicVolumeSlider(m_model.MusicVolume);
-                    break;
-                case nameof(SettingsModel.SfxVolume):
-                    m_view.UpdateSfxVolumeSlider(m_model.SfxVolume);
-                    break;
-                case nameof(SettingsModel.QualityLevel):
-                    m_view.UpdateQualityDropdown(m_model.QualityLevel);
-                    break;
-                case nameof(SettingsModel.Fullscreen):
-                    m_view.UpdateFullscreenToggle(m_model.Fullscreen);
-                    break;
-                case nameof(SettingsModel.ResolutionIndex):
-                    m_view.UpdateResolutionDropdown(m_model.ResolutionIndex);
-                    break;
-                case nameof(SettingsModel.InvertYAxis):
-                    m_view.UpdateInvertYAxisToggle(m_model.InvertYAxis);
-                    break;
-            }
+            
+            // 调用视图的更新方法，该方法会通知所有设置组件更新其视图
+            m_view.UpdateAllSettingsViews();
         }
 
         #endregion
@@ -291,12 +272,8 @@ namespace MyGame.UI.Settings.Controller
 
             Log.Info(LOG_MODULE, "用当前设置更新视图");
             
-            m_view.UpdateMusicVolumeSlider(m_model.MusicVolume);
-            m_view.UpdateSfxVolumeSlider(m_model.SfxVolume);
-            m_view.UpdateQualityDropdown(m_model.QualityLevel);
-            m_view.UpdateFullscreenToggle(m_model.Fullscreen);
-            m_view.UpdateResolutionDropdown(m_model.ResolutionIndex);
-            m_view.UpdateInvertYAxisToggle(m_model.InvertYAxis);
+            // 调用视图的更新方法，该方法会通知所有设置组件更新其视图
+            m_view.UpdateAllSettingsViews();
         }
         #endregion
     }

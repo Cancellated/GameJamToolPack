@@ -3,7 +3,8 @@ using UnityEngine.UI;
 using TMPro;
 using Logger;
 using MyGame.UI.Settings.Controller;
-using MyGame.UI.Components;
+
+using MyGame.UI.Settings.Components;
 using System.Collections.Generic;
 
 namespace MyGame.UI.Settings.View
@@ -35,6 +36,16 @@ namespace MyGame.UI.Settings.View
 
         [Tooltip("返回按钮")]
         [SerializeField] private Button m_backButton;
+        
+        [Header("Settings Components")]
+        [Tooltip("图形设置组件")]
+        [SerializeField] private GraphicsSettingsComponent m_graphicsSettingsComponent;
+        
+        [Tooltip("音频设置组件")]
+        [SerializeField] private AudioSettingsComponent m_audioSettingsComponent;
+        
+        [Tooltip("控制设置组件")]
+        [SerializeField] private ControlsSettingsComponent m_controlsSettingsComponent;
 
         #region 分页相关UI
 
@@ -68,26 +79,7 @@ namespace MyGame.UI.Settings.View
 
         #endregion
 
-        [Header("Audio Settings")]
-        [Tooltip("音乐音量滑块")]
-        [SerializeField] private Slider m_musicVolumeSlider;
 
-        [Tooltip("音效音量滑块")]
-        [SerializeField] private Slider m_sfxVolumeSlider;
-
-        [Header("Graphics Settings")]
-        [Tooltip("画质等级下拉框")]
-        [SerializeField] private TMP_Dropdown m_qualityDropdown;
-
-        [Tooltip("全屏开关")]
-        [SerializeField] private ToggleSwitch m_fullscreenToggle;
-
-        [Tooltip("分辨率下拉框")]
-        [SerializeField] private TMP_Dropdown m_resolutionDropdown;
-
-        [Header("Gameplay Settings")]
-        [Tooltip("Y轴反转开关")]
-        [SerializeField] private ToggleSwitch m_invertYAxisToggle;
 
         [Header("Action Buttons")]
         [Tooltip("应用按钮")]
@@ -169,38 +161,7 @@ namespace MyGame.UI.Settings.View
         /// </summary>
         private void BindSettingsEvents()
         {
-            // 音量设置
-            if (m_musicVolumeSlider != null)
-            {
-                m_musicVolumeSlider.onValueChanged.AddListener(OnMusicVolumeChanged);
-            }
-
-            if (m_sfxVolumeSlider != null)
-            {
-                m_sfxVolumeSlider.onValueChanged.AddListener(OnSfxVolumeChanged);
-            }
-
-            // 画质设置
-            if (m_qualityDropdown != null)
-            {
-                m_qualityDropdown.onValueChanged.AddListener(OnQualityLevelChanged);
-            }
-
-            if (m_fullscreenToggle != null)
-            {
-                m_fullscreenToggle.OnValueChanged += OnFullscreenChanged;
-            }
-
-            if (m_resolutionDropdown != null)
-            {
-                m_resolutionDropdown.onValueChanged.AddListener(OnResolutionChanged);
-            }
-
-            // 游戏设置
-            if (m_invertYAxisToggle != null)
-            {
-                m_invertYAxisToggle.OnValueChanged += OnInvertYAxisChanged;
-            }
+            // 现在通过组件来处理事件绑定，这里可以留空或添加全局事件
         }
 
         #endregion
@@ -244,77 +205,7 @@ namespace MyGame.UI.Settings.View
 
         #region 设置控件事件处理
 
-        /// <summary>
-        /// 音乐音量变化事件处理
-        /// </summary>
-        /// <param name="value">音量值</param>
-        private void OnMusicVolumeChanged(float value)
-        {
-            if (m_controller != null)
-            {
-                m_controller.UpdateMusicVolume(value);
-            }
-        }
 
-        /// <summary>
-        /// 音效音量变化事件处理
-        /// </summary>
-        /// <param name="value">音量值</param>
-        private void OnSfxVolumeChanged(float value)
-        {
-            if (m_controller != null)
-            {
-                m_controller.UpdateSfxVolume(value);
-            }
-        }
-
-        /// <summary>
-        /// 画质等级变化事件处理
-        /// </summary>
-        /// <param name="value">画质等级索引</param>
-        private void OnQualityLevelChanged(int value)
-        {
-            if (m_controller != null)
-            {
-                m_controller.UpdateQualityLevel(value);
-            }
-        }
-
-        /// <summary>
-        /// 全屏设置变化事件处理
-        /// </summary>
-        /// <param name="value">是否全屏</param>
-        private void OnFullscreenChanged(bool value)
-        {
-            if (m_controller != null)
-            {
-                m_controller.UpdateFullscreen(value);
-            }
-        }
-
-        /// <summary>
-        /// 分辨率变化事件处理
-        /// </summary>
-        /// <param name="value">分辨率索引</param>
-        private void OnResolutionChanged(int value)
-        {
-            if (m_controller != null)
-            {
-                m_controller.UpdateResolutionIndex(value);
-            }
-        }
-
-        /// <summary>
-        /// Y轴反转设置变化事件处理
-        /// </summary>
-        /// <param name="value">是否反转Y轴</param>
-        private void OnInvertYAxisChanged(bool value)
-        {
-            if (m_controller != null)
-            {
-                m_controller.UpdateInvertYAxis(value);
-            }
-        }
 
         #endregion
 
@@ -344,12 +235,36 @@ namespace MyGame.UI.Settings.View
         public override void Initialize()
         {
             Log.Info(LOG_MODULE, "初始化设置面板");
-            // 初始化分辨率选项
-            InitializeResolutionDropdown();
-            // 初始化画质选项
-            InitializeQualityDropdown();
+            
+            // 初始化子组件
+            InitializeSettingsComponents();
+            
             // 初始化分页
             InitializePages();
+        }
+        
+        /// <summary>
+        /// 初始化设置组件
+        /// </summary>
+        private void InitializeSettingsComponents()
+        {
+            // 初始化图形设置组件
+            if (m_graphicsSettingsComponent != null)
+            {
+                m_graphicsSettingsComponent.Initialize(m_controller);
+            }
+            
+            // 初始化音频设置组件
+            if (m_audioSettingsComponent != null)
+            {
+                m_audioSettingsComponent.Initialize(m_controller);
+            }
+            
+            // 初始化控制设置组件
+            if (m_controlsSettingsComponent != null)
+            {
+                m_controlsSettingsComponent.Initialize(m_controller);
+            }
         }
 
         /// <summary>
@@ -447,74 +362,23 @@ namespace MyGame.UI.Settings.View
         #region UI更新方法
 
         /// <summary>
-        /// 更新音乐音量滑块
+        /// 更新所有设置组件的视图
         /// </summary>
-        /// <param name="volume">音量值</param>
-        public void UpdateMusicVolumeSlider(float volume)
+        public void UpdateAllSettingsViews()
         {
-            if (m_musicVolumeSlider != null)
+            if (m_graphicsSettingsComponent != null)
             {
-                m_musicVolumeSlider.value = volume;
+                m_graphicsSettingsComponent.UpdateView();
             }
-        }
-
-        /// <summary>
-        /// 更新音效音量滑块
-        /// </summary>
-        /// <param name="volume">音量值</param>
-        public void UpdateSfxVolumeSlider(float volume)
-        {
-            if (m_sfxVolumeSlider != null)
+            
+            if (m_audioSettingsComponent != null)
             {
-                m_sfxVolumeSlider.value = volume;
+                m_audioSettingsComponent.UpdateView();
             }
-        }
-
-        /// <summary>
-        /// 更新画质等级下拉框
-        /// </summary>
-        /// <param name="qualityLevel">画质等级</param>
-        public void UpdateQualityDropdown(int qualityLevel)
-        {
-            if (m_qualityDropdown != null)
+            
+            if (m_controlsSettingsComponent != null)
             {
-                m_qualityDropdown.value = qualityLevel;
-            }
-        }
-
-        /// <summary>
-        /// 更新全屏开关
-        /// </summary>
-        /// <param name="isFullscreen">是否全屏</param>
-        public void UpdateFullscreenToggle(bool isFullscreen)
-        {
-            if (m_fullscreenToggle != null)
-            {
-                m_fullscreenToggle.IsOn = isFullscreen;
-            }
-        }
-
-        /// <summary>
-        /// 更新分辨率下拉框
-        /// </summary>
-        /// <param name="resolutionIndex">分辨率索引</param>
-        public void UpdateResolutionDropdown(int resolutionIndex)
-        {
-            if (m_resolutionDropdown != null)
-            {
-                m_resolutionDropdown.value = resolutionIndex;
-            }
-        }
-
-        /// <summary>
-        /// 更新Y轴反转开关
-        /// </summary>
-        /// <param name="invertYAxis">是否反转Y轴</param>
-        public void UpdateInvertYAxisToggle(bool invertYAxis)
-        {
-            if (m_invertYAxisToggle != null)
-            {
-                m_invertYAxisToggle.IsOn = invertYAxis;
+                m_controlsSettingsComponent.UpdateView();
             }
         }
 
@@ -522,50 +386,7 @@ namespace MyGame.UI.Settings.View
 
         #region 初始化辅助方法
 
-        /// <summary>
-        /// 初始化分辨率下拉框
-        /// </summary>
-        private void InitializeResolutionDropdown()
-        {
-            if (m_resolutionDropdown == null)
-                return;
 
-            m_resolutionDropdown.ClearOptions();
-            List<string> resolutionOptions = new();
-            Resolution[] resolutions = Screen.resolutions;
-
-            int currentResolutionIndex = 0;
-            for (int i = 0; i < resolutions.Length; i++)
-            {
-                string option = $"{resolutions[i].width}x{resolutions[i].height}@{resolutions[i].refreshRateRatio.value}Hz";
-                resolutionOptions.Add(option);
-
-                if (resolutions[i].width == Screen.currentResolution.width &&
-                    resolutions[i].height == Screen.currentResolution.height)
-                {
-                    currentResolutionIndex = i;
-                }
-            }
-
-            m_resolutionDropdown.AddOptions(resolutionOptions);
-            m_resolutionDropdown.value = currentResolutionIndex;
-            m_resolutionDropdown.RefreshShownValue();
-        }
-
-        /// <summary>
-        /// 初始化画质等级下拉框
-        /// </summary>
-        private void InitializeQualityDropdown()
-        {
-            if (m_qualityDropdown == null)
-                return;
-
-            m_qualityDropdown.ClearOptions();
-            string[] qualityNames = QualitySettings.names;
-            m_qualityDropdown.AddOptions(new List<string>(qualityNames));
-            m_qualityDropdown.value = QualitySettings.GetQualityLevel();
-            m_qualityDropdown.RefreshShownValue();
-        }
 
         #endregion
     }

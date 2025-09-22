@@ -1,5 +1,7 @@
+using Logger;
 using MyGame.UI;
 using UnityEngine;
+using MyGame.Events;
 
 namespace MyGame.UI.Settings.Model
 {
@@ -113,6 +115,9 @@ namespace MyGame.UI.Settings.Model
             PlayerPrefs.SetInt("InvertYAxis", InvertYAxis ? 1 : 0);
             
             PlayerPrefs.Save();
+            
+            // 触发设置保存完成事件
+            GameEvents.TriggerSettingsSaved();
         }
 
         /// <summary>
@@ -124,10 +129,19 @@ namespace MyGame.UI.Settings.Model
             QualitySettings.SetQualityLevel(QualityLevel);
             
             // 应用分辨率和全屏设置
-            // 这里可以添加分辨率的具体实现
+            Resolution[] resolutions = Screen.resolutions;
+            if (resolutions != null && resolutions.Length > 0 && ResolutionIndex >= 0 && ResolutionIndex < resolutions.Length)
+            {
+                Resolution selectedResolution = resolutions[ResolutionIndex];
+                Screen.SetResolution(selectedResolution.width, selectedResolution.height, Fullscreen);
+                Log.Info("Settings", $"应用分辨率设置: {selectedResolution.width}x{selectedResolution.height}, 全屏: {Fullscreen}");
+            }
             
             // 应用音量设置
             // 这里可以添加音量的具体实现
+            
+            // 触发设置应用完成事件
+            GameEvents.TriggerSettingsApplied();
         }
 
         #endregion

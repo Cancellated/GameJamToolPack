@@ -196,6 +196,12 @@ namespace MyGame.UI
         /// <returns>协程</returns>
         protected IEnumerator FadeIn()
         {
+            if (m_canvasGroup == null)
+            {
+                IsVisible = true;
+                yield break;
+            }
+            
             float elapsedTime = 0f;
             float startAlpha = m_canvasGroup.alpha;
             
@@ -221,6 +227,13 @@ namespace MyGame.UI
         /// <returns>协程</returns>
         protected IEnumerator FadeOut(System.Action onComplete)
         {
+            if (m_canvasGroup == null)
+            {
+                IsVisible = false;
+                onComplete?.Invoke();
+                yield break;
+            }
+            
             float elapsedTime = 0f;
             float startAlpha = m_canvasGroup.alpha;
             
