@@ -141,7 +141,6 @@ namespace MyGame.Managers
             // 1. 首先检查是否直接指定了IUIPanel
             if (wrapper.iUIPanel != null)
             {
-                Log.Info(module, "使用直接指定的IUIPanel: " + wrapper.iUIPanel.GetType().Name);
                 return wrapper.iUIPanel;
             }
             
@@ -151,7 +150,6 @@ namespace MyGame.Managers
                 if (wrapper.panel is IUIPanel)
                 {
                     IUIPanel panel = wrapper.panel as IUIPanel;
-                    Log.Info(module, "面板实现了IUIPanel接口: " + panel.GetType().Name);
                     return panel;
                 }
                 
@@ -161,12 +159,10 @@ namespace MyGame.Managers
                     Log.Info(module, "尝试从GameObject上查找IUIPanel组件: " + wrapper.panel.name);
                     if (wrapper.panel.TryGetComponent<IUIPanel>(out var foundPanel))
                     {
-                        Log.Info(module, "成功找到同一GameObject上的IUIPanel组件: " + foundPanel.GetType().Name);
                         return foundPanel;
                     }
                     else
                     {
-                        Log.Info(module, "未找到同一GameObject上的IUIPanel组件");
                         return null;
                     }
                 }
@@ -287,17 +283,13 @@ namespace MyGame.Managers
             Log.Info(module, "尝试显示/隐藏UI类型: " + state + ", show: " + show);
             
             if (_panelMap.TryGetValue(state, out var panel))
-            {
-                Log.Info(module, "找到对应面板: " + panel.ToString());
-                
+            {               
                 if (show)
                 {
-                    Log.Info(module, "调用面板的Show方法");
                     panel.Show();
                 }
                 else
                 {
-                    Log.Info(module, "调用面板的Hide方法");
                     panel.Hide();
                 }
             }

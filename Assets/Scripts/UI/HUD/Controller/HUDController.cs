@@ -31,16 +31,6 @@ namespace MyGame.UI.HUD.Controller
         }
 
         /// <summary>
-        /// 创建并初始化模型
-        /// </summary>
-        private void CreateAndInitializeModel()
-        {
-            HUDModel model = new();
-            model.Initialize();
-            SetModel(model);
-        }
-
-        /// <summary>
         /// 初始化逻辑
         /// </summary>
         protected override void OnInitialize()

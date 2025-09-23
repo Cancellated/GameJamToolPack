@@ -42,7 +42,10 @@ namespace MyGame.UI
         #region 生命周期
         
         /// <summary>
-        /// 初始化面板
+        /// 初始化面板：
+        /// 1. 自动获取CanvasGroup组件
+        /// 2. 初始状态为隐藏
+        /// 3. 尝试自动绑定控制器
         /// </summary>
         protected virtual void Awake()
         {
@@ -79,6 +82,14 @@ namespace MyGame.UI
         {
             Initialize();
         }
+
+        /// <summary>
+        /// 当面板被禁用时
+        /// </summary>
+        protected virtual void OnDisable()
+        {
+            UnbindController();
+        }
         
         #endregion
         
@@ -111,7 +122,7 @@ namespace MyGame.UI
         }
         
         /// <summary>
-        /// 初始化面板
+        /// 初始化面板，此方法在基类为空
         /// </summary>
         public virtual void Initialize()
         {

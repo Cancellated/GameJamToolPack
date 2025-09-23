@@ -160,8 +160,8 @@ namespace MyGame.UI.Settings.Components
             m_resolutions = Screen.resolutions;
             
             // 移除重复的分辨率
-            List<Resolution> uniqueResolutions = new List<Resolution>();
-            HashSet<string> resolutionKeys = new HashSet<string>();
+            List<Resolution> uniqueResolutions = new();
+            HashSet<string> resolutionKeys = new();
 
             foreach (Resolution resolution in m_resolutions)
             {
@@ -177,7 +177,7 @@ namespace MyGame.UI.Settings.Components
             m_resolutions = uniqueResolutions.ToArray();
 
             // 生成分辨率选项文本
-            List<string> options = new List<string>();
+            List<string> options = new();
             for (int i = 0; i < m_resolutions.Length; i++)
             {
                 string resolutionText = $"{m_resolutions[i].width}x{m_resolutions[i].height} ({m_resolutions[i].refreshRateRatio.value}Hz)";

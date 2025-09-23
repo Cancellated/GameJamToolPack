@@ -1,5 +1,5 @@
 using UnityEngine;
-using System;
+using Unity.VisualScripting;
 
 namespace MyGame.UI
 {
@@ -83,7 +83,7 @@ namespace MyGame.UI
     /// <typeparam name="TModel">模型类型</typeparam>
     public abstract class BaseController<TView, TModel> : BaseController 
         where TView : class
-        where TModel : class
+        where TModel : class, new()
     {
         #region 字段和属性
         
@@ -100,6 +100,27 @@ namespace MyGame.UI
         #endregion
         
         #region 公共方法
+        
+        /// <summary>
+        /// 创建并初始化模型实例
+        /// 由于模型通常不是MonoBehaviour，不能直接挂载到游戏对象上
+        /// 通过代码创建实例来解决这个问题
+        /// </summary>
+        /// <returns>创建并初始化后的模型实例</returns>
+        protected TModel CreateAndInitializeModel()
+        {
+            // 创建模型实例
+            TModel model = new();
+            
+            // 使用反射检查并调用Initialize方法
+            var initializeMethod = typeof(TModel).GetMethod("Initialize", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic, null, System.Type.EmptyTypes, null);
+            initializeMethod?.Invoke(model, null);
+            
+            // 设置模型引用
+            SetModel(model);
+            
+            return model;
+        }
         
         /// <summary>
         /// 设置视图引用

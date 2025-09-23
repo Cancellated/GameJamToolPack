@@ -3,9 +3,8 @@ using UnityEngine.UI;
 using TMPro;
 using Logger;
 using MyGame.UI.Settings.Controller;
-
-using MyGame.UI.Settings.Components;
 using System.Collections.Generic;
+using MyGame.UI.Settings.Components;
 
 namespace MyGame.UI.Settings.View
 {
@@ -14,20 +13,6 @@ namespace MyGame.UI.Settings.View
     /// </summary>
     public class SettingsPanelView : BaseView<SettingsPanelController>
     {
-        #region 枚举
-
-        /// <summary>
-        /// 设置页面类型
-        /// </summary>
-        public enum SettingsPage
-        {
-            Graphics,
-            Audio,
-            Controls
-        }
-
-        #endregion
-
         #region 字段
 
         [Header("UI References")]
@@ -36,50 +21,6 @@ namespace MyGame.UI.Settings.View
 
         [Tooltip("返回按钮")]
         [SerializeField] private Button m_backButton;
-        
-        [Header("Settings Components")]
-        [Tooltip("图形设置组件")]
-        [SerializeField] private GraphicsSettingsComponent m_graphicsSettingsComponent;
-        
-        [Tooltip("音频设置组件")]
-        [SerializeField] private AudioSettingsComponent m_audioSettingsComponent;
-        
-        [Tooltip("控制设置组件")]
-        [SerializeField] private ControlsSettingsComponent m_controlsSettingsComponent;
-
-        #region 分页相关UI
-
-        [Header("Page Navigation")]
-        [Tooltip("页面容器")]
-        [SerializeField] private Transform m_pagesContainer;
-
-        [Tooltip("图形设置页面")]
-        [SerializeField] private GameObject m_graphicsPage;
-
-        [Tooltip("声音设置页面")]
-        [SerializeField] private GameObject m_audioPage;
-
-        [Tooltip("控制设置页面")]
-        [SerializeField] private GameObject m_controlsPage;
-
-        [Tooltip("图形设置按钮")]
-        [SerializeField] private Button m_graphicsButton;
-
-        [Tooltip("声音设置按钮")]
-        [SerializeField] private Button m_audioButton;
-
-        [Tooltip("控制设置按钮")]
-        [SerializeField] private Button m_controlsButton;
-
-        [Tooltip("当前选中的页面指示器")]
-        [SerializeField] private Image m_pageIndicator;
-
-        [Tooltip("页面指示器相对于按钮的垂直偏移量（正值向下移动）")]
-        [SerializeField] private float m_indicatorVerticalOffset = 40f;
-
-        #endregion
-
-
 
         [Header("Action Buttons")]
         [Tooltip("应用按钮")]
@@ -89,7 +30,8 @@ namespace MyGame.UI.Settings.View
         [SerializeField] private Button m_saveButton;
 
         private const string LOG_MODULE = LogModules.SETTINGS;
-        private SettingsPage m_currentPage = SettingsPage.Graphics;
+
+        private readonly List<GameObject> m_optionComponents = new();
 
         #endregion
 
@@ -104,8 +46,8 @@ namespace MyGame.UI.Settings.View
             m_panelType = UIType.SettingsPanel;
             base.Awake();
             
-            // 绑定按钮事件
-            BindButtonEvents();
+            // 查找所有设置组件
+            FindAllSettingsComponents();
         }
 
         /// <summary>
@@ -127,43 +69,26 @@ namespace MyGame.UI.Settings.View
             {
                 m_saveButton.onClick.AddListener(OnSaveButtonClick);
             }
-
-            // 绑定分页按钮事件
-            BindPageNavigationEvents();
-
-            // 绑定设置控件事件
-            BindSettingsEvents();
         }
 
         /// <summary>
-        /// 绑定分页导航事件
+        /// 当面板被启用时调用
         /// </summary>
-        private void BindPageNavigationEvents()
+        override protected void OnEnable()
         {
-            if (m_graphicsButton != null)
-            {
-                m_graphicsButton.onClick.AddListener(() => SwitchPage(SettingsPage.Graphics));
-            }
-
-            if (m_audioButton != null)
-            {
-                m_audioButton.onClick.AddListener(() => SwitchPage(SettingsPage.Audio));
-            }
-
-            if (m_controlsButton != null)
-            {
-                m_controlsButton.onClick.AddListener(() => SwitchPage(SettingsPage.Controls));
-            }
+            // 面板启用时不需要自动初始化，初始化由控制器统一管理
         }
 
         /// <summary>
-        /// 绑定设置控件事件
+        /// 初始化面板
         /// </summary>
-        private void BindSettingsEvents()
+        public override void Initialize()
         {
-            // 现在通过组件来处理事件绑定，这里可以留空或添加全局事件
+            Log.Info(LOG_MODULE, "初始化设置面板");
+            TryBindController();
+            BindButtonEvents();
+            InitializeAllSettingsComponents();
         }
-
         #endregion
 
         #region 按钮事件处理
@@ -203,12 +128,6 @@ namespace MyGame.UI.Settings.View
 
         #endregion
 
-        #region 设置控件事件处理
-
-
-
-        #endregion
-
         #region 面板控制
 
         /// <summary>
@@ -229,164 +148,93 @@ namespace MyGame.UI.Settings.View
             base.Hide();
         }
 
+        #endregion
+
+        #region 控制器绑定
+
         /// <summary>
-        /// 初始化面板
+        /// 尝试绑定控制器
         /// </summary>
-        public override void Initialize()
+        protected override void TryBindController()
         {
-            Log.Info(LOG_MODULE, "初始化设置面板");
-            
-            // 初始化子组件
-            InitializeSettingsComponents();
-            
-            // 初始化分页
-            InitializePages();
-        }
-        
-        /// <summary>
-        /// 初始化设置组件
-        /// </summary>
-        private void InitializeSettingsComponents()
-        {
-            // 初始化图形设置组件
-            if (m_graphicsSettingsComponent != null)
+            if (m_controller == null)
             {
-                m_graphicsSettingsComponent.Initialize(m_controller);
+                m_controller = FindObjectOfType<SettingsPanelController>();
+                if (m_controller == null)
+                {
+                    Log.Error(LOG_MODULE, "未找到SettingsPanelController实例");
+                }
             }
-            
-            // 初始化音频设置组件
-            if (m_audioSettingsComponent != null)
-            {
-                m_audioSettingsComponent.Initialize(m_controller);
-            }
-            
-            // 初始化控制设置组件
-            if (m_controlsSettingsComponent != null)
-            {
-                m_controlsSettingsComponent.Initialize(m_controller);
-            }
-        }
-
-        /// <summary>
-        /// 初始化分页
-        /// </summary>
-        private void InitializePages()
-        {
-            // 默认显示图形设置页面
-            SwitchPage(SettingsPage.Graphics);
-        }
-
-        /// <summary>
-        /// 切换页面
-        /// </summary>
-        /// <param name="page">要切换的页面类型</param>
-        public void SwitchPage(SettingsPage page)
-        {
-            Log.Info(LOG_MODULE, $"切换到页面: {page}");
-            
-            // 隐藏所有页面
-            if (m_graphicsPage != null)
-                m_graphicsPage.SetActive(false);
-            if (m_audioPage != null)
-                m_audioPage.SetActive(false);
-            if (m_controlsPage != null)
-                m_controlsPage.SetActive(false);
-
-            // 显示选中的页面
-            switch (page)
-            {
-                case SettingsPage.Graphics:
-                    if (m_graphicsPage != null)
-                        m_graphicsPage.SetActive(true);
-                    break;
-                case SettingsPage.Audio:
-                    if (m_audioPage != null)
-                        m_audioPage.SetActive(true);
-                    break;
-                case SettingsPage.Controls:
-                    if (m_controlsPage != null)
-                        m_controlsPage.SetActive(true);
-                    break;
-            }
-
-            // 更新当前页面
-            m_currentPage = page;
-            
-            // 更新页面指示器位置
-            UpdatePageIndicator();
-        }
-
-        /// <summary>
-        /// 更新页面指示器位置
-        /// </summary>
-        /// <summary>
-        /// 更新页面指示器的位置，根据当前选中的页面
-        /// </summary>
-        private void UpdatePageIndicator()
-        {
-            if (m_pageIndicator == null)
-                return;
-
-            switch (m_currentPage)
-            {
-                case SettingsPage.Graphics:
-                    SetIndicatorPosition(m_graphicsButton);
-                    break;
-
-                case SettingsPage.Audio:
-                    SetIndicatorPosition(m_audioButton);
-                    break;
-
-                case SettingsPage.Controls:
-                    SetIndicatorPosition(m_controlsButton);
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// 设置页面指示器相对于指定按钮的位置
-        /// </summary>
-        /// <param name="targetButton">目标按钮</param>
-        private void SetIndicatorPosition(Button targetButton)
-        {
-            if (targetButton == null || m_pageIndicator == null)
-                return;
-
-            Vector3 indicatorPosition = targetButton.transform.position;
-            indicatorPosition.y -= m_indicatorVerticalOffset; // 将指示器移到按钮下方
-            m_pageIndicator.transform.position = indicatorPosition;
         }
 
         #endregion
 
-        #region UI更新方法
+        #region 选项组件管理
+
+        /// <summary>
+        /// 查找所有设置组件
+        /// </summary>
+        private void FindAllSettingsComponents()
+        {
+            Log.Info(LOG_MODULE, "查找所有设置组件");
+            
+            // 清空现有列表
+            m_optionComponents.Clear();
+            
+            // 获取设置面板下的所有BaseSettingsComponent派生组件
+            var settingsComponents = GetComponentsInChildren<BaseSettingsComponent>(true);
+            
+            foreach (var component in settingsComponents)
+            {
+                m_optionComponents.Add(component.gameObject);
+                Log.Info(LOG_MODULE, $"找到设置组件: {component.name}");
+            }
+        }
+
+        /// <summary>
+        /// 初始化所有设置组件
+        /// </summary>
+        private void InitializeAllSettingsComponents()
+        {
+            Log.Info(LOG_MODULE, "初始化所有设置组件");
+            
+            if (m_controller == null)
+            {
+                Log.Error(LOG_MODULE, "控制器为空，无法初始化设置组件");
+                return;
+            }
+            
+            foreach (var componentObj in m_optionComponents)
+            {
+                if (componentObj != null)
+                {
+                    if (componentObj.TryGetComponent<BaseSettingsComponent>(out var settingsComponent))
+                    {
+                        settingsComponent.Initialize(m_controller);
+                        Log.DebugLog(LOG_MODULE, $"已初始化设置组件: {componentObj.name}");
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// 更新所有设置组件的视图
         /// </summary>
-        public void UpdateAllSettingsViews()
+        public void UpdateAllSettingsComponents()
         {
-            if (m_graphicsSettingsComponent != null)
-            {
-                m_graphicsSettingsComponent.UpdateView();
-            }
+            Log.Info(LOG_MODULE, "更新所有设置组件视图");
             
-            if (m_audioSettingsComponent != null)
+            foreach (var componentObj in m_optionComponents)
             {
-                m_audioSettingsComponent.UpdateView();
-            }
-            
-            if (m_controlsSettingsComponent != null)
-            {
-                m_controlsSettingsComponent.UpdateView();
+                if (componentObj != null)
+                {
+                    if (componentObj.TryGetComponent<BaseSettingsComponent>(out var settingsComponent))
+                    {
+                        settingsComponent.UpdateView();
+                    }
+                }
             }
         }
-
-        #endregion
-
-        #region 初始化辅助方法
-
-
 
         #endregion
     }
