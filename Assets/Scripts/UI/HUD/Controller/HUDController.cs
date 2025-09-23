@@ -35,7 +35,7 @@ namespace MyGame.UI.HUD.Controller
         /// </summary>
         private void CreateAndInitializeModel()
         {
-            HUDModel model = new HUDModel();
+            HUDModel model = new();
             model.Initialize();
             SetModel(model);
         }

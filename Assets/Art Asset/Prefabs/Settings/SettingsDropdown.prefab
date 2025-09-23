@@ -870,7 +870,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 3121034043804217946}
   m_Direction: 2
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.6666667
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1131,7 +1131,7 @@ GameObject:
   - component: {fileID: 6965294121741675364}
   m_Layer: 0
   m_Name: Title
-  m_TagString: Untagged
+  m_TagString: Title
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

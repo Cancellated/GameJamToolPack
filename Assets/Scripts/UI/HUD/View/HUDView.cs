@@ -29,10 +29,14 @@ namespace MyGame.UI.HUD.View
         protected override void TryBindController()
         {
             // 查找当前GameObject上的控制器
-            HUDController controller = gameObject.GetComponent<HUDController>();
-            
+            if (TryGetComponent<HUDController>(out var controller))
+            {
+                // 找到控制器，直接绑定
+                BindController(controller);
+                return;
+            }
             // 如果没有找到控制器，则创建一个新的
-            if (controller == null)
+            else if (!gameObject.TryGetComponent(out controller))
             {
                 controller = gameObject.AddComponent<HUDController>();
                 controller.Initialize();

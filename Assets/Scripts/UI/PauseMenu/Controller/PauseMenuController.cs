@@ -35,7 +35,7 @@ namespace MyGame.UI.PauseMenu.Controller
         /// </summary>
         private void CreateAndInitializeModel()
         {
-            PauseMenuModel model = new PauseMenuModel();
+            PauseMenuModel model = new();
             model.Initialize();
             SetModel(model);
         }

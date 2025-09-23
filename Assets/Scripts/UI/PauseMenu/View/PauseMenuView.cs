@@ -29,10 +29,8 @@ namespace MyGame.UI.PauseMenu.View
         protected override void TryBindController()
         {
             // 查找当前GameObject上的控制器
-            PauseMenuController controller = gameObject.GetComponent<PauseMenuController>();
-            
             // 如果没有找到控制器，则创建一个新的
-            if (controller == null)
+            if (!gameObject.TryGetComponent<PauseMenuController>(out var controller))
             {
                 controller = gameObject.AddComponent<PauseMenuController>();
                 controller.Initialize();
