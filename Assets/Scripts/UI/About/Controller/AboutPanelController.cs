@@ -121,22 +121,6 @@ namespace MyGame.UI.About.Controller
             base.SetView(view);
         }
 
-        /// <summary>
-        /// 当视图设置完成后调用
-        /// </summary>
-        protected override void OnViewSet()
-        {
-
-        }
-        
-        /// <summary>
-        /// 当模型设置完成后调用
-        /// </summary>
-        protected override void OnModelSet()
-        {
-
-        }
-
         #endregion
 
         #region 用户交互处理

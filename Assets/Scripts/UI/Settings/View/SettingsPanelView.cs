@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using Logger;
 using MyGame.UI.Settings.Controller;
+using System.Collections;
 using System.Collections.Generic;
 using MyGame.UI.Settings.Components;
 
@@ -29,7 +30,7 @@ namespace MyGame.UI.Settings.View
         [Tooltip("保存按钮")]
         [SerializeField] private Button m_saveButton;
 
-        private const string LOG_MODULE = LogModules.SETTINGS;
+        private const string LOG_MODULE = LogModules.SETTINGS + "View";
 
         private readonly List<GameObject> m_optionComponents = new();
 
@@ -69,14 +70,6 @@ namespace MyGame.UI.Settings.View
             {
                 m_saveButton.onClick.AddListener(OnSaveButtonClick);
             }
-        }
-
-        /// <summary>
-        /// 当面板被启用时调用
-        /// </summary>
-        override protected void OnEnable()
-        {
-            // 面板启用时不需要自动初始化，初始化由控制器统一管理
         }
 
         /// <summary>
@@ -159,10 +152,22 @@ namespace MyGame.UI.Settings.View
         {
             if (m_controller == null)
             {
-                m_controller = FindObjectOfType<SettingsPanelController>();
-                if (m_controller == null)
+                // 首先尝试在父物体中查找控制器
+                if (!transform.parent.TryGetComponent<SettingsPanelController>(out var controller))
                 {
-                    Log.Error(LOG_MODULE, "未找到SettingsPanelController实例");
+                    // 如果父物体中没有，尝试在整个场景中查找
+                    controller = FindObjectOfType<SettingsPanelController>();
+                    if (controller == null)
+                    {
+                        Log.Error(LOG_MODULE, "未找到SettingsPanelController实例，请确保已将控制器脚本挂载到组件上");
+                    }
+                }
+                
+                m_controller = controller;
+                if (m_controller != null)
+                {
+                    OnControllerBound();
+                    Log.Info(LOG_MODULE, "已成功绑定SettingsPanelController");
                 }
             }
         }
@@ -181,40 +186,68 @@ namespace MyGame.UI.Settings.View
             // 清空现有列表
             m_optionComponents.Clear();
             
-            // 获取设置面板下的所有BaseSettingsComponent派生组件
+            // 使用基类查找所有派生组件
+            FindSettingsComponentsByBaseClass();
+        }
+        
+        /// <summary>
+        /// 通过基类查找所有派生组件
+        /// 这种方法可以找到所有继承自BaseSettingsComponent的组件，无需单独列出每个派生类
+        /// </summary>
+        private void FindSettingsComponentsByBaseClass()
+        {
+            
+            // 获取所有继承自BaseSettingsComponent的组件
             var settingsComponents = GetComponentsInChildren<BaseSettingsComponent>(true);
             
+            // 遍历并记录每个组件的详细信息
+            int addedCount = 0;
             foreach (var component in settingsComponents)
             {
-                m_optionComponents.Add(component.gameObject);
-                Log.Info(LOG_MODULE, $"找到设置组件: {component.name}");
+                if (component != null && component.gameObject != null)
+                {
+                    m_optionComponents.Add(component.gameObject);
+                    addedCount++;
+                }
             }
+            
+            Log.Info(LOG_MODULE, $"成功添加 {addedCount} 个设置组件到集合");
         }
 
         /// <summary>
         /// 初始化所有设置组件
         /// </summary>
         private void InitializeAllSettingsComponents()
-        {
-            Log.Info(LOG_MODULE, "初始化所有设置组件");
-            
+        { 
             if (m_controller == null)
             {
                 Log.Error(LOG_MODULE, "控制器为空，无法初始化设置组件");
-                return;
             }
+            
+            // 遍历并初始化每个设置组件
+            int initializedCount = 0;
             
             foreach (var componentObj in m_optionComponents)
             {
-                if (componentObj != null)
+                if (componentObj == null)
                 {
-                    if (componentObj.TryGetComponent<BaseSettingsComponent>(out var settingsComponent))
-                    {
-                        settingsComponent.Initialize(m_controller);
-                        Log.DebugLog(LOG_MODULE, $"已初始化设置组件: {componentObj.name}");
-                    }
+                    Log.Warning(LOG_MODULE, "发现空的设置组件对象，跳过初始化");
+                    continue;
+                }
+                
+                if (componentObj.TryGetComponent<BaseSettingsComponent>(out var settingsComponent))
+                {
+                    settingsComponent.Initialize(m_controller);
+                    // 立即更新视图以显示当前设置值
+                    settingsComponent.UpdateView();
+                    initializedCount++;
+                }
+                else
+                {
+                    Log.Warning(LOG_MODULE, $"对象 {componentObj.name} 不包含 BaseSettingsComponent 组件");
                 }
             }
+            Log.Info(LOG_MODULE, $"所有设置组件初始化完成，成功初始化: {initializedCount}/{m_optionComponents.Count}");
         }
 
         /// <summary>
@@ -222,8 +255,6 @@ namespace MyGame.UI.Settings.View
         /// </summary>
         public void UpdateAllSettingsComponents()
         {
-            Log.Info(LOG_MODULE, "更新所有设置组件视图");
-            
             foreach (var componentObj in m_optionComponents)
             {
                 if (componentObj != null)

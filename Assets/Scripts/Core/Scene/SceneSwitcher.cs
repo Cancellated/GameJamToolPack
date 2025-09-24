@@ -69,24 +69,33 @@ namespace MyGame.Managers
             // 注意：这里不再触发SceneLoadStart事件，因为该事件已经在RequestLoadScene中触发
             Log.Info(module, $"开始异步加载场景: {sceneName}");
 
+            // 根据unloadCurrent参数决定加载模式
+            LoadSceneMode loadMode = unloadCurrent ? LoadSceneMode.Single : LoadSceneMode.Additive;
+
             if (unloadCurrent)
             {
-                // 卸载当前场景
+                // 如果是Single模式，不需要单独卸载当前场景，Unity会自动处理
+            }
+            else
+            {
+                // 记录当前活动场景名称，用于Additive模式下的日志记录
                 var currentScene = SceneManager.GetActiveScene();
-                GameEvents.TriggerSceneUnload(currentScene.name);
-                yield return SceneManager.UnloadSceneAsync(currentScene);
+                Log.Info(module, $"将使用Additive模式加载，当前场景 '{currentScene.name}' 会被保留");
             }
 
             // 异步加载新场景
-            var asyncLoad = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+            var asyncLoad = SceneManager.LoadSceneAsync(sceneName, loadMode);
             while (!asyncLoad.isDone)
             {
                 yield return null;
             }
 
-            // 设置新场景为活动场景
-            var newScene = SceneManager.GetSceneByName(sceneName);
-            SceneManager.SetActiveScene(newScene);
+            // 如果是Additive模式，需要手动设置新场景为活动场景
+            if (!unloadCurrent)
+            {
+                var newScene = SceneManager.GetSceneByName(sceneName);
+                SceneManager.SetActiveScene(newScene);
+            }
 
             // 触发场景加载完成事件
             GameEvents.TriggerSceneLoadComplete(sceneName);

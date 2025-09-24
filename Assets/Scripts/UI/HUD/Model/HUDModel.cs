@@ -62,20 +62,5 @@ namespace MyGame.UI.HUD.Model
             // 在这里清理模型的各种数据资源
         }
 
-        /// <summary>
-        /// 初始化逻辑
-        /// </summary>
-        protected override void OnInitialize()
-        {
-            base.OnInitialize();
-        }
-
-        /// <summary>
-        /// 清理逻辑
-        /// </summary>
-        protected override void OnCleanup()
-        {
-            base.OnCleanup();
-        }
     }
 }

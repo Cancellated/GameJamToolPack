@@ -52,25 +52,5 @@ namespace MyGame.UI.MainMenu.Model
         public MainMenuModel() { }
 
         #endregion
-
-        #region 保护方法
-
-        /// <summary>
-        /// 初始化逻辑
-        /// </summary>
-        protected override void OnInitialize()
-        {
-            // 可以在这里进行数据初始化
-        }
-
-        /// <summary>
-        /// 清理逻辑
-        /// </summary>
-        protected override void OnCleanup()
-        {
-            // 可以在这里进行资源清理
-        }
-
-        #endregion
     }
 }

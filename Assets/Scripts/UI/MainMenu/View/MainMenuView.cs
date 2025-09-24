@@ -15,6 +15,9 @@ namespace MyGame.UI.MainMenu.View
         [Header("按钮")]
         [Tooltip("开始游戏按钮")]
         [SerializeField] private Button m_startGameButton;
+
+        [Tooltip("加载游戏按钮")]
+        [SerializeField] private Button m_loadGameButton;
         
         [Tooltip("设置按钮")]
         [SerializeField] private Button m_settingsButton;
@@ -64,13 +67,6 @@ namespace MyGame.UI.MainMenu.View
             BindController(controller);
         }
 
-        /// <summary>
-        /// 控制器绑定后的回调
-        /// </summary>
-        protected override void OnControllerBound()
-        {
-            Log.Info(LOG_MODULE, "主菜单视图已绑定控制器");
-        }
 
         #endregion
 

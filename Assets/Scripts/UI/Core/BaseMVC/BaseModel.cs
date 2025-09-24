@@ -34,13 +34,22 @@ namespace MyGame.UI
         
         /// <summary>
         /// 初始化模型
+        /// 提供双重检查机制防止重复初始化
         /// </summary>
         public virtual void Initialize()
         {
             if (!IsInitialized)
             {
-                OnInitialize();
-                IsInitialized = true;
+                try
+                {
+                    IsInitialized = true;
+                }
+                catch (Exception ex)
+                {
+                    // 记录初始化失败的异常信息
+                    UnityEngine.Debug.LogError($"Failed to initialize model {GetType().Name}: {ex.Message}");
+                    // 保持IsInitialized为false，允许后续重试初始化
+                }
             }
         }
         
@@ -51,28 +60,12 @@ namespace MyGame.UI
         {
             if (IsInitialized)
             {
-                OnCleanup();
                 IsInitialized = false;
             }
         }
         
         #endregion
         
-        #region 保护方法
-        
-        /// <summary>
-        /// 初始化逻辑
-        /// 子类可以重写此方法来实现特定的初始化逻辑
-        /// </summary>
-        protected virtual void OnInitialize() { }
-        
-        /// <summary>
-        /// 清理逻辑
-        /// 子类可以重写此方法来实现特定的清理逻辑
-        /// </summary>
-        protected virtual void OnCleanup() { }
-        
-        #endregion
     }
     
     /// <summary>
@@ -100,8 +93,9 @@ namespace MyGame.UI
         {
             OnPropertyChanged?.Invoke(propertyName);
         }
+
+        /// <summary>
         /// 设置属性值并通知变更
-        /// </summary>
         /// <typeparam name="T">属性类型</typeparam>
         /// <param name="field">字段引用</param>
         /// <param name="value">新值</param>

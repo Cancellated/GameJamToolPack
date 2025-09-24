@@ -2,6 +2,7 @@ using MyGame.Events;
 using MyGame.Managers;
 using Logger;
 using UnityEngine;
+using MyGame.DevTool;
 
 namespace MyGame.UI.Control
 {
@@ -133,8 +134,12 @@ namespace MyGame.UI.Control
             if (context.performed)
             {
                 Log.Info(LOG_MODULE, "控制台按键被按下");
-                // 触发控制台显示事件
-                GameEvents.TriggerMenuShow(UIType.Console, true);
+
+                // 检查控制台当前状态并切换
+                bool isCurrentlyVisible = DebugConsole.Instance.IsVisible;
+
+                // 触发控制台显示/隐藏事件，切换当前状态
+                GameEvents.TriggerMenuShow(UIType.Console, !isCurrentlyVisible);
             }
         }
         #endregion

@@ -84,24 +84,6 @@ namespace MyGame.UI.HUD.Controller
         }
 
         /// <summary>
-        /// 视图设置后的回调
-        /// </summary>
-        protected override void OnViewSet()
-        {
-            base.OnViewSet();
-            Log.Info(LOG_MODULE, "HUD视图已设置");
-        }
-
-        /// <summary>
-        /// 模型设置后的回调
-        /// </summary>
-        protected override void OnModelSet()
-        {
-            base.OnModelSet();
-            Log.Info(LOG_MODULE, "HUD模型已设置");
-        }
-
-        /// <summary>
         /// 清理逻辑
         /// </summary>
         protected override void OnCleanup()

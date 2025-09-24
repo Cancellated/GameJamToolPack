@@ -65,21 +65,6 @@ namespace MyGame.UI.Loading.Model
             }
         }
         
-        /// <summary>
-        /// 初始化模型
-        /// </summary>
-        protected override void OnInitialize()
-        {
-            Reset();
-        }
-        
-        /// <summary>
-        /// 清理模型资源
-        /// </summary>
-        protected override void OnCleanup()
-        {
-            Reset();
-        }
         
         /// <summary>
         /// 重置模型状态

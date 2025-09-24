@@ -57,10 +57,13 @@ namespace MyGame.Managers
 
         /// <summary>
         /// 切换到UI输入模式
+        /// 特殊处理：保留控制台按键的功能，即使在UI模式下也能响应
         /// </summary>
         public void SwitchToUIMode()
         {
             _inputActions.GamePlay.Disable();
+            // 单独启用控制台按键，确保在任何模式下都能唤出控制台
+            _inputActions.GamePlay.Console.Enable();
             _inputActions.UI.Enable();
         }
 

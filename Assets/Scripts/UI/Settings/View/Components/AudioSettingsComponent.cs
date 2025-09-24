@@ -30,7 +30,6 @@ namespace MyGame.UI.Settings.Components
         /// </summary>
         protected override void InitializeComponent()
         {
-            Log.Info(LOG_MODULE, "初始化音频设置组件");
             // 设置滑块范围
             if (m_musicVolumeSlider != null)
             {
@@ -71,8 +70,6 @@ namespace MyGame.UI.Settings.Components
         {
             if (m_controller == null)
                 return;
-
-            Log.Info(LOG_MODULE, "更新音频设置组件视图");
         }
 
         /// <summary>

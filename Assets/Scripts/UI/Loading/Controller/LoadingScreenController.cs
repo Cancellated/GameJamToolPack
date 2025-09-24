@@ -88,27 +88,5 @@ namespace MyGame.UI.Loading.Controller
         }
 
         #endregion
-
-        #region 视图和模型设置回调
-
-        /// <summary>
-        /// 视图设置后的回调
-        /// 在这里可以进行视图相关的初始化操作
-        /// </summary>
-        protected override void OnViewSet()
-        {
-            // 可以在这里进行视图相关的初始化操作
-        }
-        
-        /// <summary>
-        /// 模型设置后的回调
-        /// 在这里可以进行模型相关的初始化操作
-        /// </summary>
-        protected override void OnModelSet()
-        {
-            // 可以在这里进行模型相关的初始化操作
-        }
-
-        #endregion
     }
 }

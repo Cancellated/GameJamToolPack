@@ -2,6 +2,7 @@ using Logger;
 using MyGame.UI;
 using UnityEngine;
 using MyGame.Events;
+using System.Collections.Generic;
 
 namespace MyGame.UI.Settings.Model
 {
@@ -21,9 +22,13 @@ namespace MyGame.UI.Settings.Model
         private int m_qualityLevel = 2;
         private bool m_fullscreen = true;
         private int m_resolutionIndex = 0;
+        // 自定义画质名称列表
+        private List<string> m_customQualityNames = new();
 
         // 游戏设置
         private bool m_invertYAxis = false;
+
+        private const string LOG_MODULE = LogModules.SETTINGS + "Model";
 
         #endregion
 
@@ -54,6 +59,15 @@ namespace MyGame.UI.Settings.Model
         {
             get { return m_qualityLevel; }
             set { SetProperty(ref m_qualityLevel, value, nameof(QualityLevel)); }
+        }
+        
+        /// <summary>
+        /// 自定义画质名称列表
+        /// </summary>
+        public List<string> CustomQualityNames
+        {
+            get { return m_customQualityNames; }
+            set { SetProperty(ref m_customQualityNames, value, nameof(CustomQualityNames)); }
         }
 
         /// <summary>
@@ -100,6 +114,48 @@ namespace MyGame.UI.Settings.Model
             Fullscreen = PlayerPrefs.GetInt("Fullscreen", 1) == 1;
             ResolutionIndex = PlayerPrefs.GetInt("ResolutionIndex", 0);
             InvertYAxis = PlayerPrefs.GetInt("InvertYAxis", 0) == 1;
+            
+            // 初始化自定义画质名称
+            InitializeCustomQualityNames();
+        }
+        
+        /// <summary>
+        /// 初始化自定义画质名称
+        /// 这里可以根据需要修改为从配置文件加载或使用硬编码的名称
+        /// </summary>
+        private void InitializeCustomQualityNames()
+        {
+            // 默认使用Unity的画质等级名称作为后备
+            string[] unityQualityNames = QualitySettings.names;
+            
+            // 根据项目需求设置自定义名称
+            List<string> customNames = new();
+            
+            // 创建Unity默认画质名称到自定义名称的映射
+            Dictionary<string, string> qualityNameMapping = new()
+            {
+                { "Performant", "低" },
+                { "Balanced", "中" },
+                { "High Fidelity", "高" },
+                // 如果想要定义更多等级画质，在Edit > Project Settings > Quality 打开画质设置面板，点击"+"按钮添加新的画质级别
+                // 然后在qualityNameMapping中添加对应的映射关系
+            };
+            
+            // 使用foreach循环遍历所有Unity默认画质名称
+            foreach (string unityName in unityQualityNames)
+            {
+                // 检查是否有对应的自定义名称，如果有则使用自定义名称，否则使用原始名称
+                if (qualityNameMapping.TryGetValue(unityName, out string customName))
+                {
+                    customNames.Add(customName);
+                }
+                else
+                {
+                    customNames.Add(unityName);
+                }
+            }
+            
+            CustomQualityNames = customNames;
         }
 
         /// <summary>
@@ -134,7 +190,7 @@ namespace MyGame.UI.Settings.Model
             {
                 Resolution selectedResolution = resolutions[ResolutionIndex];
                 Screen.SetResolution(selectedResolution.width, selectedResolution.height, Fullscreen);
-                Log.Info("Settings", $"应用分辨率设置: {selectedResolution.width}x{selectedResolution.height}, 全屏: {Fullscreen}");
+                Log.Info(LOG_MODULE, $"应用分辨率设置: {selectedResolution.width}x{selectedResolution.height}, 全屏: {Fullscreen}");
             }
             
             // 应用音量设置

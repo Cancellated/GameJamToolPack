@@ -114,10 +114,6 @@ namespace MyGame.Managers
             
             // 输出最终映射内容
             Log.Info(module, "面板映射初始化完成，共包含 " + _panelMap.Count + " 个面板类型");
-            foreach (var kvp in _panelMap)
-            {
-                Log.Info(module, "面板类型: " + kvp.Key + "，面板实例: " + kvp.Value.GetType().Name);
-            }
         }
         
         private void OnDestroy()
@@ -152,11 +148,9 @@ namespace MyGame.Managers
                     IUIPanel panel = wrapper.panel as IUIPanel;
                     return panel;
                 }
-                
                 // 3. 如果MonoBehaviour没有实现IUIPanel接口，则尝试从同一GameObject上查找IUIPanel组件
                 else
                 {
-                    Log.Info(module, "尝试从GameObject上查找IUIPanel组件: " + wrapper.panel.name);
                     if (wrapper.panel.TryGetComponent<IUIPanel>(out var foundPanel))
                     {
                         return foundPanel;
@@ -184,7 +178,6 @@ namespace MyGame.Managers
             // 检查面板类型是否已存在于映射中
             if (!_panelMap.ContainsKey(panel.PanelType))
             {
-                Log.Info(module, "添加面板到映射: " + panel.PanelType + " (" + panel.GetType().Name + ")");
                 _panelMap.Add(panel.PanelType, panel);
                 panel.Initialize();
             }

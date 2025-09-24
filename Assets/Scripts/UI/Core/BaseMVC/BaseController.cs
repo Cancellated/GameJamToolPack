@@ -129,7 +129,6 @@ namespace MyGame.UI
         public virtual void SetView(TView view)
         {
             m_view = view;
-            OnViewSet();
         }
         
         /// <summary>
@@ -139,24 +138,7 @@ namespace MyGame.UI
         public virtual void SetModel(TModel model)
         {
             m_model = model;
-            OnModelSet();
         }
-        
-        #endregion
-        
-        #region 保护方法
-        
-        /// <summary>
-        /// 视图设置后的回调
-        /// 子类可以重写此方法来处理视图设置后的逻辑
-        /// </summary>
-        protected virtual void OnViewSet() { }
-        
-        /// <summary>
-        /// 模型设置后的回调
-        /// 子类可以重写此方法来处理模型设置后的逻辑
-        /// </summary>
-        protected virtual void OnModelSet() { }
         
         #endregion
     }

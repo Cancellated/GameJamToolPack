@@ -29,7 +29,6 @@ namespace MyGame.UI.Settings.Components
         /// </summary>
         protected override void InitializeComponent()
         {
-            Log.Info(LOG_MODULE, "初始化控制设置组件");
             // 初始化Y轴反转开关为默认状态（不反转）
             if (m_invertYAxisToggle != null)
             {
@@ -59,7 +58,6 @@ namespace MyGame.UI.Settings.Components
             if (m_controller == null)
                 return;
 
-            Log.Info(LOG_MODULE, "更新控制设置组件视图");
         }
 
         /// <summary>

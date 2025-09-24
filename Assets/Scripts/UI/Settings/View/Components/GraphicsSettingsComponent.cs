@@ -37,7 +37,6 @@ namespace MyGame.UI.Settings.Components
         /// </summary>
         protected override void InitializeComponent()
         {
-            Log.Info(LOG_MODULE, "初始化图形设置组件");
             InitializeResolutionDropdown();
             InitializeQualityDropdown();
         }
@@ -73,10 +72,28 @@ namespace MyGame.UI.Settings.Components
         {
             if (m_controller == null)
                 return;
-
-            Log.Info(LOG_MODULE, "更新图形设置组件视图");
-            // 当前架构中，设置组件无法直接访问控制器的模型数据
-            // 后续可以考虑在SettingsPanelController中添加获取设置的方法
+                
+            // 更新全屏状态
+            if (m_fullscreenToggle != null)
+            {
+                bool isFullscreen = m_controller.IsFullscreen();
+                // 临时移除事件监听器，避免设置值时触发事件
+                m_fullscreenToggle.OnValueChanged -= OnFullscreenChanged;
+                // 设置值
+                m_fullscreenToggle.IsOn = isFullscreen;
+                // 重新添加事件监听器
+                m_fullscreenToggle.OnValueChanged += OnFullscreenChanged;
+            }
+            
+            // 更新画质等级
+            if (m_qualityDropdown != null)
+            {
+                int qualityLevel = m_controller.GetQualityLevel();
+                m_qualityDropdown.SetValueWithoutNotify(qualityLevel);
+            }
+            
+            // 更新分辨率
+            SetCurrentResolution();
         }
 
         /// <summary>
@@ -165,7 +182,7 @@ namespace MyGame.UI.Settings.Components
 
             foreach (Resolution resolution in m_resolutions)
             {
-                string key = $"{resolution.width}x{resolution.height}@{resolution.refreshRateRatio.value}Hz";
+                string key = $"{resolution.width}x{resolution.height}";
                 if (!resolutionKeys.Contains(key))
                 {
                     resolutionKeys.Add(key);
@@ -180,7 +197,7 @@ namespace MyGame.UI.Settings.Components
             List<string> options = new();
             for (int i = 0; i < m_resolutions.Length; i++)
             {
-                string resolutionText = $"{m_resolutions[i].width}x{m_resolutions[i].height} ({m_resolutions[i].refreshRateRatio.value}Hz)";
+                string resolutionText = $"{m_resolutions[i].width}x{m_resolutions[i].height}";
                 options.Add(resolutionText);
             }
 
@@ -193,23 +210,39 @@ namespace MyGame.UI.Settings.Components
 
         /// <summary>
         /// 设置当前分辨率为选中项
+        /// 优先使用控制器中存储的分辨率索引，只有在没有保存设置时才使用当前屏幕分辨率
         /// </summary>
         private void SetCurrentResolution()
         {
             if (m_resolutionDropdown == null || m_resolutions == null || m_resolutions.Length == 0)
                 return;
 
-            // 查找当前分辨率在数组中的索引
-            Resolution currentResolution = Screen.currentResolution;
-            int currentResolutionIndex = 0;
+            int currentResolutionIndex = -1;
+            bool hasSavedResolution = false;
 
-            for (int i = 0; i < m_resolutions.Length; i++)
+            // 优先使用控制器中保存的分辨率设置
+            if (m_controller != null)
             {
-                if (m_resolutions[i].width == currentResolution.width &&
-                    m_resolutions[i].height == currentResolution.height)
+                currentResolutionIndex = m_controller.GetResolutionIndex();
+                // 确保索引在有效范围内
+                if (currentResolutionIndex >= 0 && currentResolutionIndex < m_resolutions.Length)
                 {
-                    currentResolutionIndex = i;
-                    break;
+                    hasSavedResolution = true;
+                }
+            }
+
+            // 如果没有保存的分辨率设置或者保存的索引无效，则使用当前屏幕分辨率
+            if (!hasSavedResolution)
+            {
+                Resolution currentResolution = Screen.currentResolution;
+                for (int i = 0; i < m_resolutions.Length; i++)
+                {
+                    if (m_resolutions[i].width == currentResolution.width &&
+                        m_resolutions[i].height == currentResolution.height)
+                    {
+                        currentResolutionIndex = i;
+                        break;
+                    }
                 }
             }
 
@@ -228,11 +261,22 @@ namespace MyGame.UI.Settings.Components
             // 清空现有选项
             m_qualityDropdown.ClearOptions();
 
-            // 获取所有画质等级名称
-            string[] qualityNames = QualitySettings.names;
+            List<string> qualityNames = null;
+            
+            // 优先使用控制器中提供的自定义画质名称
+            if (m_controller != null)
+            {
+                qualityNames = m_controller.GetCustomQualityNames();
+            }
+            
+            // 如果没有自定义画质名称，则使用Unity的默认画质名称
+            if (qualityNames == null || qualityNames.Count == 0)
+            {
+                qualityNames = new List<string>(QualitySettings.names);
+            }
 
             // 添加到下拉框
-            m_qualityDropdown.AddOptions(new List<string>(qualityNames));
+            m_qualityDropdown.AddOptions(qualityNames);
 
             // 设置当前画质等级为默认选中项
             m_qualityDropdown.SetValueWithoutNotify(QualitySettings.GetQualityLevel());

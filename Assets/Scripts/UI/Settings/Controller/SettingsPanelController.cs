@@ -3,6 +3,7 @@ using UnityEngine;
 using Logger;
 using MyGame.UI.Settings.Model;
 using MyGame.UI.Settings.View;
+using System.Collections.Generic;
 
 namespace MyGame.UI.Settings.Controller
 {
@@ -18,7 +19,7 @@ namespace MyGame.UI.Settings.Controller
         [Tooltip("设置面板视图引用")]
         [SerializeField] private SettingsPanelView m_settingsPanelView;
 
-        private const string LOG_MODULE = LogModules.SETTINGS;
+        private const string LOG_MODULE = LogModules.SETTINGS + "Controller";
 
         #endregion
 
@@ -36,11 +37,6 @@ namespace MyGame.UI.Settings.Controller
             if (m_settingsPanelView != null)
             {
                 SetView(m_settingsPanelView);
-                Log.DebugLog(LOG_MODULE, "设置面板视图: 存在");
-            }
-            else
-            {
-                Log.DebugLog(LOG_MODULE, "设置面板视图: 不存在");
             }
         }
 
@@ -50,17 +46,17 @@ namespace MyGame.UI.Settings.Controller
         protected virtual void OnEnable()
         {
             Log.DebugLog(LOG_MODULE, "设置面板控制器启用");
+            SetModels();
         }
         
         /// <summary>
         /// 模型设置后的回调
         /// 在模型设置完成后执行绑定事件和初始化面板的操作
         /// </summary>
-        protected override void OnModelSet()
+        protected void SetModels()
         {
             Log.DebugLog(LOG_MODULE, "设置面板控制器: 模型已设置");
             BindModelEvents();
-            InitializePanel();
         }
 
         /// <summary>
@@ -68,7 +64,6 @@ namespace MyGame.UI.Settings.Controller
         /// </summary>
         private void OnDisable()
         {
-            Log.Info(LOG_MODULE, "设置面板控制器禁用");
             UnbindModelEvents();
         }
 
@@ -77,11 +72,9 @@ namespace MyGame.UI.Settings.Controller
         /// </summary>
         private void UnbindModelEvents()
         {
-            Log.Info(LOG_MODULE, "解绑设置模型事件");
             if (m_model != null)
             {
                 m_model.OnPropertyChanged -= HandleModelPropertyChanged;
-                Log.DebugLog(LOG_MODULE, "已解绑设置模型属性变化事件");
             }
         }
 
@@ -94,7 +87,7 @@ namespace MyGame.UI.Settings.Controller
         /// </summary>
         private void InitializePanel()
         {
-            Log.Info(LOG_MODULE, "初始化设置面板");
+            Log.Info(LOG_MODULE, "初始化设置面板视图层");
             if (m_settingsPanelView != null)
             {
                 m_settingsPanelView.Initialize();
@@ -115,7 +108,6 @@ namespace MyGame.UI.Settings.Controller
             if (m_model != null)
             {
                 m_model.OnPropertyChanged += HandleModelPropertyChanged;
-                Log.DebugLog(LOG_MODULE, "已绑定设置模型属性变化事件");
             }
             else
             {
@@ -139,8 +131,43 @@ namespace MyGame.UI.Settings.Controller
 
         #endregion
 
-        #region 页面切换
+        #region 通用值更新方法
 
+        /// <summary>
+        /// 通用的值更新方法，用于统一检查模型是否为空、值是否真正改变，并记录日志
+        /// </summary>
+        /// <typeparam name="T">值的类型</typeparam>
+        /// <param name="currentValue">当前值</param>
+        /// <param name="newValue">新值</param>
+        /// <param name="isValueChanged">值比较器，用于确定值是否已改变</param>
+        /// <param name="updateAction">值更新操作</param>
+        /// <param name="logMessage">日志消息</param>
+        /// <param name="errorMessage">模型为空时的错误消息</param>
+        /// <param name="debugLogFormat">调试日志格式化函数</param>
+        private void UpdateValue<T>(T currentValue, T newValue, Func<T, T, bool> isValueChanged, Action updateAction, string logMessage, string errorMessage, Func<T, T, string> debugLogFormat = null)
+        {
+            if (m_model != null)
+            {
+                // 检查值是否真正改变
+                if (isValueChanged(currentValue, newValue))
+                {
+                    Log.Info(LOG_MODULE, logMessage);
+                    
+                    // 如果提供了调试日志格式化函数，则记录调试日志
+                    if (debugLogFormat != null)
+                    {
+                        Log.DebugLog(LOG_MODULE, debugLogFormat(currentValue, newValue));
+                    }
+                    
+                    // 执行更新操作
+                    updateAction();
+                }
+            }
+            else
+            {
+                Log.Error(LOG_MODULE, errorMessage);
+            }
+        }
 
         #endregion
 
@@ -152,16 +179,15 @@ namespace MyGame.UI.Settings.Controller
         /// <param name="volume">新的音量值</param>
         public void UpdateMusicVolume(float volume)
         {
-            Log.Info(LOG_MODULE, "更新音乐音量: " + volume);
-            if (m_model != null)
-            {
-                Log.DebugLog(LOG_MODULE, "设置模型: 更新前音乐音量=" + m_model.MusicVolume + ", 更新后音量=" + volume);
-                m_model.MusicVolume = volume;
-            }
-            else
-            {
-                Log.Error(LOG_MODULE, "设置模型为空，无法更新音乐音量");
-            }
+            UpdateValue(
+                m_model?.MusicVolume ?? 0f,
+                volume,
+                (current, newVal) => !Mathf.Approximately(current, newVal),
+                () => m_model.MusicVolume = volume,
+                "更新音乐音量: " + volume,
+                "设置模型为空，无法更新音乐音量",
+                (current, newVal) => string.Format("设置模型: 更新前音乐音量={0}, 更新后音量={1}", current, newVal)
+            );
         }
 
         /// <summary>
@@ -170,16 +196,15 @@ namespace MyGame.UI.Settings.Controller
         /// <param name="volume">新的音量值</param>
         public void UpdateSfxVolume(float volume)
         {
-            Log.Info(LOG_MODULE, "更新音效音量: " + volume);
-            if (m_model != null)
-            {
-                Log.DebugLog(LOG_MODULE, "设置模型: 更新前音效音量=" + m_model.SfxVolume + ", 更新后音量=" + volume);
-                m_model.SfxVolume = volume;
-            }
-            else
-            {
-                Log.Error(LOG_MODULE, "设置模型为空，无法更新音效音量");
-            }
+            UpdateValue(
+                m_model?.SfxVolume ?? 0f,
+                volume,
+                (current, newVal) => !Mathf.Approximately(current, newVal),
+                () => m_model.SfxVolume = volume,
+                "更新音效音量: " + volume,
+                "设置模型为空，无法更新音效音量",
+                (current, newVal) => string.Format("设置模型: 更新前音效音量={0}, 更新后音量={1}", current, newVal)
+            );
         }
 
         /// <summary>
@@ -188,16 +213,15 @@ namespace MyGame.UI.Settings.Controller
         /// <param name="qualityLevel">新的画质级别</param>
         public void UpdateQualityLevel(int qualityLevel)
         {
-            Log.Info(LOG_MODULE, "更新画质级别: " + qualityLevel);
-            if (m_model != null)
-            {
-                Log.DebugLog(LOG_MODULE, "设置模型: 更新前画质级别=" + m_model.QualityLevel + ", 更新后画质级别=" + qualityLevel);
-                m_model.QualityLevel = qualityLevel;
-            }
-            else
-            {
-                Log.Error(LOG_MODULE, "设置模型为空，无法更新画质级别");
-            }
+            UpdateValue(
+                m_model?.QualityLevel ?? 0,
+                qualityLevel,
+                (current, newVal) => current != newVal,
+                () => m_model.QualityLevel = qualityLevel,
+                "更新画质级别: " + qualityLevel,
+                "设置模型为空，无法更新画质级别",
+                (current, newVal) => string.Format("设置模型: 更新前画质级别={0}, 更新后画质级别={1}", current, newVal)
+            );
         }
 
         /// <summary>
@@ -206,16 +230,16 @@ namespace MyGame.UI.Settings.Controller
         /// <param name="isFullscreen">是否全屏</param>
         public void UpdateFullscreen(bool isFullscreen)
         {
-            Log.Info(LOG_MODULE, "更新全屏状态: " + (isFullscreen ? "全屏" : "窗口"));
-            if (m_model != null)
-            {
-                Log.DebugLog(LOG_MODULE, "设置模型: 更新前全屏状态=" + (m_model.Fullscreen ? "全屏" : "窗口") + ", 更新后全屏状态=" + (isFullscreen ? "全屏" : "窗口"));
-                m_model.Fullscreen = isFullscreen;
-            }
-            else
-            {
-                Log.Error(LOG_MODULE, "设置模型为空，无法更新全屏状态");
-            }
+            UpdateValue(
+                m_model?.Fullscreen ?? false,
+                isFullscreen,
+                (current, newVal) => current != newVal,
+                () => m_model.Fullscreen = isFullscreen,
+                "更新全屏状态: " + (isFullscreen ? "全屏" : "窗口"),
+                "设置模型为空，无法更新全屏状态",
+                (current, newVal) => string.Format("设置模型: 更新前全屏状态={0}, 更新后全屏状态={1}", 
+                    current ? "全屏" : "窗口", newVal ? "全屏" : "窗口")
+            );
         }
 
         /// <summary>
@@ -224,16 +248,15 @@ namespace MyGame.UI.Settings.Controller
         /// <param name="resolutionIndex">新的分辨率索引</param>
         public void UpdateResolutionIndex(int resolutionIndex)
         {
-            Log.Info(LOG_MODULE, "更新分辨率索引: " + resolutionIndex);
-            if (m_model != null)
-            {
-                Log.DebugLog(LOG_MODULE, "设置模型: 更新前分辨率索引=" + m_model.ResolutionIndex + ", 更新后分辨率索引=" + resolutionIndex);
-                m_model.ResolutionIndex = resolutionIndex;
-            }
-            else
-            {
-                Log.Error(LOG_MODULE, "设置模型为空，无法更新分辨率索引");
-            }
+            UpdateValue(
+                m_model?.ResolutionIndex ?? 0,
+                resolutionIndex,
+                (current, newVal) => current != newVal,
+                () => m_model.ResolutionIndex = resolutionIndex,
+                "更新分辨率索引: " + resolutionIndex,
+                "设置模型为空，无法更新分辨率索引",
+                (current, newVal) => string.Format("设置模型: 更新前分辨率索引={0}, 更新后分辨率索引={1}", current, newVal)
+            );
         }
 
         /// <summary>
@@ -242,16 +265,16 @@ namespace MyGame.UI.Settings.Controller
         /// <param name="invertYAxis">是否反转Y轴</param>
         public void UpdateInvertYAxis(bool invertYAxis)
         {
-            Log.Info(LOG_MODULE, "更新Y轴反转设置: " + (invertYAxis ? "反转" : "不反转"));
-            if (m_model != null)
-            {
-                Log.DebugLog(LOG_MODULE, "设置模型: 更新前Y轴反转=" + (m_model.InvertYAxis ? "反转" : "不反转") + ", 更新后Y轴反转=" + (invertYAxis ? "反转" : "不反转"));
-                m_model.InvertYAxis = invertYAxis;
-            }
-            else
-            {
-                Log.Error(LOG_MODULE, "设置模型为空，无法更新Y轴反转设置");
-            }
+            UpdateValue(
+                m_model?.InvertYAxis ?? false,
+                invertYAxis,
+                (current, newVal) => current != newVal,
+                () => m_model.InvertYAxis = invertYAxis,
+                "更新Y轴反转设置: " + (invertYAxis ? "反转" : "不反转"),
+                "设置模型为空，无法更新Y轴反转设置",
+                (current, newVal) => string.Format("设置模型: 更新前Y轴反转={0}, 更新后Y轴反转={1}", 
+                    current ? "反转" : "不反转", newVal ? "反转" : "不反转")
+            );
         }
 
         #endregion
@@ -301,12 +324,9 @@ namespace MyGame.UI.Settings.Controller
         /// </summary>
         private void UpdateViewWithCurrentSettings()
         {
-            Log.Info(LOG_MODULE, "更新视图显示当前设置");
             if (m_settingsPanelView != null)
             {
-                // 调用视图的UpdateAllSettingsComponents方法更新所有设置组件
                 m_settingsPanelView.UpdateAllSettingsComponents();
-                Log.DebugLog(LOG_MODULE, "视图更新完成");
             }
             else
             {
@@ -365,7 +385,6 @@ namespace MyGame.UI.Settings.Controller
             if (m_model != null)
             {
                 int qualityLevel = m_model.QualityLevel;
-                Log.DebugLog(LOG_MODULE, "获取画质级别: " + qualityLevel + ", 名称: " + QualitySettings.names[qualityLevel]);
                 return qualityLevel;
             }
             else
@@ -384,7 +403,6 @@ namespace MyGame.UI.Settings.Controller
             if (m_model != null)
             {
                 bool isFullscreen = m_model.Fullscreen;
-                Log.DebugLog(LOG_MODULE, "获取全屏状态: " + (isFullscreen ? "全屏" : "窗口"));
                 return isFullscreen;
             }
             else
@@ -403,7 +421,6 @@ namespace MyGame.UI.Settings.Controller
             if (m_model != null)
             {
                 int resolutionIndex = m_model.ResolutionIndex;
-                Log.DebugLog(LOG_MODULE, "获取分辨率索引: " + resolutionIndex);
                 return resolutionIndex;
             }
             else
@@ -411,6 +428,21 @@ namespace MyGame.UI.Settings.Controller
                 Log.Error(LOG_MODULE, "设置模型为空，返回默认分辨率索引");
                 return 0;
             }
+        }
+
+        /// <summary>
+        /// 获取自定义画质名称列表
+        /// </summary>
+        /// <returns>自定义画质名称列表</returns>
+        public List<string> GetCustomQualityNames()
+        {
+            if (m_model == null)
+            {
+                Log.Error(LOG_MODULE, "Settings model is null when getting custom quality names");
+                return null;
+            }
+            
+            return m_model.CustomQualityNames;
         }
 
         #endregion
