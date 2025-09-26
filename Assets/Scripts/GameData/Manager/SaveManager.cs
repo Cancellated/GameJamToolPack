@@ -85,6 +85,39 @@ namespace MyGame.Data
         #region 公共方法
         
         /// <summary>
+        /// 加载存档数据但不应用游戏设置，仅用于预览存档信息。
+        /// </summary>
+        /// <param name="slotName">存档槽名称，如果为空则使用默认存档槽。</param>
+        /// <returns>加载的存档数据，如果失败则返回null。</returns>
+        public SaveData LoadSaveData(string slotName = null)
+        {
+            if (m_saveSystem == null)
+            {
+                Log.Error(LOG_MODULE, "存档系统未初始化");
+                return null;
+            }
+            
+            // 使用默认存档槽如果未指定
+            string saveSlot = string.IsNullOrEmpty(slotName) ? DEFAULT_SAVE_SLOT : slotName;
+            
+            Log.Info(LOG_MODULE, $"开始加载存档数据: {saveSlot}");
+            
+            // 直接从存档系统加载数据但不更新当前游戏数据
+            SaveData loadedData = m_saveSystem.LoadGame(saveSlot);
+            
+            if (loadedData != null)
+            {
+                Log.Info(LOG_MODULE, "存档数据加载成功");
+            }
+            else
+            {
+                Log.Warning(LOG_MODULE, "存档数据加载失败或存档不存在");
+            }
+            
+            return loadedData;
+        }
+        
+        /// <summary>
         /// 保存当前游戏数据到指定存档槽。
         /// </summary>
         /// <param name="slotName">存档槽名称，如果为空则使用默认存档槽。</param>
