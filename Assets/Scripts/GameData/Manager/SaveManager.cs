@@ -15,7 +15,7 @@ namespace MyGame.Data
     public class SaveManager : Singleton<SaveManager>
     {
         private const string LOG_MODULE = "SaveManager";
-        private const string DEFAULT_SAVE_SLOT = "Save1";
+        private const string DEFAULT_SAVE_SLOT = "AutoSave";
         
         private ISaveSystem m_saveSystem;
         private SaveData m_currentSaveData;
@@ -62,14 +62,22 @@ namespace MyGame.Data
         {
             // 注册游戏事件监听器
             GameEvents.OnGameOver += HandleGameOver;
-            GameEvents.OnGameStateChanged += HandleGameStateChanged;
+            GameEvents.OnCreateNewGame += HandleCreateNewGame;
+            GameEvents.OnSaveGame += HandleSaveGame;
+            GameEvents.OnLoadGame += HandleLoadGame;
+            GameEvents.OnDeleteSave += HandleDeleteSave;
+            GameEvents.OnAutoSave += HandleAutoSave;
         }
         
         private void OnDisable()
         {
             // 注销游戏事件监听器
             GameEvents.OnGameOver -= HandleGameOver;
-            GameEvents.OnGameStateChanged -= HandleGameStateChanged;
+            GameEvents.OnCreateNewGame -= HandleCreateNewGame;
+            GameEvents.OnSaveGame -= HandleSaveGame;
+            GameEvents.OnLoadGame -= HandleLoadGame;
+            GameEvents.OnDeleteSave -= HandleDeleteSave;
+            GameEvents.OnAutoSave -= HandleAutoSave;
         }
         
         #endregion
@@ -97,10 +105,8 @@ namespace MyGame.Data
             // 保存数据
             bool success = m_saveSystem.SaveGame(m_currentSaveData, saveSlot);
             
-            // 触发存档事件
             if (success)
             {
-                TriggerSaveComplete(saveSlot);
                 Log.Info(LOG_MODULE, "游戏保存成功");
             }
             else
@@ -111,40 +117,6 @@ namespace MyGame.Data
             return success;
         }
         
-        /// <summary>
-        /// 异步保存当前游戏数据到指定存档槽。
-        /// </summary>
-        /// <param name="slotName">存档槽名称，如果为空则使用默认存档槽。</param>
-        /// <returns>表示保存操作的任务。</returns>
-        public async Task<bool> SaveCurrentGameAsync(string slotName = null)
-        {
-            if (m_saveSystem == null)
-            {
-                Log.Error(LOG_MODULE, "存档系统未初始化");
-                return false;
-            }
-            
-            // 使用默认存档槽如果未指定
-            string saveSlot = string.IsNullOrEmpty(slotName) ? DEFAULT_SAVE_SLOT : slotName;
-            
-            Log.Info(LOG_MODULE, $"开始异步保存游戏到存档槽: {saveSlot}");
-            
-            // 异步保存数据
-            bool success = await m_saveSystem.SaveGameAsync(m_currentSaveData, saveSlot);
-            
-            // 触发存档事件
-            if (success)
-            {
-                TriggerSaveComplete(saveSlot);
-                Log.Info(LOG_MODULE, "游戏异步保存成功");
-            }
-            else
-            {
-                Log.Error(LOG_MODULE, "游戏异步保存失败");
-            }
-            
-            return success;
-        }
         
         /// <summary>
         /// 从指定存档槽加载游戏数据。
@@ -176,8 +148,6 @@ namespace MyGame.Data
                 // 应用加载的设置
                 ApplyLoadedSettings();
                 
-                // 触发加载完成事件
-                TriggerLoadComplete(saveSlot);
                 Log.Info(LOG_MODULE, "游戏加载成功");
                 return true;
             }
@@ -188,47 +158,6 @@ namespace MyGame.Data
             }
         }
         
-        /// <summary>
-        /// 异步从指定存档槽加载游戏数据。
-        /// </summary>
-        /// <param name="slotName">存档槽名称，如果为空则使用默认存档槽。</param>
-        /// <returns>表示加载操作的任务。</returns>
-        public async Task<bool> LoadGameAsync(string slotName = null)
-        {
-            if (m_saveSystem == null)
-            {
-                Log.Error(LOG_MODULE, "存档系统未初始化");
-                return false;
-            }
-            
-            // 使用默认存档槽如果未指定
-            string saveSlot = string.IsNullOrEmpty(slotName) ? DEFAULT_SAVE_SLOT : slotName;
-            
-            Log.Info(LOG_MODULE, $"开始异步加载游戏存档: {saveSlot}");
-            
-            // 异步加载数据
-            SaveData loadedData = await m_saveSystem.LoadGameAsync(saveSlot);
-            
-            // 检查加载结果
-            if (loadedData != null)
-            {
-                // 更新当前存档数据
-                m_currentSaveData = loadedData;
-                
-                // 应用加载的设置
-                ApplyLoadedSettings();
-                
-                // 触发加载完成事件
-                TriggerLoadComplete(saveSlot);
-                Log.Info(LOG_MODULE, "游戏异步加载成功");
-                return true;
-            }
-            else
-            {
-                Log.Error(LOG_MODULE, "游戏异步加载失败或存档不存在");
-                return false;
-            }
-        }
         
         /// <summary>
         /// 删除指定存档槽的游戏数据。
@@ -254,7 +183,6 @@ namespace MyGame.Data
             // 触发删除事件
             if (success)
             {
-                TriggerDeleteComplete(saveSlot);
                 Log.Info(LOG_MODULE, "存档删除成功");
             }
             else
@@ -292,8 +220,6 @@ namespace MyGame.Data
             // 初始化新的存档数据
             m_currentSaveData = new SaveData();
             
-            // 触发新游戏事件
-            TriggerNewGame();
             Log.Info(LOG_MODULE, "创建了新游戏存档");
         }
         
@@ -319,7 +245,7 @@ namespace MyGame.Data
         
         /// <summary>
         /// 处理游戏结束事件。
-        /// </summary>
+        /// </summary>   
         private void HandleGameOver(bool isWin)
         {
             // 游戏结束时自动保存
@@ -327,52 +253,48 @@ namespace MyGame.Data
             SaveCurrentGame();
         }
         
-        /// <summary>
-        /// 处理游戏状态变更事件。
-        /// </summary>
-        private void HandleGameStateChanged(GameState from, GameState to)
-        {
-            // 可以根据游戏状态变更添加相应的存档逻辑
-            // 例如：在进入主菜单前自动保存
-        }
-        
         #endregion
         
         #region 存档事件触发方法
         
         /// <summary>
-        /// 触发新游戏事件。
+        /// 处理新游戏创建事件。
         /// </summary>
-        private void TriggerNewGame()
+        private void HandleCreateNewGame()
         {
-            SaveEvents.TriggerNewGame();
+            // 新游戏创建时自动保存
+            Log.Info(LOG_MODULE, "新游戏创建，触发自动保存");
+            NewGame();
+            SaveCurrentGame();
+        }
+
+        private void HandleSaveGame(string slotName)
+        {
+            SaveCurrentGame(slotName);
+            Log.Info(LOG_MODULE, $"游戏存档已保存到槽位: {slotName}");
+        }
+
+        private void HandleLoadGame(string slotName)
+        {
+            if(!DoesSaveExist(slotName))
+            {
+                Log.Error(LOG_MODULE, $"要加载的存档文件不存在: {slotName}");
+                return;
+            }
+            LoadGame(slotName);
+            Log.Info(LOG_MODULE, $"游戏从槽位 {slotName} 加载完成");
         }
         
-        /// <summary>
-        /// 触发存档完成事件。
-        /// </summary>
-        /// <param name="slotName">存档槽名称。</param>
-        private void TriggerSaveComplete(string slotName)
+        private void HandleDeleteSave(string slotName)
         {
-            SaveEvents.TriggerSaveComplete(slotName);
+            DeleteSave(slotName);
+            Log.Info(LOG_MODULE, $"游戏存档已删除槽位: {slotName}");
         }
         
-        /// <summary>
-        /// 触发加载完成事件。
-        /// </summary>
-        /// <param name="slotName">存档槽名称。</param>
-        private void TriggerLoadComplete(string slotName)
+        private void HandleAutoSave(string slotName = DEFAULT_SAVE_SLOT)
         {
-            SaveEvents.TriggerLoadComplete(slotName);
-        }
-        
-        /// <summary>
-        /// 触发删除完成事件。
-        /// </summary>
-        /// <param name="slotName">存档槽名称。</param>
-        private void TriggerDeleteComplete(string slotName)
-        {
-            SaveEvents.TriggerDeleteComplete(slotName);
+            SaveCurrentGame(slotName);
+            Log.Info(LOG_MODULE, $"游戏自动保存到槽位: {slotName}");
         }
         
         #endregion

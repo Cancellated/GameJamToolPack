@@ -108,8 +108,19 @@ namespace MyGame.UI.Control
             if (context.performed)
             {
                 Log.Info(LOG_MODULE, "暂停菜单按键被按下");
-                // 触发暂停菜单显示事件
-                GameEvents.TriggerMenuShow(UIType.PauseMenu, true);
+                
+                // 检查暂停菜单当前状态并切换
+                if (UIManager.Instance != null && UIManager.Instance.PanelMap.ContainsKey(UIType.PauseMenu))
+                {
+                    bool isCurrentlyVisible = UIManager.Instance.PanelMap[UIType.PauseMenu].IsVisible;
+                    // 触发暂停菜单显示/隐藏事件，切换当前状态
+                    GameEvents.TriggerMenuShow(UIType.PauseMenu, !isCurrentlyVisible);
+                }
+                else
+                {
+                    // 如果无法获取面板状态，默认显示
+                    GameEvents.TriggerMenuShow(UIType.PauseMenu, true);
+                }
             }
         }
 
@@ -121,8 +132,19 @@ namespace MyGame.UI.Control
             if (context.performed)
             {
                 Log.Info(LOG_MODULE, "物品栏按键被按下");
-                // 触发物品栏显示事件
-                GameEvents.TriggerMenuShow(UIType.Inventory, true);
+                
+                // 检查物品栏当前状态并切换
+                if (UIManager.Instance != null && UIManager.Instance.PanelMap.ContainsKey(UIType.Inventory))
+                {
+                    bool isCurrentlyVisible = UIManager.Instance.PanelMap[UIType.Inventory].IsVisible;
+                    // 触发物品栏显示/隐藏事件，切换当前状态
+                    GameEvents.TriggerMenuShow(UIType.Inventory, !isCurrentlyVisible);
+                }
+                else
+                {
+                    // 如果无法获取面板状态，默认显示
+                    GameEvents.TriggerMenuShow(UIType.Inventory, true);
+                }
             }
         }
 

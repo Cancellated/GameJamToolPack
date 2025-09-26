@@ -18,7 +18,7 @@ namespace MyGame.Data
         private const string SAVE_FILE_EXTENSION = ".json";
         private const string SAVE_FOLDER_NAME = "Saves";
         
-        private string m_saveDirectoryPath;
+        private readonly string m_saveDirectoryPath;
         
         /// <summary>
         /// 初始化JSON存档系统。
@@ -67,7 +67,7 @@ namespace MyGame.Data
             char[] invalidChars = Path.GetInvalidFileNameChars();
             
             // 替换所有不允许的字符为下划线
-            StringBuilder sb = new StringBuilder(fileName);
+            StringBuilder sb = new(fileName);
             foreach (char invalidChar in invalidChars)
             {
                 sb.Replace(invalidChar, '_');
@@ -227,7 +227,7 @@ namespace MyGame.Data
         /// <returns>存档槽名称列表。</returns>
         public List<string> GetAvailableSaves()
         {
-            List<string> saveSlots = new List<string>();
+            List<string> saveSlots = new();
             
             try
             {

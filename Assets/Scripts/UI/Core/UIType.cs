@@ -11,6 +11,7 @@ namespace MyGame.UI
     {
         None,
         MainMenu,
+        SaveLoadMenu,
         PauseMenu,
         ResultPanel,
         HUD,

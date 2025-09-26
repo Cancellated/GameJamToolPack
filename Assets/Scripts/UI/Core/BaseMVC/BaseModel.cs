@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 namespace MyGame.UI
 {
@@ -7,7 +8,7 @@ namespace MyGame.UI
     /// MVC架构中的模型基类
     /// 负责管理数据和业务逻辑
     /// </summary>
-    public abstract class BaseModel
+    public abstract class BaseModel :IInitializable
     {
         #region 字段和属性
         

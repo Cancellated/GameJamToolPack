@@ -22,35 +22,12 @@ namespace MyGame.Data
 
         #region 游戏设置
 
-        /// <summary>
-        /// 音乐音量
-        /// </summary>
-        public float musicVolume;
-
-        /// <summary>
-        /// 音效音量
-        /// </summary>
-        public float sfxVolume;
-
-        /// <summary>
-        /// 画质等级
-        /// </summary>
-        public int qualityLevel;
-
-        /// <summary>
-        /// 是否全屏
-        /// </summary>
-        public bool fullscreen;
-
-        /// <summary>
-        /// 分辨率索引
-        /// </summary>
-        public int resolutionIndex;
-
-        /// <summary>
-        /// 是否反转Y轴
-        /// </summary>
-        public bool invertYAxis;
+        public float musicVolume; // 音乐音量
+        public float sfxVolume; // 音效音量
+        public int qualityLevel; // 画质等级
+        public bool fullscreen; // 是否全屏
+        public int resolutionIndex; // 分辨率索引
+        public bool invertYAxis; // 是否反转Y轴 
 
         #endregion
 
@@ -77,7 +54,7 @@ namespace MyGame.Data
         {
             gameProgress = new GameProgress();
             saveTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            version = Application.version;
+            version = "1.0.0"; // 使用默认版本号，避免在序列化期间调用Application.version
         }
 
         /// <summary>
@@ -90,7 +67,7 @@ namespace MyGame.Data
             gameProgress = progress ?? new GameProgress();
             UpdateSettings(settings);
             saveTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            version = Application.version;
+            version = "1.0.0"; // 使用默认版本号，避免在序列化期间调用Application.version
         }
 
         #endregion

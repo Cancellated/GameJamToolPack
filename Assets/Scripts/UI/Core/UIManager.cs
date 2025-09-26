@@ -46,7 +46,7 @@ namespace MyGame.Managers
 
         public UIType currentState = UIType.None;
         [Header("面板映射")]
-        private Dictionary<UIType, IUIPanel> _panelMap; // 面板类型到面板实例的映射
+        public Dictionary<UIType, IUIPanel> PanelMap; // 面板类型到面板实例的映射
 
         #endregion
 
@@ -59,7 +59,7 @@ namespace MyGame.Managers
         {
             base.Awake();
             // 初始化面板映射字典
-            _panelMap = new Dictionary<UIType, IUIPanel>();
+            PanelMap = new Dictionary<UIType, IUIPanel>();
             
             // 注册UI相关事件监听
             GameEvents.OnMenuShow += OnMenuShow;    // UI显隐处理
@@ -75,7 +75,7 @@ namespace MyGame.Managers
             // 初始隐藏所有UI
             HideAllUI();
             // 当主菜单面板存在时才显示主菜单
-            if (_panelMap.ContainsKey(UIType.MainMenu))
+            if (PanelMap.ContainsKey(UIType.MainMenu))
             {
                 SetUIState(UIType.MainMenu, true);
             }
@@ -90,7 +90,7 @@ namespace MyGame.Managers
             Log.Info(module, "开始初始化面板映射");
             
             // 清空现有映射和面板列表
-            _panelMap.Clear();
+            PanelMap.Clear();
             uiPanels.Clear();
             
             // 从包装器列表中收集面板
@@ -113,7 +113,7 @@ namespace MyGame.Managers
             }
             
             // 输出最终映射内容
-            Log.Info(module, "面板映射初始化完成，共包含 " + _panelMap.Count + " 个面板类型");
+            Log.Info(module, "面板映射初始化完成，共包含 " + PanelMap.Count + " 个面板类型");
         }
         
         private void OnDestroy()
@@ -176,9 +176,9 @@ namespace MyGame.Managers
             uiPanels.Add(panel);
             
             // 检查面板类型是否已存在于映射中
-            if (!_panelMap.ContainsKey(panel.PanelType))
+            if (!PanelMap.ContainsKey(panel.PanelType))
             {
-                _panelMap.Add(panel.PanelType, panel);
+                PanelMap.Add(panel.PanelType, panel);
                 panel.Initialize();
             }
             else
@@ -196,7 +196,7 @@ namespace MyGame.Managers
         /// </summary>
         private void HideAllUI()
         {
-            foreach (var panel in _panelMap.Values)
+            foreach (var panel in PanelMap.Values)
             {
                 if (panel.PanelType != UIType.Console)
                 {
@@ -249,6 +249,9 @@ namespace MyGame.Managers
                         SetUIState(UIType.PauseMenu, false);
                         SetUIState(UIType.ResultPanel, false);
                         break;
+                    case UIType.SaveLoadMenu:
+                        SetUIState(UIType.HUD, false);
+                        break;
                     case UIType.Loading:
                         // 加载界面不与其他UI互斥
                     case UIType.Console:
@@ -275,7 +278,7 @@ namespace MyGame.Managers
             // 根据状态显示/隐藏对应UI
             Log.Info(module, "尝试显示/隐藏UI类型: " + state + ", show: " + show);
             
-            if (_panelMap.TryGetValue(state, out var panel))
+            if (PanelMap.TryGetValue(state, out var panel))
             {               
                 if (show)
                 {

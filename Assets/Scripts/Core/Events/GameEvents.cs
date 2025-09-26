@@ -115,45 +115,56 @@ namespace MyGame.Events
         /// <summary>
         /// 新游戏创建事件
         /// </summary>
-        public static event Action OnNewGameCreated;
+        public static event Action OnCreateNewGame;
         
-        public static void TriggerNewGameCreated()
+        public static void TriggerCreateNewGame()
         {
             Log.Info(module, "触发新游戏创建事件");
-            OnNewGameCreated?.Invoke();
+            OnCreateNewGame?.Invoke();
         }
 
         /// <summary>
         /// 游戏数据保存完成事件
         /// </summary>
-        public static event Action<string> OnGameSaved;
+        public static event Action<string> OnSaveGame;
         
-        public static void TriggerGameSaved(string slotName)
+        public static void TriggerSaveGame(string slotName)
         {
             Log.Info(module, $"触发游戏数据保存完成事件: {slotName}");
-            OnGameSaved?.Invoke(slotName);
+            OnSaveGame?.Invoke(slotName);
+        }
+
+        /// <summary>
+        /// 自动保存事件
+        /// </summary>
+        public static event Action<string> OnAutoSave;
+        
+        public static void TriggerAutoSave(string slotName = "AutoSave")
+        {
+            Log.Info(module, $"触发自动保存事件: {slotName}");
+            OnAutoSave?.Invoke(slotName);
         }
 
         /// <summary>
         /// 游戏数据加载完成事件
         /// </summary>
-        public static event Action<string> OnGameLoaded;
+        public static event Action<string> OnLoadGame;
         
-        public static void TriggerGameLoaded(string slotName)
+        public static void TriggerLoadGame(string slotName)
         {
             Log.Info(module, $"触发游戏数据加载完成事件: {slotName}");
-            OnGameLoaded?.Invoke(slotName);
+            OnLoadGame?.Invoke(slotName);
         }
 
         /// <summary>
-        /// 游戏数据删除完成事件
+        /// 游戏数据删除事件
         /// </summary>
-        public static event Action<string> OnGameDeleted;
+        public static event Action<string> OnDeleteSave;
         
-        public static void TriggerGameDeleted(string slotName)
+        public static void TriggerDeleteSave(string slotName)
         {
-            Log.Info(module, $"触发游戏数据删除完成事件: {slotName}");
-            OnGameDeleted?.Invoke(slotName);
+            Log.Info(module, $"触发游戏数据删除事件: {slotName}");
+            OnDeleteSave?.Invoke(slotName);
         }
 
         #endregion
