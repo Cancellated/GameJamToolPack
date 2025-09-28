@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Logger;
 using MyGame.Events;
 using MyGame.Managers;
 using MyGame.UI;
+using MyGame.UI.Core;
 using MyGame.UI.Loading;
 using MyGame.UI.Loading.View;
 using UnityEngine;
@@ -189,6 +191,59 @@ namespace MyGame.Managers
 
         #endregion
 
+        #region 动态面板管理
+
+        /// <summary>
+        /// 动态注册UI面板到管理器
+        /// 用于从预制体实例化的面板注册到UIManager
+        /// </summary>
+        /// <param name="panel">要注册的IUIPanel接口实现</param>
+        /// <returns>注册是否成功</returns>
+        public bool RegisterUIPanel(IUIPanel panel)
+        {
+            if (panel == null)
+            {
+                Log.Error(module, "尝试注册空面板");
+                return false;
+            }
+
+            if (!PanelMap.ContainsKey(panel.PanelType))
+            {
+                AddPanelToMap(panel);
+                Log.Info(module, "成功动态注册面板: " + panel.PanelType + " (" + panel.GetType().Name + ")");
+                return true;
+            }
+            else
+            {
+                Log.Info(module, "面板类型已存在于映射中，跳过注册: " + panel.PanelType);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 从管理器中注销UI面板
+        /// </summary>
+        /// <param name="panelType">要注销的面板类型</param>
+        /// <returns>注销是否成功</returns>
+        public bool UnregisterUIPanel(UIType panelType)
+        {
+            if (PanelMap.TryGetValue(panelType, out var panel))
+            {
+                PanelMap.Remove(panelType);
+                uiPanels.Remove(panel);
+                panel.Cleanup();
+                Log.Info(module, "成功注销面板: " + panelType);
+                return true;
+            }
+            else
+            {
+                Log.Warning(module, "未找到要注销的面板类型: " + panelType);
+                return false;
+            }
+        }
+
+        #endregion
+
         #region UI控制核心方法
         
         /// <summary>
@@ -209,7 +264,7 @@ namespace MyGame.Managers
         /// <summary>
         /// 设置UI状态并处理互斥关系
         /// </summary>
-        private void SetUIState(UIType state, bool show)
+        internal void SetUIState(UIType state, bool show)
         {
             // 处理互斥关系
             if (show)
@@ -279,7 +334,7 @@ namespace MyGame.Managers
             Log.Info(module, "尝试显示/隐藏UI类型: " + state + ", show: " + show);
             
             if (PanelMap.TryGetValue(state, out var panel))
-            {               
+            {                
                 if (show)
                 {
                     panel.Show();
@@ -289,9 +344,45 @@ namespace MyGame.Managers
                     panel.Hide();
                 }
             }
+            else if (show)
+            {
+                // 如果面板不存在且请求显示，则尝试自动加载
+                Log.Warning(module, "未找到面板类型: " + state + ", 正在尝试自动加载");
+                StartCoroutine(LoadPanelAutomatically(state));
+            }
             else
             {
                 Log.Error(module, "未找到对应UI类型的面板: " + state);
+            }
+        }
+        
+        /// <summary>
+        /// 自动加载面板的协程
+        /// 解决动态面板注册时机问题，确保在访问面板前已完成加载和注册
+        /// </summary>
+        /// <param name="panelType">需要加载的面板类型</param>
+        private IEnumerator LoadPanelAutomatically(UIType panelType)
+        {
+            Log.Info(module, "开始自动加载面板: " + panelType);
+            
+            // 使用PanelLoader异步加载面板
+            Task<bool> loadTask = PanelLoader.Instance.LoadPanelAsync(panelType);
+            
+            // 等待加载完成
+            while (!loadTask.IsCompleted)
+            {
+                yield return null;
+            }
+            
+            // 如果加载成功，则显示面板
+            if (loadTask.Result && PanelMap.TryGetValue(panelType, out var panel))
+            {
+                Log.Info(module, "面板 " + panelType + " 自动加载成功并显示");
+                panel.Show();
+            }
+            else
+            {
+                Log.Error(module, "面板 " + panelType + " 自动加载失败");
             }
         }
 

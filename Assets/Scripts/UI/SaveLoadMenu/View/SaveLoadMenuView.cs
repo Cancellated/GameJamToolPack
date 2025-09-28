@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using MyGame.Data;
 using MyGame.UI.SaveLoad.Events;
 using MyGame.UI.SaveLoad.Controller;
@@ -130,8 +132,8 @@ namespace MyGame.UI.SaveLoad.View
     {
         [Header("Save Slots")]
         [SerializeField] protected Transform saveSlotsContainer;
-        [SerializeField] protected GameObject saveSlotPrefab;
         
+
         [Header("Save Options")]
         [SerializeField] protected GameObject saveOptionsMenu;
         [SerializeField] protected Button saveButton;
@@ -244,29 +246,85 @@ namespace MyGame.UI.SaveLoad.View
             UpdateSaveOptionsButtonStates();
         }
         
+        // 用于跟踪异步加载操作
+        private List<AsyncOperationHandle<GameObject>> _prefabLoadHandles = new();
+        
         /// <summary>
         /// 创建存档槽UI
+        /// 使用Addressable Assets异步加载预制件
         /// </summary>
-        protected virtual void CreateSaveSlotUIs()
+        protected virtual async void CreateSaveSlotUIs()
         {
-            if (_model == null || saveSlotsContainer == null || saveSlotPrefab == null)
+            if (_model == null || saveSlotsContainer == null)
                 return;
             
-            // 清理现有存档槽UI
-            ClearSaveSlotUIs();
-            
-            // 创建新的存档槽UI
-            foreach (var slotInfo in _model.SaveSlots)
+            // 获取SaveLoadMenuConfig
+            SaveLoadMenuConfig config = null;
+            if (m_controller != null)
             {
-                GameObject slotGO = Instantiate(saveSlotPrefab, saveSlotsContainer);
+                config = m_controller.Config;
+            }
+            
+            if (config == null)
+            {
+                Debug.LogError("SaveLoadMenuConfig is not set in controller");
+                return;
+            }
+            
+            // 清理现有存档槽UI和加载句柄
+            ClearSaveSlotUIs();
+            ClearLoadHandles();
+            
+            try
+            {
+                // 异步加载存档槽预制件
+                AsyncOperationHandle<GameObject> prefabLoadHandle = Addressables.LoadAssetAsync<GameObject>(config.SaveSlotPrefabAddress);
+                _prefabLoadHandles.Add(prefabLoadHandle);
                 
-                if (slotGO.TryGetComponent<ISaveSlotUI>(out var slotUI))
+                // 等待加载完成
+                await prefabLoadHandle.Task;
+                
+                if (prefabLoadHandle.Status == AsyncOperationStatus.Succeeded && prefabLoadHandle.Result != null)
                 {
-                    slotUI.Initialize(slotInfo, this);
-                    slotUI.SetSelected(_model.SelectedSaveSlotName == slotInfo.SlotName);
-                    _saveSlotUIs.Add(slotUI);
+                    GameObject saveSlotPrefab = prefabLoadHandle.Result;
+                    
+                    // 创建新的存档槽UI
+                    foreach (var slotInfo in _model.SaveSlots)
+                    {
+                        GameObject slotGO = Instantiate(saveSlotPrefab, saveSlotsContainer);
+                        
+                        if (slotGO.TryGetComponent<ISaveSlotUI>(out var slotUI))
+                        {
+                            slotUI.Initialize(slotInfo, this);
+                            slotUI.SetSelected(_model.SelectedSaveSlotName == slotInfo.SlotName);
+                            _saveSlotUIs.Add(slotUI);
+                        }
+                    }
+                }
+                else
+                {
+                    Debug.LogError("Failed to load save slot prefab with Addressable: " + config.SaveSlotPrefabAddress);
                 }
             }
+            catch (System.Exception e)
+            {
+                Debug.LogError("Error loading save slot prefab: " + e.Message);
+            }
+        }
+        
+        /// <summary>
+        /// 清理异步加载句柄
+        /// </summary>
+        protected virtual void ClearLoadHandles()
+        {
+            foreach (var handle in _prefabLoadHandles)
+            {
+                if (handle.IsValid())
+                {
+                    Addressables.Release(handle);
+                }
+            }
+            _prefabLoadHandles.Clear();
         }
         
         /// <summary>
@@ -539,6 +597,7 @@ namespace MyGame.UI.SaveLoad.View
             UnbindButtonEvents();
             UnsubscribeFromModelEvents();
             ClearSaveSlotUIs();
+            ClearLoadHandles(); // 清理Addressable资源
         }
     }
 }

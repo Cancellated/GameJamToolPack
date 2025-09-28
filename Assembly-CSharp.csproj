@@ -101,6 +101,7 @@
     <Compile Include="Assets\Scripts\UI\Inventory\Model\InventoryModel.cs" />
     <Compile Include="Assets\Scripts\UI\Core\IUIPanel.cs" />
     <Compile Include="Assets\Scripts\Logger\Log.cs" />
+    <Compile Include="Assets\Scripts\UI\Core\PanelLoader.cs" />
     <Compile Include="Assets\Scripts\UI\Core\UIType.cs" />
     <Compile Include="Assets\Scripts\UI\Loading\View\LoadingScreen.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\Controller\InventoryController.cs" />
@@ -125,6 +126,7 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexColorCycler.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\View\InventoryView.cs" />
     <Compile Include="Assets\Scripts\Core\AudioListenerManager.cs" />
+    <Compile Include="Assets\Scripts\UI\Core\Config\PanelAddressConfig.cs" />
     <Compile Include="Assets\Scripts\DevTools\Model\DebugCommands.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\ObjectSpin.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_PhoneNumberValidator.cs" />

@@ -67,7 +67,7 @@ namespace MyGame.Data
             gameProgress = progress ?? new GameProgress();
             UpdateSettings(settings);
             saveTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            version = "1.0.0"; // 使用默认版本号，避免在序列化期间调用Application.version
+            version = "1.0.0";
         }
 
         #endregion

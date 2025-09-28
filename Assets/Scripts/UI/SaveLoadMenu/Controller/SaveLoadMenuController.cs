@@ -165,10 +165,7 @@ namespace MyGame.UI.SaveLoad.Controller
         private void InitializeMVC()
         {
             // 确保模型和视图不为空
-            if (_model == null)
-            {
-                _model = GetComponentInChildren<SaveLoadMenuModel>();
-            }
+            _model ??= new SaveLoadMenuModel();
             
             if (_view == null)
             {
@@ -219,16 +216,17 @@ namespace MyGame.UI.SaveLoad.Controller
             if (_model == null)
                 return;
             
-            List<SaveSlotInfo> slots = new List<SaveSlotInfo>();
-            
-            // 添加自动存档槽
-            slots.Add(new SaveSlotInfo
+            List<SaveSlotInfo> slots = new()
             {
-                SlotName = SaveLoadMenuConstants.AUTO_SAVE_SLOT,
-                DisplayName = "自动存档",
-                IsAutoSave = true,
-                HasSave = SaveManager.Instance.DoesSaveExist(SaveLoadMenuConstants.AUTO_SAVE_SLOT)
-            });
+                // 添加自动存档槽
+                new SaveSlotInfo
+                {
+                    SlotName = SaveLoadMenuConstants.AUTO_SAVE_SLOT,
+                    DisplayName = "自动存档",
+                    IsAutoSave = true,
+                    HasSave = SaveManager.Instance.DoesSaveExist(SaveLoadMenuConstants.AUTO_SAVE_SLOT)
+                }
+            };
             
             // 添加手动存档槽
             int saveSlotCount = SaveLoadMenuConstants.DEFAULT_SAVE_SLOT_COUNT;

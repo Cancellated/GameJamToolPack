@@ -86,15 +86,16 @@ namespace MyGame.Data
         
         /// <summary>
         /// 加载存档数据但不应用游戏设置，仅用于预览存档信息。
+        /// 包含延迟初始化逻辑，确保在第一次访问时初始化存档系统。
         /// </summary>
         /// <param name="slotName">存档槽名称，如果为空则使用默认存档槽。</param>
         /// <returns>加载的存档数据，如果失败则返回null。</returns>
         public SaveData LoadSaveData(string slotName = null)
         {
+            // 延迟初始化存档系统
             if (m_saveSystem == null)
             {
-                Log.Error(LOG_MODULE, "存档系统未初始化");
-                return null;
+                InitializeSaveSystem();
             }
             
             // 使用默认存档槽如果未指定
@@ -119,15 +120,16 @@ namespace MyGame.Data
         
         /// <summary>
         /// 保存当前游戏数据到指定存档槽。
+        /// 包含延迟初始化逻辑，确保在第一次访问时初始化存档系统。
         /// </summary>
         /// <param name="slotName">存档槽名称，如果为空则使用默认存档槽。</param>
         /// <returns>保存操作是否成功。</returns>
         public bool SaveCurrentGame(string slotName = null)
         {
+            // 延迟初始化存档系统
             if (m_saveSystem == null)
             {
-                Log.Error(LOG_MODULE, "存档系统未初始化");
-                return false;
+                InitializeSaveSystem();
             }
             
             // 使用默认存档槽如果未指定
@@ -153,15 +155,16 @@ namespace MyGame.Data
         
         /// <summary>
         /// 从指定存档槽加载游戏数据。
+        /// 包含延迟初始化逻辑，确保在第一次访问时初始化存档系统。
         /// </summary>
         /// <param name="slotName">存档槽名称，如果为空则使用默认存档槽。</param>
         /// <returns>加载操作是否成功。</returns>
         public bool LoadGame(string slotName = null)
         {
+            // 延迟初始化存档系统
             if (m_saveSystem == null)
             {
-                Log.Error(LOG_MODULE, "存档系统未初始化");
-                return false;
+                InitializeSaveSystem();
             }
             
             // 使用默认存档槽如果未指定
@@ -194,15 +197,16 @@ namespace MyGame.Data
         
         /// <summary>
         /// 删除指定存档槽的游戏数据。
+        /// 包含延迟初始化逻辑，确保在第一次访问时初始化存档系统。
         /// </summary>
         /// <param name="slotName">存档槽名称，如果为空则使用默认存档槽。</param>
         /// <returns>删除操作是否成功。</returns>
         public bool DeleteSave(string slotName = null)
         {
+            // 延迟初始化存档系统
             if (m_saveSystem == null)
             {
-                Log.Error(LOG_MODULE, "存档系统未初始化");
-                return false;
+                InitializeSaveSystem();
             }
             
             // 使用默认存档槽如果未指定
@@ -228,21 +232,39 @@ namespace MyGame.Data
         
         /// <summary>
         /// 检查指定存档槽是否存在游戏数据。
+        /// 包含延迟初始化逻辑，确保在第一次访问时初始化存档系统。
         /// </summary>
         /// <param name="slotName">存档槽名称，如果为空则使用默认存档槽。</param>
         /// <returns>存档是否存在。</returns>
         public bool DoesSaveExist(string slotName = null)
         {
+            // 延迟初始化存档系统（防止Awake顺序问题导致的未初始化错误）
             if (m_saveSystem == null)
             {
-                Log.Error(LOG_MODULE, "存档系统未初始化");
-                return false;
+                InitializeSaveSystem();
             }
             
             // 使用默认存档槽如果未指定
             string saveSlot = string.IsNullOrEmpty(slotName) ? DEFAULT_SAVE_SLOT : slotName;
             
             return m_saveSystem.DoesSaveExist(saveSlot);
+        }
+        
+        /// <summary>
+        /// 初始化存档系统实现
+        /// 确保与Awake方法中的初始化逻辑保持一致
+        /// </summary>
+        private void InitializeSaveSystem()
+        {
+            if (m_saveSystem == null)
+            {
+                m_saveSystem = new JsonSaveSystem();
+                
+                // 确保当前存档数据已初始化
+                m_currentSaveData ??= new SaveData();
+                
+                Log.Info(LOG_MODULE, "存档系统初始化完成");
+            }
         }
         
         /// <summary>

@@ -83,7 +83,7 @@ GameEvents.TriggerMenuShow(UIType.SaveLoadMenu, true);
 - `MaxManualSaveCount`：最大手动存档数量
 
 ### UI配置
-- `SaveSlotPrefabPath`：存档槽预制件路径
+- `SaveSlotPrefabAddress`：存档槽预制件的Addressable资源地址
 - `MenuAnimationDuration`：菜单动画时长
 - `SlotAnimationDuration`：存档槽动画时长
 

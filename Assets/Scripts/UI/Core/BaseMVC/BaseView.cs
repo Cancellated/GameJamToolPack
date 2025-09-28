@@ -134,8 +134,6 @@ namespace MyGame.UI
         /// </summary>
         public virtual void Cleanup()
         {
-            // 子类可以重写此方法进行资源清理
-            UnbindController();
         }
         
         /// <summary>

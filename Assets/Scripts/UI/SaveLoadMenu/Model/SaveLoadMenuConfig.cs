@@ -23,8 +23,8 @@ namespace MyGame.UI.SaveLoad
         public int MaxManualSaveCount = 10;
         
         [Header("UI配置")]
-        [Tooltip("存档槽预制件路径")]
-        public string SaveSlotPrefabPath = "Prefabs/UI/SaveSlot";
+        [Tooltip("存档槽预制件的Addressable Address")]
+        public string SaveSlotPrefabAddress = "SaveSlotPrefab";
         
         [Tooltip("存档菜单动画时长")]
         public float MenuAnimationDuration = 0.3f;
