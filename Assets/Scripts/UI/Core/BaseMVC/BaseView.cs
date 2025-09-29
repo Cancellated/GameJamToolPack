@@ -186,7 +186,7 @@ namespace MyGame.UI
         #region 辅助方法
         
         /// <summary>
-        /// 设置CanvasGroup的可见性
+        /// 设置CanvasGroup的可见性,并更新IsVisible状态(无需动画)
         /// </summary>
         /// <param name="visible">是否可见</param>
         protected void SetCanvasVisible(bool visible)

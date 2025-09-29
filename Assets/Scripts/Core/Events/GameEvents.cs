@@ -82,7 +82,7 @@ namespace MyGame.Events
         
         public static void TriggerSceneLoadStart(string sceneName)
         {
-            Log.Info(module, $"开始加载场景: {sceneName}");
+            Log.Info(module, $"触发开始加载场景事件: {sceneName}");
             OnSceneLoadStart?.Invoke(sceneName);
         }
         
@@ -93,7 +93,7 @@ namespace MyGame.Events
         
         public static void TriggerSceneLoadComplete(string sceneName)
         {
-            Log.Info(module, $"场景加载完成: {sceneName}");
+            Log.Info(module, $"触发场景加载完成事件: {sceneName}");
             OnSceneLoadComplete?.Invoke(sceneName);
         }
         
@@ -104,7 +104,7 @@ namespace MyGame.Events
         
         public static void TriggerSceneUnload(string sceneName)
         {
-            Log.Info(module, $"卸载场景: {sceneName}");
+            Log.Info(module, $"触发场景卸载事件: {sceneName}");
             OnSceneUnload?.Invoke(sceneName);
         }
 

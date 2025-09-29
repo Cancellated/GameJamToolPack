@@ -11,7 +11,7 @@ namespace MyGame.UI.Loading.Controller
     /// 加载界面控制器
     /// 负责处理加载界面的逻辑、事件响应和与视图的交互
     /// </summary>
-    public class LoadingScreenController : BaseController<LoadingScreen, LoadingScreenModel>
+    public class LoadingScreenController : BaseController<LoadingScreenView, LoadingScreenModel>
     {
         private const string LOG_MODULE = LogModules.LOADING;
 
@@ -35,56 +35,46 @@ namespace MyGame.UI.Loading.Controller
 
         /// <summary>
         /// 初始化控制器逻辑
-        /// 订阅场景加载相关的事件
         /// </summary>
         protected override void OnInitialize()
         {
-            // 订阅场景加载相关事件
-            GameEvents.OnSceneLoadStart += HandleSceneLoadStart;
-            GameEvents.OnSceneLoadComplete += HandleSceneLoadComplete;
         }
 
         /// <summary>
         /// 清理控制器资源
-        /// 取消订阅所有事件
         /// </summary>
         protected override void OnCleanup()
         {
-            // 取消订阅所有事件
-            GameEvents.OnSceneLoadStart -= HandleSceneLoadStart;
-            GameEvents.OnSceneLoadComplete -= HandleSceneLoadComplete;
-            
             // 清理模型资源
             m_model?.Cleanup();
         }
 
         #endregion
 
-        #region 事件处理
+        #region 公共方法
 
         /// <summary>
-        /// 处理场景加载开始事件
-        /// 通知视图更新加载信息
+        /// 当加载界面隐藏动画播放完成时调用
+        /// 负责清理加载界面资源
         /// </summary>
-        /// <param name="sceneName">要加载的场景名称</param>
-        private void HandleSceneLoadStart(string sceneName)
+        public void OnHideAnimationComplete()
         {
-            // 更新模型数据
-            m_model?.StartLoading(sceneName);
-            Log.Info(LOG_MODULE, "开始加载场景，加载界面已响应");
-            GameEvents.TriggerMenuShow(UIType.Loading, true);
-        }
-
-        /// <summary>
-        /// 处理场景加载完成事件
-        /// 通知视图更新加载状态
-        /// </summary>
-        /// <param name="sceneName">已加载完成的场景名称</param>
-        private void HandleSceneLoadComplete(string sceneName)
-        {
-            // 更新模型数据
-            m_model?.CompleteLoading();
-            GameEvents.TriggerMenuShow(UIType.Loading, false);
+            Log.Info(LOG_MODULE, "加载界面隐藏动画播放完成，清理加载界面资源");
+            
+            if (m_view != null && m_view.gameObject != null)
+            {
+                Log.Info(LOG_MODULE, "准备销毁加载界面对象（已添加到DontDestroyOnLoad Canvas）");
+                
+                // 确保UIManager注销此面板
+                if (UIManager.Instance != null)
+                {
+                    UIManager.Instance.UnregisterUIPanel(UIType.Loading);
+                }
+                
+                // 延迟一帧后销毁，确保所有事件都已处理完成
+                // 视图对象销毁后，Canvas会在没有子对象时自动清理
+                UnityEngine.Object.Destroy(m_view.gameObject, 0.1f);
+            }
         }
 
         #endregion

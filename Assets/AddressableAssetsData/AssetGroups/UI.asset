@@ -17,8 +17,13 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 7cc7899dbe730fa46949013946aefbf2
   m_SerializeEntries:
+  - m_GUID: 3c00ccc22a8229d4c9b0e0439b30aa0f
+    m_Address: Assets/Art Asset/Prefabs/UI/Debug/DebugConsole.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 61cbbcb34fac11a4ba2ff461275b3ba5
-    m_Address: Assets/Art Asset/Prefabs/Loading/LoadingScreen.prefab
+    m_Address: Assets/Art Asset/Prefabs/UI/Loading/LoadingScreen.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

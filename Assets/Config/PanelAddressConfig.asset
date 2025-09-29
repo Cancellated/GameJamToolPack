@@ -14,4 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _panelMappings:
   - panelType: 6
-    addressableAddress: Assets/Art Asset/Prefabs/Loading/LoadingScreen.prefab
+    addressableAddress: Assets/Art Asset/Prefabs/UI/Loading/LoadingScreen.prefab
+  - panelType: 5
+    addressableAddress: Assets/Art Asset/Prefabs/UI/HUD/HUD.prefab

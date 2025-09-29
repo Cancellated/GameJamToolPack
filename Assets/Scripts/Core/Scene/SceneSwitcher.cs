@@ -66,7 +66,6 @@ namespace MyGame.Managers
 
         private IEnumerator LoadSceneAsyncCoroutine(string sceneName, bool unloadCurrent)
         {
-            // 注意：这里不再触发SceneLoadStart事件，因为该事件已经在RequestLoadScene中触发
             Log.Info(module, $"开始异步加载场景: {sceneName}");
 
             // 根据unloadCurrent参数决定加载模式

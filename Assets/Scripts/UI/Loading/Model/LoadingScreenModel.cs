@@ -96,7 +96,6 @@ namespace MyGame.UI.Loading.Model
             CurrentLoadingScene = sceneName;
             LoadingProgress = 0f;
             IsLoading = true;
-            Log.Info(LOG_MODULE, $"开始加载场景: {sceneName}");
         }
         
         /// <summary>
