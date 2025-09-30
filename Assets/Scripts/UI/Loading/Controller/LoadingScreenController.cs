@@ -55,25 +55,15 @@ namespace MyGame.UI.Loading.Controller
 
         /// <summary>
         /// 当加载界面隐藏动画播放完成时调用
-        /// 负责清理加载界面资源
+        /// 负责隐藏界面但不销毁对象（加载界面已挂载到全局canvas下持久化）
         /// </summary>
         public void OnHideAnimationComplete()
         {
-            Log.Info(LOG_MODULE, "加载界面隐藏动画播放完成，清理加载界面资源");
+            Log.Info(LOG_MODULE, "加载界面隐藏动画播放完成");
             
             if (m_view != null && m_view.gameObject != null)
             {
-                Log.Info(LOG_MODULE, "准备销毁加载界面对象（已添加到DontDestroyOnLoad Canvas）");
-                
-                // 确保UIManager注销此面板
-                if (UIManager.Instance != null)
-                {
-                    UIManager.Instance.UnregisterUIPanel(UIType.Loading);
-                }
-                
-                // 延迟一帧后销毁，确保所有事件都已处理完成
-                // 视图对象销毁后，Canvas会在没有子对象时自动清理
-                UnityEngine.Object.Destroy(m_view.gameObject, 0.1f);
+                m_view.gameObject.SetActive(false);
             }
         }
 

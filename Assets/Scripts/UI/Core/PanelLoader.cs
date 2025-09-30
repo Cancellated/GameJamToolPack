@@ -48,40 +48,104 @@ namespace MyGame.UI.Core
         }
         
         /// <summary>
-        /// 更新Canvas引用，确保使用的是当前场景中的Canvas
+        /// 向GameObject添加并配置CanvasScaler组件
+        /// 统一配置CanvasScaler参数，避免重复代码
         /// </summary>
-        private void UpdateCanvasReference()
+        /// <param name="gameObject">要添加CanvasScaler的GameObject</param>
+        /// <returns>配置好的CanvasScaler组件</returns>
+        private CanvasScaler AddAndConfigureCanvasScaler(GameObject gameObject)
         {
-            // 查找场景中现有的Canvas
-            Canvas canvas = FindObjectOfType<Canvas>();
-            if (canvas == null)
-            {
-                // 如果没有找到Canvas，则创建一个新的
-            GameObject canvasObj = new("UI");
-            canvas = canvasObj.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            
-            // 添加并配置CanvasScaler组件，与场景中设置的配置保持一致
-            CanvasScaler scaler = canvasObj.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920, 1080);
-            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-            scaler.matchWidthOrHeight = 0.5f;
-            scaler.referencePixelsPerUnit = 100;
-            
-            canvasObj.AddComponent<GraphicRaycaster>();
-            Log.Info(module, "创建了新的Canvas作为UI面板的父容器，并配置了CanvasScaler以匹配场景中的设置");
-            }
-            _canvasTransform = canvas.transform;
-            Log.Info(module, "已更新Canvas引用");
+            CanvasScaler canvasScaler = gameObject.AddComponent<CanvasScaler>();
+            canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            canvasScaler.referenceResolution = new Vector2(1920, 1080);
+            canvasScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+            canvasScaler.matchWidthOrHeight = 0.5f;
+            canvasScaler.referencePixelsPerUnit = 100;
+            return canvasScaler;
         }
-        
+
+        /// <summary>
+        /// 更新Canvas引用，可以指定是使用全局Canvas还是场景特定Canvas
+        /// </summary>
+        /// <param name="useGlobalCanvas">是否使用全局Canvas</param>
+        /// <param name="canvasName">如果不使用全局Canvas，指定要查找的Canvas名称</param>
+        private void UpdateCanvasReference(bool useGlobalCanvas = true, string canvasName = "UI")
+        {
+            Canvas canvas;
+            
+            if (useGlobalCanvas)
+            {
+                // 查找或创建全局Canvas
+                GameObject globalCanvasObj = GameObject.Find("GlobalUI");
+                if (globalCanvasObj == null)
+                {
+                    // 如果没有找到全局Canvas，则创建一个新的
+                    globalCanvasObj = new GameObject("GlobalUI");
+                    // 标记为全局不销毁对象
+                    DontDestroyOnLoad(globalCanvasObj);
+                    Log.Info(module, "创建了新的全局Canvas并设置为DontDestroyOnLoad");
+                    
+                    canvas = globalCanvasObj.AddComponent<Canvas>();
+                    canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                    
+                    // 添加并配置CanvasScaler组件
+                    AddAndConfigureCanvasScaler(globalCanvasObj);
+                    
+                    globalCanvasObj.AddComponent<GraphicRaycaster>();
+                }
+                else
+                {
+                    // 如果找到全局Canvas，获取其Canvas组件
+                    canvas = globalCanvasObj.GetComponent<Canvas>();
+                    
+                    // 确保已存在的GlobalUI也被设置为DontDestroyOnLoad
+                    if (globalCanvasObj.scene.buildIndex == -1)
+                    {
+                        Log.Info(module, "检测到全局Canvas已存在并已设置为DontDestroyOnLoad");
+                    }
+                    else
+                    {
+                        DontDestroyOnLoad(globalCanvasObj);
+                        Log.Info(module, "已将全局Canvas设置为DontDestroyOnLoad");
+                    }
+                }
+                Log.Info(module, "已更新全局Canvas引用");
+            }
+            else
+            {
+                // 查找场景特定的Canvas
+                GameObject sceneCanvasObj = GameObject.Find(canvasName);
+                if (sceneCanvasObj != null)
+                {
+                    canvas = sceneCanvasObj.GetComponent<Canvas>();
+                    Log.Info(module, $"已找到场景特定Canvas: {canvasName}");
+                }
+                else
+                {
+                    // 如果没有找到场景Canvas，则创建一个新的场景Canvas
+                    sceneCanvasObj = new GameObject(canvasName);
+                    canvas = sceneCanvasObj.AddComponent<Canvas>();
+                    canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                    
+                    // 添加并配置CanvasScaler组件
+                    AddAndConfigureCanvasScaler(sceneCanvasObj);
+                    
+                    sceneCanvasObj.AddComponent<GraphicRaycaster>();
+                    Log.Info(module, $"创建了新的场景特定Canvas: {canvasName}");
+                }
+            }
+            
+            _canvasTransform = canvas.transform;
+        }
+
+
         protected override void Awake()
         {
             base.Awake();
             
             // 查找或创建Canvas作为所有UI面板的父容器
-            UpdateCanvasReference();
+            // 在初始化时使用全局Canvas
+            UpdateCanvasReference(true, "GlobalUI");
             
             // 初始化面板地址映射
             InitializePanelAddressMap();
@@ -142,13 +206,43 @@ namespace MyGame.UI.Core
         }
         
         /// <summary>
+        /// 设置UI面板的排序层级
+        /// 确保重要的UI元素（如加载界面和控制台）显示在正确的层级
+        /// </summary>
+        /// <param name="panelType">面板类型</param>
+        /// <param name="panelTransform">面板的Transform组件</param>
+        private void SetPanelSortingOrder(UIType panelType, Transform panelTransform)
+        {
+
+            // 根据面板类型设置排序层级
+            int sortingOrder = panelType switch
+            {
+                UIType.Loading => 1000,// 加载界面应该在最顶层
+                UIType.Console => 900,// 调试控制台也应该在较高层级，但比加载界面低
+                _ => 10,// 普通UI面板使用默认层级
+            };
+
+            // 创建或获取Sorting Group组件来管理排序
+            if (!panelTransform.TryGetComponent<Canvas>(out var canvas))
+            {
+                canvas = panelTransform.gameObject.AddComponent<Canvas>();
+                canvas.overrideSorting = true;
+            }
+            
+            canvas.sortingOrder = sortingOrder;
+            Log.Info(module, $"为面板 {panelType} 设置了排序层级 {sortingOrder}");
+        }
+        
+        /// <summary>
         /// 异步加载面板资源并实例化
         /// 加载完成后自动注册到UIManager，但不自动显示
         /// </summary>
         /// <param name="panelType">面板类型</param>
         /// <param name="panelAddress">可选：Addressable资源地址，如果未提供则使用映射表中的地址</param>
+        /// <param name="useGlobalCanvas">可选：是否使用全局Canvas</param>
+        /// <param name="canvasName">可选：如果不使用全局Canvas，指定要查找的Canvas名称</param>
         /// <returns>加载操作的Task</returns>
-        public async Task<bool> LoadPanelAsync(UIType panelType, string panelAddress = null)
+        public async Task<bool> LoadPanelAsync(UIType panelType, string panelAddress = null, bool useGlobalCanvas = true, string canvasName = "UI")
         {
             // 检查面板是否已经加载
             if (_loadedPanels.ContainsKey(panelType))
@@ -189,12 +283,19 @@ namespace MyGame.UI.Core
                 
                 if (loadHandle.Status == AsyncOperationStatus.Succeeded && loadHandle.Result != null)
                 {
-                    // 确保使用的是当前场景中的Canvas
-                    UpdateCanvasReference();
+                    // 只在使用场景特定Canvas时更新引用
+                    // 全局Canvas已在初始化时创建，无需重复更新
+                    if (!useGlobalCanvas)
+                    {
+                        UpdateCanvasReference(false, canvasName);
+                    }
                     
                     // 实例化面板
                     GameObject panelObj = Instantiate(loadHandle.Result, _canvasTransform);
                     panelObj.name = $"{panelType}Panel";
+                    
+                    // 设置面板的排序层级，确保重要面板在正确层级显示
+                    SetPanelSortingOrder(panelType, panelObj.transform);
                     
                     // 获取IUIPanel组件
                     if (panelObj.TryGetComponent<IUIPanel>(out IUIPanel panel))

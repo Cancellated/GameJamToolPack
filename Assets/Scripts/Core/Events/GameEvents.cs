@@ -98,6 +98,18 @@ namespace MyGame.Events
         }
         
         /// <summary>
+        /// 加载界面准备就绪事件
+        /// 当加载界面完全显示后触发，用于开始实际的场景加载
+        /// </summary>
+        public static event Action<string> OnLoadingScreenReady;
+        
+        public static void TriggerLoadingScreenReady(string sceneName)
+        {
+            Log.Info(module, $"触发加载界面准备就绪事件: {sceneName}");
+            OnLoadingScreenReady?.Invoke(sceneName);
+        }
+        
+        /// <summary>
         /// 场景卸载事件
         /// </summary>
         public static event Action<string> OnSceneUnload;

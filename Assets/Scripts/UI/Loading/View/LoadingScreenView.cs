@@ -9,11 +9,24 @@ namespace MyGame.UI.Loading.View
     /// <summary>
     /// 加载界面组件
     /// MVC架构中的View层，负责显示加载界面的UI元素和动画效果
+    /// 使用Animator组件控制由bool参数触发的动画
     /// </summary>
     public class LoadingScreenView : BaseView<LoadingScreenController>
     {
         private const string LOG_MODULE = LogModules.LOADING;
-        private static GameObject s_loadingCanvas;
+        
+        // 动画参数名称常量
+        private const string ANIM_PARAM_SHOW_LOADING = "ShowLoading";
+        private const string ANIM_PARAM_HIDE_LOADING = "HideLoading";
+
+        [Header("层级设置")]
+        [Tooltip("加载界面Canvas的Sorting Order。值越高，显示层级越高，不易被其他UI遮挡。")]
+        public int canvasSortingOrder = 1000;
+        
+        [Header("动画设置")]
+        [Tooltip("控制加载界面显隐动画的Animator组件")]
+        [SerializeField] private Animator m_animator;
+        
 
         /// <summary>
         /// 初始化加载界面
@@ -25,22 +38,52 @@ namespace MyGame.UI.Loading.View
             
             // 调用基类的Awake方法，完成基础初始化
             base.Awake();
+            
+            // 确保使用全局Canvas
+            EnsureGlobalCanvasParent();
+            
+            // 自动获取Animator组件
+            if (m_animator == null)
+            {
+                m_animator = GetComponent<Animator>();
+                if (m_animator == null)
+                {
+                    m_animator = gameObject.AddComponent<Animator>();
+                    Log.Info(LOG_MODULE, "已自动添加Animator组件", this);
+                }
+            }
         }
         
         /// <summary>
-        /// 清理加载Canvas
+        /// 确保加载界面使用全局Canvas作为父级并设置正确的排序层级
         /// </summary>
-        private static void CleanupLoadingCanvas()
+        private void EnsureGlobalCanvasParent()
         {
-            if (s_loadingCanvas != null)
+            // 获取全局Canvas
+            GameObject globalCanvasObj = GameObject.Find("GlobalUI");
+            Canvas globalCanvas = globalCanvasObj != null ? globalCanvasObj.GetComponent<Canvas>() : null;
+            if (globalCanvas != null)
             {
-                // 检查Canvas下是否还有其他子对象
-                if (s_loadingCanvas.transform.childCount == 0)
+                // 如果当前对象不在全局Canvas下，则将其移动到全局Canvas下
+                if (transform.parent != globalCanvas.transform)
                 {
-                    Log.Info(LOG_MODULE, "加载Canvas下没有子对象，准备销毁");
-                    UnityEngine.Object.Destroy(s_loadingCanvas);
-                    s_loadingCanvas = null;
+                    transform.SetParent(globalCanvas.transform, false);
                 }
+                
+                // 获取或添加面板自身的Canvas组件
+                if (!TryGetComponent<Canvas>(out var panelCanvas))
+                {
+                    panelCanvas = gameObject.AddComponent<Canvas>();
+                    panelCanvas.overrideSorting = true;
+                }
+                
+                // 设置Canvas的排序层级为1000，与PanelLoader中设置的Loading类型排序层级保持一致
+                panelCanvas.sortingOrder = canvasSortingOrder;
+                Log.Info(LOG_MODULE, $"已设置加载界面Canvas排序层级为: {canvasSortingOrder}", this);
+            }
+            else
+            {
+                Log.Warning(LOG_MODULE, "未找到全局Canvas组件。", this);
             }
         }
         
@@ -83,40 +126,68 @@ namespace MyGame.UI.Loading.View
         
         /// <summary>
         /// 显示加载界面
-        /// 重写IUIPanel接口的Show方法
+        /// 重写IUIPanel接口的Show方法，通过设置bool参数触发进入动画
         /// </summary>
         public override void Show()
         {
-            base.Show();
+            if (!IsVisible)
+            {  
+                // 确保CanvasGroup的alpha值为1，使面板可见
+                if (m_canvasGroup != null)
+                {
+                    m_canvasGroup.alpha = 1f;
+                }  
+                // 通过设置bool参数触发进入动画
+                if (m_animator != null)
+                {
+                    m_animator.SetBool(ANIM_PARAM_SHOW_LOADING, true);
+                    m_animator.SetBool(ANIM_PARAM_HIDE_LOADING, false);
+                }
+                
+                IsVisible = true;
+                
+                Log.Info(LOG_MODULE, "加载界面显示，触发ShowLoading动画");
+            }
         }
         
         /// <summary>
         /// 隐藏加载界面
-        /// 重写IUIPanel接口的Hide方法，添加完成回调支持
+        /// 重写IUIPanel接口的Hide方法，通过设置bool参数触发退出动画
         /// </summary>
         public override void Hide()
         {
-            Log.Info(LOG_MODULE, "隐藏加载界面");
-            // 自定义淡出动画完成后的行为：销毁加载界面
-            StartCoroutine(CustomHideRoutine());
+            if (IsVisible)
+            {
+                Log.Info(LOG_MODULE, "隐藏加载界面，触发HideLoading动画");
+                
+                // 通过设置bool参数触发退出动画
+                if (m_animator != null)
+                {
+                    m_animator.SetBool(ANIM_PARAM_HIDE_LOADING, true);
+                    m_animator.SetBool(ANIM_PARAM_SHOW_LOADING, false);
+                }
+                else
+                {
+                    // 如果没有动画组件，直接隐藏
+                    OnHideAnimationComplete();
+                }
+            }
         }
         
         /// <summary>
-        /// 自定义隐藏协程
-        /// 执行淡出动画后触发隐藏完成事件并销毁加载界面
+        /// 隐藏动画完成后的回调处理
+        /// 此方法应由动画状态机在动画结束时调用
         /// </summary>
-        private System.Collections.IEnumerator CustomHideRoutine()
+        public void OnHideAnimationComplete()
         {
-            // 播放淡出动画
-            if (IsVisible)
+            IsVisible = false; 
+            // 重置动画状态
+            if (m_animator != null)
             {
-                yield return StartCoroutine(base.FadeOut(() => 
-                {
-                    gameObject.SetActive(false);
-                }));
+                m_animator.SetBool(ANIM_PARAM_HIDE_LOADING, false);
             }
             
-            // 动画播放完成后，通知控制器可以进行场景切换
+            // 通知控制器加载界面已隐藏
             if (m_controller != null)
             {
                 var loadingController = m_controller as LoadingScreenController;
@@ -125,14 +196,7 @@ namespace MyGame.UI.Loading.View
                     loadingController.OnHideAnimationComplete();
                 }
             }
-            
-            // 延迟一帧后清理Canvas，确保对象销毁顺序正确
-            yield return null;
-            
-            // 清理加载Canvas（如果没有其他子对象）
-            CleanupLoadingCanvas();
-            
-            Log.Info(LOG_MODULE, "加载界面淡出动画播放完成，已请求清理Canvas");
         }
+    
     }
 }

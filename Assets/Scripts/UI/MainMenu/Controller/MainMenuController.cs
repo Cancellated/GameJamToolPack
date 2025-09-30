@@ -191,9 +191,6 @@ namespace MyGame.UI.MainMenu.Controller
         /// </summary>
         public void OnStartGame()
         {
-            // 隐藏主菜单
-            GameEvents.TriggerMenuShow(UIType.MainMenu, false);
-            
             // 触发游戏开始事件
             GameEvents.TriggerGameStart();
         }

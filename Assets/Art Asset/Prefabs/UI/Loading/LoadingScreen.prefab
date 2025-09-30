@@ -145,10 +145,10 @@ GameObject:
   m_Component:
   - component: {fileID: 6927248637304803399}
   - component: {fileID: 7465432179454502374}
-  - component: {fileID: 7472469903430808944}
-  - component: {fileID: 4435901341798266564}
   - component: {fileID: 3156689184338865133}
   - component: {fileID: 8568955850829122307}
+  - component: {fileID: 7472469903430808944}
+  - component: {fileID: 4435901341798266564}
   m_Layer: 0
   m_Name: LoadingScreen
   m_TagString: Untagged
@@ -184,6 +184,33 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7174676498187163783}
   m_CullTransparentMesh: 1
+--- !u!114 &3156689184338865133
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7174676498187163783}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05b2eeb3ad3dbfd47b96b810642ce246, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_canvasGroup: {fileID: 4435901341798266564}
+  m_panelType: 6
+  m_fadeDuration: 0.3
+--- !u!114 &8568955850829122307
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7174676498187163783}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0c529bb67c8ef64899d386eda989d53, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &7472469903430808944
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -226,30 +253,3 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!114 &3156689184338865133
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7174676498187163783}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 05b2eeb3ad3dbfd47b96b810642ce246, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_canvasGroup: {fileID: 4435901341798266564}
-  m_panelType: 6
-  m_fadeDuration: 0.3
---- !u!114 &8568955850829122307
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7174676498187163783}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c0c529bb67c8ef64899d386eda989d53, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

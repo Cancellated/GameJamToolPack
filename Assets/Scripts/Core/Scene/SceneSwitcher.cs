@@ -19,12 +19,16 @@ namespace MyGame.Managers
         {
             // 注册场景加载请求事件监听
             GameEvents.OnSceneLoadStart += OnSceneLoadStartHandler;
+            // 注册加载界面准备就绪事件监听
+            GameEvents.OnLoadingScreenReady += OnLoadingScreenReadyHandler;
         }
 
         private void OnDisable()
         {
             // 注销场景加载请求事件监听
             GameEvents.OnSceneLoadStart -= OnSceneLoadStartHandler;
+            // 注销加载界面准备就绪事件监听
+            GameEvents.OnLoadingScreenReady -= OnLoadingScreenReadyHandler;
         }
         #endregion
         
@@ -44,11 +48,23 @@ namespace MyGame.Managers
         #region 事件处理方法
         /// <summary>
         /// 处理场景加载开始事件
+        /// 此方法仅记录日志，实际加载逻辑已移至OnLoadingScreenReadyHandler
         /// </summary>
         /// <param name="sceneName">要加载的场景名称</param>
         private void OnSceneLoadStartHandler(string sceneName)
         {
             Log.Info(module, $"接收到场景加载请求: {sceneName}");
+            // 不再直接加载场景，等待加载界面准备就绪后由OnLoadingScreenReadyHandler处理
+        }
+        
+        /// <summary>
+        /// 处理加载界面准备就绪事件
+        /// 当加载界面完全显示后，开始实际的场景加载
+        /// </summary>
+        /// <param name="sceneName">要加载的场景名称</param>
+        private void OnLoadingScreenReadyHandler(string sceneName)
+        {
+            Log.Info(module, $"加载界面已准备就绪，开始实际加载场景: {sceneName}");
             LoadSceneAsync(sceneName);
         }
         #endregion

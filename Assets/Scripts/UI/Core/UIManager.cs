@@ -45,19 +45,6 @@ namespace MyGame.Managers
 
         #endregion
 
-        #region 加载配置     
-        /// <summary>
-        /// 加载界面的最小显示时间（秒）
-        /// 确保加载界面至少显示指定时间，避免一闪而过
-        /// </summary>
-        [Header("加载界面配置")]
-        [Tooltip("加载界面的最小显示时间（秒）")]
-        [SerializeField]
-        private float m_minLoadingDisplayTime = 1.5f;
-
-        private float m_loadingStartTime = 0f; // 记录加载界面显示的开始时间
-        #endregion
-
         #region 状态管理
 
         public UIType currentState = UIType.None;
@@ -422,14 +409,45 @@ namespace MyGame.Managers
 
         /// <summary>
         /// 场景加载开始时显示加载界面
+        /// 异步等待加载界面完全显示后再触发实际的场景加载事件
         /// </summary>
         /// <param name="sceneName">要加载的场景名称</param>
         private void ShowLoading(string sceneName)
         {
             Log.Info(module, "场景加载开始，显示加载界面");
+            // 立即显示加载界面，但延迟实际的场景加载
             SetUIState(UIType.Loading, true);
-            // 记录加载界面显示的开始时间
-            m_loadingStartTime = Time.unscaledTime;
+            // 启动协程等待加载界面完全显示后再继续场景加载
+            StartCoroutine(WaitForLoadingScreenReady(sceneName));
+        }
+        
+        /// <summary>
+        /// 等待加载界面准备就绪后再触发实际的场景加载事件
+        /// 解决加载界面在场景加载完成后才显示的时序问题
+        /// </summary>
+        /// <param name="sceneName">要加载的场景名称</param>
+        private IEnumerator WaitForLoadingScreenReady(string sceneName)
+        {
+            Log.Info(module, "等待加载界面完全显示");
+            
+            float startTime = Time.time;
+            float maxWaitTime = 2f; // 最大等待时间2秒
+            
+            // 等待直到加载面板完全加载完成或超时
+            while (!PanelMap.ContainsKey(UIType.Loading) && Time.time - startTime < maxWaitTime)
+            {
+                yield return null;
+            }
+            
+            // 确保加载界面至少显示一小段时间，使其可见
+            if (PanelMap.ContainsKey(UIType.Loading))
+            {
+                yield return new WaitForSeconds(1f); // 短暂等待确保界面渲染
+            }
+            
+            // 触发实际的场景加载事件
+            Log.Info(module, "加载界面已准备就绪，通知实际的场景加载: " + sceneName);
+            GameEvents.TriggerLoadingScreenReady(sceneName);
         }
 
         /// <summary>
@@ -439,103 +457,51 @@ namespace MyGame.Managers
         private void HideLoading(string sceneName)
         {
             Log.Info(module, "场景加载完成，开始隐藏加载界面");
-            
-            // 检查Loading面板是否已经注册，如果没有则等待并延迟隐藏
-            if (!PanelMap.ContainsKey(UIType.Loading))
-            {
-                Log.Info(module, "Loading面板尚未加载完成，将延迟隐藏");
-                StartCoroutine(WaitAndHideLoading());
-            }
-            else
-            {
-                // 计算加载界面已经显示的时间
-                float loadingDisplayedTime = Time.unscaledTime - m_loadingStartTime;
-                
-                // 如果加载界面显示时间不足最小显示时间，则等待足够的时间再隐藏
-                if (loadingDisplayedTime < m_minLoadingDisplayTime)
-                {
-                    Log.Info(module, "加载界面显示时间不足，将等待至最小显示时间后隐藏");
-                    StartCoroutine(WaitForMinLoadingTime());
-                }
-                else
-                {
-                    // 如果面板已注册且显示时间足够，则直接隐藏
-                    SetUIState(UIType.Loading, false);
-                }
-            }
-        }
-        
-        /// <summary>
-        /// 等待加载界面达到最小显示时间后再隐藏的协程
-        /// 确保加载界面不会因场景加载过快而一闪而过
-        /// </summary>
-        private IEnumerator WaitForMinLoadingTime()
-        {
-            // 计算还需要等待的时间
-            float waitTime = m_minLoadingDisplayTime - (Time.unscaledTime - m_loadingStartTime);
-            
-            // 确保等待时间为正数
-            waitTime = Mathf.Max(0f, waitTime);
-            
-            Log.Info(module, "等待加载界面最小显示时间，还需等待: " + waitTime.ToString("F2") + "秒");
-            
-            // 等待剩余时间
-            float elapsedTime = 0f;
-            while (elapsedTime < waitTime)
-            {
-                elapsedTime += Time.unscaledDeltaTime;
-                yield return null;
-            }
-            
-            // 等待完成后隐藏加载界面
-            Log.Info(module, "加载界面已达到最小显示时间，现在隐藏它");
-            SetUIState(UIType.Loading, false);
+            StartCoroutine(WaitAndHideLoading());
         }
         
         /// <summary>
         /// 等待Loading面板加载完成后再隐藏的协程
         /// 解决场景加载完成时面板可能尚未加载完成的时序问题
+        /// 同时确保动画有足够时间播放
         /// </summary>
         private IEnumerator WaitAndHideLoading()
         {
-            // 等待直到面板被注册或超时（最多等待2秒）
-            float timeout = 2f;
-            float elapsedTime = 0f;
+            Log.Info(module, "等待加载界面初始化完成后再隐藏");
             
-            while (!PanelMap.ContainsKey(UIType.Loading) && elapsedTime < timeout)
+            // 记录开始等待的时间
+            float startTime = Time.time;
+            float minShowTime = 1f; // 至少显示1秒确保动画播放完成
+            
+            // 等待直到面板加载完成或超时
+            while (!PanelMap.ContainsKey(UIType.Loading))
             {
-                elapsedTime += Time.deltaTime;
                 yield return null;
             }
             
-            // 如果面板已加载完成
+            // 计算已经显示的时间
+            float shownTime = Time.time - startTime;
+            
+            // 如果显示时间不足最小显示时间，则继续等待
+            if (shownTime < minShowTime)
+            {
+                float waitTime = minShowTime - shownTime;
+                Log.Info(module, $"加载界面显示时间不足，额外等待 {waitTime} 秒");
+                yield return new WaitForSeconds(waitTime);
+            }
+            
+            // 隐藏加载界面
             if (PanelMap.ContainsKey(UIType.Loading))
             {
-                Log.Info(module, "Loading面板已加载完成，现在检查显示时间");
-                
-                // 计算加载界面已经显示的时间
-                float loadingDisplayedTime = Time.unscaledTime - m_loadingStartTime;
-                
-                // 如果加载界面显示时间不足最小显示时间，则等待足够的时间再隐藏
-                if (loadingDisplayedTime < m_minLoadingDisplayTime)
-                {
-                    Log.Info(module, "加载界面显示时间不足，将等待至最小显示时间后隐藏");
-                    StartCoroutine(WaitForMinLoadingTime());
-                }
-                else
-                {
-                    // 如果显示时间足够，则直接隐藏
-                    Log.Info(module, "加载界面显示时间足够，现在隐藏它");
-                    SetUIState(UIType.Loading, false);
-                }
+                Log.Info(module, "加载界面初始化完成并已显示足够时间，执行隐藏操作");
+                SetUIState(UIType.Loading, false);
             }
             else
             {
-                Log.Warning(module, "等待Loading面板超时，无法隐藏");
+                Log.Warning(module, "加载界面板未在规定时间内初始化完成，跳过隐藏操作");
             }
         }
+        
         #endregion
-
- 
     }
 }

@@ -43,7 +43,7 @@ namespace MyGame.DevTool
 
         [Header("层级设置")]
         [Tooltip("控制台Canvas的Sorting Order。值越高，显示层级越高，不易被其他UI遮挡。")]
-        public int canvasSortingOrder = 1000; // 设置较高的默认值，确保控制台显示在大多数UI上层
+        public int canvasSortingOrder = 900; // 设置较高的默认值，确保控制台显示在大多数UI上层
         #endregion
 
         #region 生命周期函数
