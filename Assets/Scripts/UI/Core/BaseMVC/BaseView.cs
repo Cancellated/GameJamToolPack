@@ -88,7 +88,7 @@ namespace MyGame.UI
         /// </summary>
         protected virtual void OnDisable()
         {
-            UnbindController();
+
         }
         
         #endregion

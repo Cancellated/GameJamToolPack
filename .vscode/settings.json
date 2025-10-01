@@ -1,6 +1,8 @@
 {
   "files.exclude": {
+    "**/*.sln": true,
     "**/*.csproj": true,
-    "**/*.sln": true
+    "**/Assembly-CSharp.csproj": false,
+    "**/Assembly-CSharp-Editor.csproj": false
   }
 }

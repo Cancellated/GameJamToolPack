@@ -3,6 +3,7 @@ using MyGame.UI.About.Model;
 using MyGame.UI.About.View;
 using UnityEngine;
 using MyGame.UI;
+using Logger;
 
 namespace MyGame.UI.About.Controller
 {
@@ -12,6 +13,8 @@ namespace MyGame.UI.About.Controller
     /// </summary>
     public class AboutPanelController : BaseController<AboutPanelView, AboutModel>
     {
+        static readonly string LOG_MODULE = LogModules.ABOUT;
+
         #region 生命周期
 
         /// <summary>
@@ -35,8 +38,6 @@ namespace MyGame.UI.About.Controller
         /// </summary>
         protected override void OnInitialize()
         {
-            // 注册事件监听
-            GameEvents.OnMenuShow += OnMenuShow;
         }
 
         /// <summary>
@@ -44,8 +45,6 @@ namespace MyGame.UI.About.Controller
         /// </summary>
         public override void Cleanup()
         {
-            UnregisterEvents();
-            
             // 清理模型资源
             if (m_model != null)
             {
@@ -72,43 +71,7 @@ namespace MyGame.UI.About.Controller
         }
 
         #endregion
-        
-        #region 私有辅助方法
-        
-        /// <summary>
-        /// 注销所有事件监听
-        /// </summary>
-        private void UnregisterEvents()
-        {
-            // 注销事件监听
-            GameEvents.OnMenuShow -= OnMenuShow;
-        }
 
-        #endregion
-
-        #region 事件监听
-
-        /// <summary>
-        /// UI显示事件处理
-        /// </summary>
-        /// <param name="type">UI类型</param>
-        /// <param name="show">是否显示</param>
-        private void OnMenuShow(UIType type, bool show)
-        {
-            if(type == UIType.AboutPanel)
-            {
-                if(show)
-                {
-                    m_view.Show();
-                }
-                else
-                {
-                    m_view.Hide();
-                }
-            }
-        }
-
-        #endregion
 
         #region 控制器方法
 

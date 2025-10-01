@@ -11,7 +11,7 @@ namespace MyGame.UI.MainMenu.Model
         #region 字段与属性
 
         // 默认关卡场景名称
-        private string m_defaultGameScene = "GameLevel1";
+        private string m_defaultGameScene = "Level Select";
         private bool m_isSettingsVisible = false;
         private bool m_isAboutVisible = false;
 
