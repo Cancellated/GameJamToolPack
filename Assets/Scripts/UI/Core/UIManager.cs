@@ -471,7 +471,7 @@ namespace MyGame.Managers
             
             // 记录开始等待的时间
             float startTime = Time.time;
-            float minShowTime = 1f; // 至少显示1秒确保动画播放完成
+            float minShowTime = 0.5f; // 至少显示1秒确保动画播放完成
             
             // 等待直到面板加载完成或超时
             while (!PanelMap.ContainsKey(UIType.Loading))

@@ -2144,6 +2144,7 @@ GameObject:
   - component: {fileID: 840153389}
   - component: {fileID: 840153393}
   - component: {fileID: 840153392}
+  - component: {fileID: 840153395}
   - component: {fileID: 840153391}
   - component: {fileID: 840153396}
   - component: {fileID: 840153397}
@@ -4195,7 +4196,7 @@ MonoBehaviour:
   - panel: {fileID: 1391176322381451079}
   - panel: {fileID: 7147059253465359644}
   - panel: {fileID: 8122713037286718955}
-  - panel: {fileID: 7668303840932097820}
+  - panel: {fileID: 7668303840932097823}
   - panel: {fileID: 558912384}
   - panel: {fileID: 840153391}
   currentState: 0
@@ -4794,12 +4795,10 @@ GameObject:
   m_Component:
   - component: {fileID: 7668303840932097818}
   - component: {fileID: 1921738812307064620}
-  - component: {fileID: 7668303840932097820}
-  - component: {fileID: 7668303840932097819}
   - component: {fileID: 7668303840932097822}
-  - component: {fileID: 7668303840932097821}
-  - component: {fileID: 7668303840932097824}
   - component: {fileID: 7668303840932097823}
+  - component: {fileID: 7668303840932097824}
+  - component: {fileID: 7668303840932097821}
   m_Layer: 0
   m_Name: AboutPanel
   m_TagString: Untagged
@@ -7189,35 +7188,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &7668303840932097819
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 789515825788536144}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f58f3d16ac3039f4c8694e31edaa5b91, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &7668303840932097820
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 789515825788536144}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0ed954b301b45694e92ee370f9067f86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_canvasGroup: {fileID: 1921738812307064620}
-  m_panelType: 10
-  m_fadeDuration: 0.3
-  m_aboutPanel: {fileID: 789515825788536144}
-  m_closeButton: {fileID: 349526873652592939}
 --- !u!114 &7668303840932097821
 MonoBehaviour:
   m_ObjectHideFlags: 0
