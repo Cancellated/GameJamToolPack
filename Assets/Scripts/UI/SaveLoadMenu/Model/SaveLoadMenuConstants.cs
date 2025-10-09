@@ -12,7 +12,7 @@ namespace MyGame.UI.SaveLoad
         /// <summary>
         /// 自动存档槽名称
         /// </summary>
-        public const string AUTO_SAVE_SLOT = "auto_save";
+        public const string AUTO_SAVE_SLOT = "AutoSave";
         
         /// <summary>
         /// 默认存档槽数量

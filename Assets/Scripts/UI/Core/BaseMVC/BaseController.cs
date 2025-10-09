@@ -14,7 +14,7 @@ namespace MyGame.UI
         /// <summary>
         /// 是否初始化
         /// </summary>
-        public bool IsInitialized { get; private set; }
+        public bool IsInitialized { get; protected set; }
         
         #endregion
         

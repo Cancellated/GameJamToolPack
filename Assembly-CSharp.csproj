@@ -102,7 +102,9 @@
     <Compile Include="Assets\Scripts\UI\Core\IUIPanel.cs" />
     <Compile Include="Assets\Scripts\Logger\Log.cs" />
     <Compile Include="Assets\Scripts\UI\Core\PanelLoader.cs" />
+    <Compile Include="Assets\Scripts\UI\SaveLoadMenu\View\Components\ISaveSlotUI.cs" />
     <Compile Include="Assets\Scripts\UI\Core\UIType.cs" />
+    <Compile Include="Assets\Scripts\UI\SaveLoadMenu\View\Components\SaveSlot.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\Controller\InventoryController.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\CameraController.cs" />
     <Compile Include="Assets\Scripts\UI\MainMenu\View\MainMenuView.cs" />
@@ -157,7 +159,6 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\ShaderPropAnimator.cs" />
     <Compile Include="Assets\Scripts\DevTools\Model\DebugCommandModel.cs" />
     <Compile Include="Assets\Scripts\UI\Settings\View\Components\GraphicsSettingsComponent.cs" />
-    <Compile Include="Assets\Scripts\UI\SaveLoadMenu\View\SaveLoadMenuPanel.cs" />
     <Compile Include="Assets\Scripts\UI\Core\BaseMVC\BaseView.cs" />
     <Compile Include="Assets\Scripts\UI\MainMenu\Model\MainMenuModel.cs" />
     <Compile Include="Assets\Scripts\UI\Settings\Controller\SettingsPanelController.cs" />

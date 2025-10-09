@@ -188,10 +188,13 @@ namespace MyGame.UI.MainMenu.Controller
 
         /// <summary>
         /// 开始游戏
+        /// 先触发创建新游戏事件以自动保存新存档，然后触发游戏开始事件
         /// </summary>
         public void OnStartGame()
         {
-            // 触发游戏开始事件
+            // 先触发创建新游戏事件，这样会自动保存新存档到自动存档槽
+            GameEvents.TriggerCreateNewGame();
+            // 然后触发游戏开始事件
             GameEvents.TriggerGameStart();
         }
 

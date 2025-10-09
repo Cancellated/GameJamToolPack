@@ -14,8 +14,8 @@ namespace MyGame.Data
     /// </summary>
     public class SaveManager : Singleton<SaveManager>
     {
-        private const string LOG_MODULE = "SaveManager";
-        private const string DEFAULT_SAVE_SLOT = "AutoSave";
+        private const string LOG_MODULE = LogModules.SAVE;
+        private const string DEFAULT_SAVE_SLOT = "AutoSave";    // 自动存档槽名称
         
         private ISaveSystem m_saveSystem;
         private SaveData m_currentSaveData;
@@ -122,7 +122,7 @@ namespace MyGame.Data
         /// 保存当前游戏数据到指定存档槽。
         /// 包含延迟初始化逻辑，确保在第一次访问时初始化存档系统。
         /// </summary>
-        /// <param name="slotName">存档槽名称，如果为空则使用默认存档槽。</param>
+        /// <param name="slotName">存档槽名称，如果为空则使用自动存档槽。</param>
         /// <returns>保存操作是否成功。</returns>
         public bool SaveCurrentGame(string slotName = null)
         {
@@ -132,7 +132,7 @@ namespace MyGame.Data
                 InitializeSaveSystem();
             }
             
-            // 使用默认存档槽如果未指定
+            // 使用自动存档槽如果未指定
             string saveSlot = string.IsNullOrEmpty(slotName) ? DEFAULT_SAVE_SLOT : slotName;
             
             Log.Info(LOG_MODULE, $"开始保存游戏到存档槽: {saveSlot}");

@@ -4,7 +4,7 @@ using MyGame.Data;
 using MyGame.UI.SaveLoad.Events;
 using MyGame.Events;
 using MyGame.UI.SaveLoad.View;
-using MyGame.UI;
+using MyGame.Managers;
 
 namespace MyGame.UI.SaveLoad.Controller
 {
@@ -282,6 +282,9 @@ namespace MyGame.UI.SaveLoad.Controller
         
         /// <summary>
         /// 处理存档槽选中事件
+        /// 根据当前游戏状态处理空存档槽的点击行为
+        /// - 在主菜单状态下点击空存档槽：创建新游戏
+        /// - 在游戏中点击空存档槽：直接进行存档操作
         /// </summary>
         /// <param name="slotName">存档槽名称</param>
         /// <param name="saveData">存档数据</param>
@@ -290,7 +293,35 @@ namespace MyGame.UI.SaveLoad.Controller
             if (_model == null)
                 return;
             
+            // 设置选中的存档槽
             _model.SetSelectedSaveSlot(slotName, saveData);
+            
+            // 处理空存档槽的特殊逻辑
+            if (saveData == null)
+            {
+                // 安全检查：确保GameManager实例存在
+                if (GameManager.Instance != null)
+                {
+                    // 获取当前游戏状态
+                    GameState currentState = GameManager.Instance.State;
+                    
+                    if (currentState == GameState.Menu)
+                    {
+                        // 在主菜单状态下点击空存档槽，触发创建新游戏操作
+                        HandleCreateNewGame();
+                    }
+                    else if (currentState == GameState.Playing || currentState == GameState.Paused)
+                    {
+                        // 在游戏中点击空存档槽，直接进行存档操作
+                        HandleSaveGame(slotName);
+                    }
+                }
+                else
+                {
+                    // 如果GameManager不存在，默认行为是不做任何特殊处理
+                    // 这通常只在测试场景中出现
+                }
+            }
         }
         
         /// <summary>
@@ -344,51 +375,6 @@ namespace MyGame.UI.SaveLoad.Controller
             }
             
             // 可以在这里添加返回主菜单的其他逻辑
-        }
-        
-        /// <summary>
-        /// 处理存档完成事件
-        /// </summary>
-        /// <param name="slotName">存档槽名称</param>
-        /// <param name="success">是否成功</param>
-        private void HandleSaveGameCompleted(string slotName, bool success)
-        {
-            if (success)
-            {
-                // 存档成功后刷新存档槽数据
-                InitializeSaveSlots();
-            }
-        }
-        
-        /// <summary>
-        /// 处理加载完成事件
-        /// </summary>
-        /// <param name="slotName">存档槽名称</param>
-        /// <param name="success">是否成功</param>
-        private void HandleLoadGameCompleted(string slotName, bool success)
-        {
-            if (success)
-            {
-                // 加载成功后可以隐藏菜单或执行其他逻辑
-                if (_view != null)
-                {
-                    _view.Hide();
-                }
-            }
-        }
-        
-        /// <summary>
-        /// 处理删除存档完成事件
-        /// </summary>
-        /// <param name="slotName">存档槽名称</param>
-        /// <param name="success">是否成功</param>
-        private void HandleDeleteSaveCompleted(string slotName, bool success)
-        {
-            if (success)
-            {
-                // 删除成功后刷新存档槽数据
-                InitializeSaveSlots();
-            }
         }
         
         /// <summary>
