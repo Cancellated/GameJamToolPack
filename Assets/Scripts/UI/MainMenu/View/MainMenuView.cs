@@ -132,6 +132,9 @@ namespace MyGame.UI.MainMenu.View
             if (m_startGameButton != null)
                 m_startGameButton.onClick.AddListener(OnStartGameButtonClick);
             
+            if (m_loadGameButton != null)
+                m_loadGameButton.onClick.AddListener(OnLoadGameButtonClick);
+            
             if (m_settingsButton != null)
                 m_settingsButton.onClick.AddListener(OnSettingsButtonClick);
             
@@ -149,6 +152,9 @@ namespace MyGame.UI.MainMenu.View
         {
             if (m_startGameButton != null)
                 m_startGameButton.onClick.RemoveListener(OnStartGameButtonClick);
+            
+            if (m_loadGameButton != null)
+                m_loadGameButton.onClick.RemoveListener(OnLoadGameButtonClick);
             
             if (m_settingsButton != null)
                 m_settingsButton.onClick.RemoveListener(OnSettingsButtonClick);
@@ -205,6 +211,17 @@ namespace MyGame.UI.MainMenu.View
             if (m_controller != null)
             {
                 m_controller.OnExitGame();
+            }
+        }
+        
+        /// <summary>
+        /// 加载游戏按钮点击事件
+        /// </summary>
+        private void OnLoadGameButtonClick()
+        {
+            if (m_controller != null)
+            {
+                m_controller.OnLoadGame();
             }
         }
 

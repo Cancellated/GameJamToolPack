@@ -12,11 +12,14 @@ namespace MyGame.UI.SaveLoad
     /// </summary>
     public class SaveLoadMenuModel : ObservableModel
     {
+        #region 成员变量
         private SaveData _selectedSaveData;
         private string _selectedSaveSlotName;
         private bool _isAutoSaveSlot;
-        private List<SaveSlotInfo> _saveSlots = new List<SaveSlotInfo>();
+        private List<SaveSlotInfo> _saveSlots = new();
+        #endregion
         
+        #region 事件
         /// <summary>
         /// 存档槽信息更新事件
         /// </summary>
@@ -26,7 +29,9 @@ namespace MyGame.UI.SaveLoad
         /// 选中存档槽变更事件
         /// </summary>
         public event System.Action OnSelectedSaveSlotChanged;
+        #endregion
         
+        #region 属性
         /// <summary>
         /// 选中的存档数据
         /// </summary>
@@ -74,7 +79,9 @@ namespace MyGame.UI.SaveLoad
                 OnSaveSlotsUpdated?.Invoke();
             }
         }
+        #endregion
         
+        #region 初始化和清理方法
         /// <summary>
         /// 初始化模型
         /// </summary>
@@ -96,7 +103,9 @@ namespace MyGame.UI.SaveLoad
             _selectedSaveData = null;
             _selectedSaveSlotName = null;
         }
+        #endregion
         
+        #region 存档槽操作方法
         /// <summary>
         /// 设置选中的存档槽
         /// </summary>
@@ -117,6 +126,7 @@ namespace MyGame.UI.SaveLoad
         {
             SaveSlots = new List<SaveSlotInfo>(slots);
         }
+        #endregion
     }
     
     /// <summary>

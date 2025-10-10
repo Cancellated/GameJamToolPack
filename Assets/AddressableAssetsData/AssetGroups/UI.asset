@@ -53,6 +53,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - Prefabs
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dd8cf88d22398dd41a8de98f4a39d21d
+    m_Address: Assets/Art Asset/Prefabs/UI/SaveLoad/Slot.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Prefabs
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 479e68dad06909d48b76cdd2ede0fc0b, type: 2}
   m_SchemaSet:

@@ -5,6 +5,7 @@ using MyGame.UI.SaveLoad.Events;
 using MyGame.Events;
 using MyGame.UI.SaveLoad.View;
 using MyGame.Managers;
+using static MyGame.UI.SaveLoad.View.SaveLoadMenuView;
 
 namespace MyGame.UI.SaveLoad.Controller
 {
@@ -15,6 +16,7 @@ namespace MyGame.UI.SaveLoad.Controller
     /// </summary>
     public class SaveLoadMenuController : BaseController<SaveLoadMenuView, SaveLoadMenuModel>
     {
+        #region 成员变量
         [Header("MVC Components")]
         [SerializeField] private SaveLoadMenuModel _model;
         [SerializeField] private SaveLoadMenuView _view;
@@ -22,7 +24,9 @@ namespace MyGame.UI.SaveLoad.Controller
         [Header("配置文件")]
         [Tooltip("存档菜单配置文件，包含存档设置、UI配置、文本配置等")]
         [SerializeField] private SaveLoadMenuConfig _config;
+        #endregion
         
+        #region 属性
         /// <summary>
         /// 存档菜单配置文件
         /// </summary>
@@ -51,7 +55,9 @@ namespace MyGame.UI.SaveLoad.Controller
             get { return m_view; }
             set { base.SetView(value); }
         }
+        #endregion
         
+        #region 生命周期方法
         /// <summary>
         /// 初始化MVC组件
         /// </summary>
@@ -100,7 +106,9 @@ namespace MyGame.UI.SaveLoad.Controller
                 m_view.Cleanup();
             }
         }
+        #endregion
         
+        #region MVC关系管理
         /// <summary>
         /// 设置模型组件
         /// 重写基类SetModel方法
@@ -179,7 +187,9 @@ namespace MyGame.UI.SaveLoad.Controller
             // 初始化存档槽
             InitializeSaveSlots();
         }
+        #endregion
         
+        #region 事件管理
         /// <summary>
         /// 注册事件
         /// </summary>
@@ -207,7 +217,9 @@ namespace MyGame.UI.SaveLoad.Controller
             SaveLoadMenuEvents.OnBackToMainMenu -= HandleBackToMainMenu;
             SaveLoadMenuEvents.OnSaveSlotSelected -= HandleSaveSlotSelected;
         }
+        #endregion
         
+        #region 存档槽操作
         /// <summary>
         /// 初始化存档槽
         /// </summary>
@@ -279,7 +291,9 @@ namespace MyGame.UI.SaveLoad.Controller
             // 更新模型中的存档槽列表
             _model.UpdateSaveSlots(slots);
         }
+        #endregion
         
+        #region 事件处理方法
         /// <summary>
         /// 处理存档槽选中事件
         /// 根据当前游戏状态处理空存档槽的点击行为
@@ -395,10 +409,12 @@ namespace MyGame.UI.SaveLoad.Controller
         {
             if (_view != null)
             {
-                _view.UpdateView();
+                _view.UpdateView(UpdateViewType.Selection);
             }
         }
+        #endregion
         
+        #region 菜单控制方法
         /// <summary>
         /// 显示存档菜单
         /// </summary>
@@ -422,5 +438,6 @@ namespace MyGame.UI.SaveLoad.Controller
                 _view.Hide();
             }
         }
+        #endregion
     }
 }

@@ -13,7 +13,7 @@ namespace MyGame.UI.About.Controller
     /// </summary>
     public class AboutPanelController : BaseController<AboutPanelView, AboutModel>
     {
-        static readonly string LOG_MODULE = LogModules.ABOUT;
+        // static readonly string LOG_MODULE = LogModules.ABOUT;
 
         #region 生命周期
 

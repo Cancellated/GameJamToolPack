@@ -221,6 +221,8 @@ namespace MyGame.Data
             if (success)
             {
                 Log.Info(LOG_MODULE, "存档删除成功");
+                // 触发存档列表更新事件，让UI知道存档数据已变更
+                GameEvents.TriggerDeleteSave(saveSlot);
             }
             else
             {

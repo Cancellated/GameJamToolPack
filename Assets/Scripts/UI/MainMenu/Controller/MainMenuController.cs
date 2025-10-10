@@ -221,6 +221,17 @@ namespace MyGame.UI.MainMenu.Controller
                 GameEvents.TriggerMenuShow(UIType.AboutPanel, true);
             }
         }
+        
+        /// <summary>
+        /// 显示存档加载面板
+        /// </summary>
+        public void OnLoadGame()
+        {
+            if (m_model != null)
+            {
+                GameEvents.TriggerMenuShow(UIType.SaveLoadMenu, true);
+            }
+        }
 
         /// <summary>
         /// 退出游戏
