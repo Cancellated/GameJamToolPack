@@ -87,7 +87,9 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_FrameRateCounter.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
     <Compile Include="Assets\Scripts\UI\About\View\AboutPanelView.cs" />
+    <Compile Include="Assets\Scripts\UI\SaveLoadMenu\View\Components\ConfirmType.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\Model\ItemDatabase.cs" />
+    <Compile Include="Assets\Scripts\UI\SaveLoadMenu\View\Components\ISaveSlotMenuHandler.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshSpawner.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\View\InventorySlot.cs" />

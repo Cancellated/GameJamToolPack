@@ -101,16 +101,10 @@ namespace MyGame.Data
             // 使用默认存档槽如果未指定
             string saveSlot = string.IsNullOrEmpty(slotName) ? DEFAULT_SAVE_SLOT : slotName;
             
-            Log.Info(LOG_MODULE, $"开始加载存档数据: {saveSlot}");
-            
             // 直接从存档系统加载数据但不更新当前游戏数据
             SaveData loadedData = m_saveSystem.LoadGame(saveSlot);
             
-            if (loadedData != null)
-            {
-                Log.Info(LOG_MODULE, "存档数据加载成功");
-            }
-            else
+            if (loadedData == null)
             {
                 Log.Warning(LOG_MODULE, "存档数据加载失败或存档不存在");
             }
@@ -124,29 +118,24 @@ namespace MyGame.Data
         /// </summary>
         /// <param name="slotName">存档槽名称，如果为空则使用自动存档槽。</param>
         /// <returns>保存操作是否成功。</returns>
+        /// <summary>
+        /// 保存当前游戏数据到指定存档槽并触发相应事件
+        /// </summary>
+        /// <param name="slotName">存档槽名称</param>
+        /// <returns>保存操作是否成功</returns>
         public bool SaveCurrentGame(string slotName = null)
         {
-            // 延迟初始化存档系统
-            if (m_saveSystem == null)
-            {
-                InitializeSaveSystem();
-            }
+            bool success = SaveGame(slotName);
             
-            // 使用自动存档槽如果未指定
-            string saveSlot = string.IsNullOrEmpty(slotName) ? DEFAULT_SAVE_SLOT : slotName;
+            string saveSlot = slotName ?? DEFAULT_SAVE_SLOT;
             
-            Log.Info(LOG_MODULE, $"开始保存游戏到存档槽: {saveSlot}");
-            
-            // 保存数据
-            bool success = m_saveSystem.SaveGame(m_currentSaveData, saveSlot);
-            
+            // 只有保存成功才触发事件
             if (success)
             {
-                Log.Info(LOG_MODULE, "游戏保存成功");
-            }
-            else
-            {
-                Log.Error(LOG_MODULE, "游戏保存失败");
+                // 触发游戏数据保存完成事件
+                GameEvents.TriggerSaveGame(saveSlot);
+                // 触发游戏数据保存完成通知事件，用于UI更新
+                GameEvents.TriggerSaveGameCompleted(saveSlot);
             }
             
             return success;
@@ -167,8 +156,7 @@ namespace MyGame.Data
                 InitializeSaveSystem();
             }
             
-            // 使用默认存档槽如果未指定
-            string saveSlot = string.IsNullOrEmpty(slotName) ? DEFAULT_SAVE_SLOT : slotName;
+            string saveSlot = slotName ?? DEFAULT_SAVE_SLOT;
             
             Log.Info(LOG_MODULE, $"开始加载游戏存档: {saveSlot}");
             
@@ -209,20 +197,17 @@ namespace MyGame.Data
                 InitializeSaveSystem();
             }
             
-            // 使用默认存档槽如果未指定
-            string saveSlot = string.IsNullOrEmpty(slotName) ? DEFAULT_SAVE_SLOT : slotName;
+            string saveSlot = slotName ?? DEFAULT_SAVE_SLOT;
             
             Log.Info(LOG_MODULE, $"开始删除游戏存档: {saveSlot}");
             
             // 删除存档
             bool success = m_saveSystem.DeleteGame(saveSlot);
             
-            // 触发删除事件
+            // 删除成功后，存档列表会自动更新，无需再次触发删除事件
             if (success)
             {
                 Log.Info(LOG_MODULE, "存档删除成功");
-                // 触发存档列表更新事件，让UI知道存档数据已变更
-                GameEvents.TriggerDeleteSave(saveSlot);
             }
             else
             {
@@ -246,8 +231,7 @@ namespace MyGame.Data
                 InitializeSaveSystem();
             }
             
-            // 使用默认存档槽如果未指定
-            string saveSlot = string.IsNullOrEmpty(slotName) ? DEFAULT_SAVE_SLOT : slotName;
+            string saveSlot = slotName ?? DEFAULT_SAVE_SLOT;
             
             return m_saveSystem.DoesSaveExist(saveSlot);
         }
@@ -317,18 +301,12 @@ namespace MyGame.Data
         /// <summary>
         /// 处理新游戏创建事件。
         /// </summary>
-        private void HandleCreateNewGame()
+        private void HandleCreateNewGame(string slotName = null)
         {
-            // 新游戏创建时自动保存
-            Log.Info(LOG_MODULE, "新游戏创建，触发自动保存");
+            // 新游戏创建时自动保存到指定存档槽
+            Log.Info(LOG_MODULE, $"新游戏创建，保存到槽位: {slotName ?? "默认"}");
             NewGame();
-            SaveCurrentGame();
-        }
-
-        private void HandleSaveGame(string slotName)
-        {
             SaveCurrentGame(slotName);
-            Log.Info(LOG_MODULE, $"游戏存档已保存到槽位: {slotName}");
         }
 
         private void HandleLoadGame(string slotName)
@@ -340,6 +318,53 @@ namespace MyGame.Data
             }
             LoadGame(slotName);
             Log.Info(LOG_MODULE, $"游戏从槽位 {slotName} 加载完成");
+            GameEvents.TriggerLoadGameCompleted(slotName);
+        }
+        
+        /// <summary>
+        /// 保存当前游戏数据但不触发保存完成事件，用于防止循环调用
+        /// </summary>
+        /// <param name="slotName">存档槽名称</param>
+        /// <returns>保存操作是否成功</returns>
+        private bool SaveGame(string slotName = null)
+        {
+            // 延迟初始化存档系统
+            if (m_saveSystem == null)
+            {
+                InitializeSaveSystem();
+            }
+            
+            string saveSlot = slotName ?? DEFAULT_SAVE_SLOT;
+            
+            Log.Info(LOG_MODULE, $"开始保存游戏到存档槽: {saveSlot}");
+            
+            // 保存数据
+            bool success = m_saveSystem.SaveGame(m_currentSaveData, saveSlot);
+            
+            if (success)
+            {
+                Log.Info(LOG_MODULE, "游戏保存成功");
+                // 不触发任何事件，防止循环
+            }
+            else
+            {
+                Log.Error(LOG_MODULE, "游戏保存失败");
+            }
+            
+            return success;
+        }
+
+        /// <summary>
+        /// 处理游戏保存事件
+        /// 直接调用SaveCurrentGame以保持一致的事件触发逻辑
+        /// </summary>
+        /// <param name="slotName">存档槽名称</param>
+        private void HandleSaveGame(string slotName)
+        {
+            // 不直接调用SaveCurrentGame，避免通过事件触发的保存再次触发事件导致循环
+            // 只执行保存操作但不触发新的事件
+            SaveGame(slotName);
+            Log.Info(LOG_MODULE, $"游戏存档已保存到槽位: {slotName}");
         }
         
         private void HandleDeleteSave(string slotName)

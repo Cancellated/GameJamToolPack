@@ -6,6 +6,7 @@ using System.Collections;
 using Logger;
 using MyGame.UI.SaveLoad.View;
 using MyGame.Data;
+using MyGame.UI.SaveLoad.View.Components;
 
 namespace MyGame.UI.SaveLoad.Utils
 {
@@ -223,11 +224,11 @@ namespace MyGame.UI.SaveLoad.Utils
                     GameObject instance = Object.Instantiate(saveSlotPrefab, container);
                     instance.name = "SaveSlot_" + i;
                     
-                    // 获取ISaveSlotUI组件
-                    if (instance.TryGetComponent<ISaveSlotUI>(out var saveSlotUI))
+                    // 获取SaveSlot组件
+                    if (instance.TryGetComponent<SaveSlot>(out var saveSlotComponent))
                     {
-                        saveSlotUI.Initialize(saveSlotInfos[i], view);
-                        saveSlotUIs.Add(saveSlotUI);
+                        saveSlotComponent.Initialize(saveSlotInfos[i], view);
+                        saveSlotUIs.Add(saveSlotComponent); // 自动转换为ISaveSlotUI接口
                         createdCount++;
                     }
                     else

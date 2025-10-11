@@ -3,12 +3,14 @@ using UnityEngine.UI;
 using TMPro;
 using MyGame.Data;
 using MyGame.UI.SaveLoad.View;
+using MyGame.UI.SaveLoad.View.Components;
 
-namespace MyGame.UI.SaveLoad.View
+namespace MyGame.UI.SaveLoad.View.Components
 {
     /// <summary>
     /// 具体的存档槽UI实现类
     /// 负责显示单个存档槽的信息并处理用户交互
+    /// 支持直接控制二级菜单和确认面板的显示/隐藏
     /// 挂载到存档槽预制体上使用
     /// </summary>
     public class SaveSlot : MonoBehaviour, ISaveSlotUI
@@ -37,6 +39,7 @@ namespace MyGame.UI.SaveLoad.View
         private SaveSlotInfo _slotInfo;
         private SaveLoadMenuView _view;
         private bool _isSelected = false;
+        private ISaveSlotMenuHandler _menuHandler;
 
         /// <summary>
         /// 初始化存档槽UI
@@ -47,11 +50,13 @@ namespace MyGame.UI.SaveLoad.View
         {
             _slotInfo = slotInfo;
             _view = view;
+            // 初始化菜单处理器，使用传入的视图作为菜单处理器
+            _menuHandler = view as ISaveSlotMenuHandler;
             
             // 设置存档槽名称
             if (_slotNameText != null)
             {
-                _slotNameText.text = slotInfo.SlotName;
+                _slotNameText.text = slotInfo.DisplayName;
             }
             
             // 注册点击事件
@@ -133,8 +138,65 @@ namespace MyGame.UI.SaveLoad.View
         {
             if (_view != null)
             {
+                // 首先调用原始的视图点击处理，保持兼容性
                 _view.OnSaveSlotClick(_slotInfo.SlotName, _slotInfo.SaveData);
             }
+            
+            // 如果启用了存档槽直接控制菜单的功能，并且菜单处理器有效
+            if (_menuHandler != null && _slotInfo.HasSave)
+            {
+                // 显示二级菜单
+                _menuHandler.ShowSaveOptionsMenu(_slotInfo);
+            }
+        }
+        
+        /// <summary>
+        /// 在存档槽内直接显示二级菜单
+        /// 可由外部调用，实现更灵活的菜单显示逻辑
+        /// </summary>
+        public void ShowOptionsMenu()
+        {
+            if (_menuHandler != null && _slotInfo.HasSave)
+            {
+                _menuHandler.ShowSaveOptionsMenu(_slotInfo);
+            }
+        }
+        
+        /// <summary>
+        /// 在存档槽内直接隐藏二级菜单
+        /// </summary>
+        public void HideOptionsMenu()
+        {
+            _menuHandler?.HideSaveOptionsMenu();
+        }
+        
+        /// <summary>
+        /// 在存档槽内直接显示确认面板
+        /// </summary>
+        /// <param name="confirmType">确认类型</param>
+        /// <param name="callback">确认回调（当前版本不使用）</param>
+        public void ShowConfirmPanel(ConfirmType confirmType, System.Action<bool> callback = null)
+        {
+            // 传递存档槽名称给菜单处理器
+            _menuHandler?.ShowConfirmPanel(confirmType, _slotInfo.SlotName); 
+        }
+        
+        /// <summary>
+        /// 在存档槽内直接隐藏确认面板
+        /// </summary>
+        public void HideConfirmPanel()
+        {
+            _menuHandler?.HideConfirmPanel();
+        }
+        
+        /// <summary>
+        /// 检查存档槽是否可以进行交互操作
+        /// </summary>
+        /// <returns>是否可以交互</returns>
+        public bool CanInteract()
+        {
+            // 检查存档槽本身和菜单处理器是否可用
+            return gameObject.activeInHierarchy && _menuHandler != null;
         }
 
         /// <summary>

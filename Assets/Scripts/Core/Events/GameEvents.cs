@@ -127,12 +127,12 @@ namespace MyGame.Events
         /// <summary>
         /// 新游戏创建事件
         /// </summary>
-        public static event Action OnCreateNewGame;
+        public static event Action<string> OnCreateNewGame;
         
-        public static void TriggerCreateNewGame()
+        public static void TriggerCreateNewGame(string slotName = null)
         {
-            Log.Info(module, "触发新游戏创建事件");
-            OnCreateNewGame?.Invoke();
+            Log.Info(module, $"触发新游戏创建事件，存档槽: {slotName ?? "默认"}");
+            OnCreateNewGame?.Invoke(slotName);
         }
 
         /// <summary>
@@ -158,14 +158,27 @@ namespace MyGame.Events
         }
 
         /// <summary>
-        /// 游戏数据加载完成事件
+        /// 加载游戏请求事件
+        /// 用于通知系统开始加载游戏存档
         /// </summary>
         public static event Action<string> OnLoadGame;
         
         public static void TriggerLoadGame(string slotName)
         {
-            Log.Info(module, $"触发游戏数据加载完成事件: {slotName}");
+            Log.Info(module, $"触发加载游戏请求事件: {slotName}");
             OnLoadGame?.Invoke(slotName);
+        }
+        
+        /// <summary>
+        /// 游戏数据加载完成事件
+        /// 用于通知系统游戏存档已加载完成
+        /// </summary>
+        public static event Action<string> OnLoadGameCompleted;
+        
+        public static void TriggerLoadGameCompleted(string slotName)
+        {
+            Log.Info(module, $"触发游戏数据加载完成事件: {slotName}");
+            OnLoadGameCompleted?.Invoke(slotName);
         }
 
         /// <summary>
@@ -177,6 +190,19 @@ namespace MyGame.Events
         {
             Log.Info(module, $"触发游戏数据删除事件: {slotName}");
             OnDeleteSave?.Invoke(slotName);
+        }
+        
+        /// <summary>
+        /// 游戏数据保存操作完成通知事件
+        /// 用于在保存操作实际完成后通知UI更新
+        /// 与OnSaveGame的区别：OnSaveGame用于触发保存操作，而此事件用于通知保存操作已完成
+        /// </summary>
+        public static event Action<string> OnSaveGameCompleted;
+        
+        public static void TriggerSaveGameCompleted(string slotName)
+        {
+            Log.Info(module, $"触发游戏数据保存完成通知事件: {slotName}");
+            OnSaveGameCompleted?.Invoke(slotName);
         }
 
         #endregion

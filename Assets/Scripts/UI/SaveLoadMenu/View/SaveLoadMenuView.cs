@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 using System.Collections.Generic;
 using TMPro;
 using MyGame.Data;
@@ -9,17 +8,18 @@ using Logger;
 using MyGame.UI.SaveLoad.Controller;
 using System.Collections;
 using UnityEngine.InputSystem;
-using MyGame.Utils;
 using MyGame.UI.SaveLoad.Utils;
+using MyGame.UI.SaveLoad.View.Components;
+using MyGame.UI.SaveLoad.View;
 
-namespace MyGame.UI.SaveLoad.View
+namespace MyGame.UI.SaveLoad
 {
     /// <summary>
     /// 存档菜单视图类
     /// 负责显示存档菜单的UI元素并处理用户交互
     /// 继承自BaseView以保持架构一致性
     /// </summary>
-    public class SaveLoadMenuView : BaseView<SaveLoadMenuController>
+    public class SaveLoadMenuView : BaseView<SaveLoadMenuController>, ISaveSlotMenuHandler
     {
         #region 成员变量
         [Header("存档槽")]
@@ -72,16 +72,8 @@ namespace MyGame.UI.SaveLoad.View
         [Tooltip("确认信息文本")]
         [SerializeField] private TextMeshProUGUI confirmDirectionText;
         
-        // 确认操作类型枚举
-        protected enum ConfirmActionType
-        {
-            Save,
-            Load,
-            Delete
-        }
-        
         // 当前确认操作类型
-        private ConfirmActionType _currentConfirmActionType;
+        private ConfirmType _currentConfirmActionType;
         
         // 当前确认操作的存档槽名称
         private string _currentConfirmSlotName;
@@ -169,9 +161,9 @@ namespace MyGame.UI.SaveLoad.View
             
             // 注册事件回调处理方法
             _uiEventHandler.RegisterBackButtonCallback(HandleBackButtonClick);
-            _uiEventHandler.RegisterSaveButtonCallback(slotInfo => HandleSaveButtonClick());
-            _uiEventHandler.RegisterLoadButtonCallback(slotInfo => HandleLoadButtonClick());
-            _uiEventHandler.RegisterDeleteButtonCallback(slotInfo => HandleDeleteButtonClick());
+            _uiEventHandler.RegisterSaveButtonCallback(slotInfo => HandleSaveButtonClick(slotInfo));
+            _uiEventHandler.RegisterLoadButtonCallback(slotInfo => HandleLoadButtonClick(slotInfo));
+            _uiEventHandler.RegisterDeleteButtonCallback(slotInfo => HandleDeleteButtonClick(slotInfo));
             _uiEventHandler.RegisterConfirmButtonCallback(HandleConfirmButtonClick);
             _uiEventHandler.RegisterCancelButtonCallback(HandleCancelButtonClick);
         }
@@ -181,10 +173,7 @@ namespace MyGame.UI.SaveLoad.View
         /// </summary>
         protected virtual void SetupScrollAndMask()
         {
-            if (_navigationHelper != null)
-            {
-                _navigationHelper.SetupScrollAndMask(saveSlotsContainer);
-            }
+            _navigationHelper?.SetupScrollAndMask(saveSlotsContainer);
             
             // 确保ScrollRect的viewport和content设置正确
             if (saveScrollRect != null)
@@ -253,6 +242,16 @@ namespace MyGame.UI.SaveLoad.View
         #region 存档槽UI相关方法
         // 用于跟踪创建存档槽的协程
         private Coroutine _createSaveSlotCoroutine;
+        
+        /// <summary>
+        /// 视图更新类型枚举
+        /// </summary>
+        public enum UpdateViewType
+        {
+            Full,        // 完整更新 - 重新创建存档槽UI
+            Selection,   // 仅更新选择状态
+            SpecificSlot // 仅更新特定存档槽的数据
+        }
 
         /// <summary>
         /// 更新视图显示
@@ -274,9 +273,14 @@ namespace MyGame.UI.SaveLoad.View
                     break;
                 case UpdateViewType.Selection:
                     // 仅更新选择状态 - 不重新创建存档槽UI
-                    if (_navigationHelper != null)
+                    _navigationHelper?.UpdateSelectionUI();
+                    break;
+                case UpdateViewType.SpecificSlot:
+                    // 仅更新特定存档槽的数据
+                    // 使用当前选中的存档槽信息更新UI显示
+                    if (currentSelectedSlotInfo != null && !string.IsNullOrEmpty(currentSelectedSlotInfo.SlotName))
                     {
-                        _navigationHelper.UpdateSelectionUI();
+                        UpdateSpecificSaveSlotUI(currentSelectedSlotInfo.SlotName);
                     }
                     break;
             }
@@ -286,12 +290,30 @@ namespace MyGame.UI.SaveLoad.View
         }
         
         /// <summary>
-        /// 视图更新类型枚举
+        /// 更新特定存档槽的UI显示
+        /// 只更新单个存档槽的数据而不重建所有UI，提高性能和用户体验
         /// </summary>
-        public enum UpdateViewType
+        /// <param name="slotName">要更新的存档槽名称</param>
+        public virtual void UpdateSpecificSaveSlotUI(string slotName)
         {
-            Full,        // 完整更新 - 重新创建存档槽UI
-            Selection    // 仅更新选择状态
+            if (_model == null || string.IsNullOrEmpty(slotName) || _saveSlotUIs == null)
+                return;
+            
+            // 查找对应的存档槽UI
+            ISaveSlotUI slotUI = _saveSlotUIs.Find(ui => ui.SlotName == slotName);
+            if (slotUI == null)
+                return;
+            
+            // 查找对应的存档槽数据
+            SaveSlotInfo slotInfo = _model.SaveSlots.Find(slot => slot.SlotName == slotName);
+            if (slotInfo == null)
+                return;
+            
+            // 更新存档槽UI的显示
+            slotUI.UpdateDisplay();
+            
+            // 更新按钮状态
+            UpdateSaveOptionsButtonStates();
         }
 
         
@@ -317,7 +339,7 @@ namespace MyGame.UI.SaveLoad.View
                 maxSaveSlots,             // 创建数量
                 _model.SaveSlots,         // 存档槽信息列表
                 this,                     // 当前视图引用
-                (List<ISaveSlotUI> uis) => // 全部创建完成回调
+                uis =>
                 {
                     _saveSlotUIs = uis;
                 },
@@ -340,16 +362,10 @@ namespace MyGame.UI.SaveLoad.View
         protected virtual void ClearSaveSlotUIs()
         {
             // 使用异步操作辅助类清除存档槽UI
-            if (_asyncOperationHelper != null)
-            {
-                _asyncOperationHelper.CleanupSaveSlotUIs(_saveSlotUIs);
-            }
-            
+            _asyncOperationHelper?.CleanupSaveSlotUIs(_saveSlotUIs);
+
             // 重置导航状态
-            if (_navigationHelper != null)
-            {
-                _navigationHelper.ResetSelection();
-            }
+            _navigationHelper?.ResetSelection();
         }
         
         /// <summary>
@@ -357,10 +373,7 @@ namespace MyGame.UI.SaveLoad.View
         /// </summary>
         private void Update()
         {
-            if (_navigationHelper != null)
-            {
-                _navigationHelper.HandleKeyboardNavigation();
-            }
+            _navigationHelper?.HandleKeyboardNavigation();
         }
         #endregion
         
@@ -392,10 +405,7 @@ namespace MyGame.UI.SaveLoad.View
         protected virtual void BindButtonEvents()
         {
             // 使用UI事件处理辅助类绑定按钮事件
-            if (_uiEventHandler != null)
-            {
-                _uiEventHandler.BindEvents();
-            }
+            _uiEventHandler?.BindEvents();
         }
         
         /// <summary>
@@ -404,10 +414,7 @@ namespace MyGame.UI.SaveLoad.View
         protected virtual void UnbindButtonEvents()
         {
             // 使用UI事件处理辅助类解绑按钮事件
-            if (_uiEventHandler != null)
-            {
-                _uiEventHandler.UnbindEvents();
-            }
+            _uiEventHandler?.UnbindEvents();
         }
         
         /// <summary>
@@ -418,6 +425,7 @@ namespace MyGame.UI.SaveLoad.View
             if (_model != null)
             {
                 _model.OnSaveSlotsUpdated += OnSaveSlotsUpdated;
+                _model.OnSelectedSaveSlotChanged += OnSelectedSaveSlotChanged;
             }
         }
         
@@ -429,13 +437,41 @@ namespace MyGame.UI.SaveLoad.View
             if (_model != null)
             {
                 _model.OnSaveSlotsUpdated -= OnSaveSlotsUpdated;
+                _model.OnSelectedSaveSlotChanged -= OnSelectedSaveSlotChanged;
+            }
+        }
+        
+        /// <summary>
+        /// 处理选中存档槽变更事件
+        /// 更新UI上的存档槽选中指示
+        /// 确保导航辅助类中的选中索引与模型保持同步
+        /// </summary>
+        protected virtual void OnSelectedSaveSlotChanged()
+        {
+            if (_model != null && _navigationHelper != null && _saveSlotUIs != null && _saveSlotUIs.Count > 0)
+            {
+                // 获取模型中选中的存档槽名称
+                string selectedSlotName = _model.SelectedSaveSlotName;
+                
+                if (!string.IsNullOrEmpty(selectedSlotName))
+                {
+                    // 遍历存档槽UI，找到与选中名称匹配的存档槽
+                    for (int i = 0; i < _saveSlotUIs.Count; i++)
+                    {
+                        if (_saveSlotUIs[i] != null && _saveSlotUIs[i].SlotName == selectedSlotName)
+                        {
+                            // 更新导航辅助类中的选中索引
+                            _navigationHelper.SelectAndScrollToSlot(i);
+                            break;
+                        }
+                    }
+                }
             }
         }
         
         /// <summary>
         /// 处理存档槽点击事件
-        /// - 如果是非空存档槽，显示二级菜单
-        /// - 如果是空存档槽，直接选中但不显示二级菜单
+        /// 仅负责与控制器通信，二级菜单的显示/隐藏由SaveSlot类自行处理
         /// </summary>
         /// <param name="slotName">存档槽名称</param>
         /// <param name="saveData">存档数据，如果为null表示空存档槽</param>
@@ -444,23 +480,6 @@ namespace MyGame.UI.SaveLoad.View
             if (m_controller != null)
             {
                 m_controller.HandleSaveSlotSelected(slotName, saveData);
-            }
-            
-            // 点击非空存档槽时显示二级菜单
-            if (saveData != null)
-            {
-                // 查找对应的存档槽信息
-                var slotInfo = _model.SaveSlots.Find(slot => slot.SlotName == slotName);
-                if (slotInfo != null)
-                {
-                    // 使用整合后的二级菜单
-                    ShowSaveOptionsMenu(slotInfo);
-                }
-            }
-            else
-            {
-                // 隐藏二级菜单
-                HideSaveOptionsMenu();
             }
         }
         
@@ -483,10 +502,7 @@ namespace MyGame.UI.SaveLoad.View
             currentSelectedSlotInfo = slotInfo;
             
             // 更新事件处理器中的当前选中存档槽信息
-            if (_uiEventHandler != null)
-            {
-                _uiEventHandler.SetCurrentSelectedSlotInfo(slotInfo);
-            }
+            _uiEventHandler?.SetCurrentSelectedSlotInfo(slotInfo);
             
             // 更新按钮状态
             UpdateSaveOptionsButtonStates();
@@ -503,7 +519,7 @@ namespace MyGame.UI.SaveLoad.View
         /// <summary>
         /// 隐藏保存选项菜单
         /// </summary>
-        protected virtual void HideSaveOptionsMenu()
+        public virtual void HideSaveOptionsMenu()
         {
             // 隐藏整合后的二级菜单面板
             if (saveOptionsPanel != null)
@@ -583,10 +599,7 @@ namespace MyGame.UI.SaveLoad.View
             bool hasSaveData = currentSelectedSlotInfo != null && currentSelectedSlotInfo.SaveData != null;
             
             // 使用事件处理器统一更新按钮状态
-            if (_uiEventHandler != null)
-            {
-                _uiEventHandler.UpdateButtonStates(currentSelectedSlotInfo != null, hasSaveData);
-            }
+            _uiEventHandler?.UpdateButtonStates(currentSelectedSlotInfo != null, hasSaveData);
         }
         #endregion
         
@@ -594,36 +607,48 @@ namespace MyGame.UI.SaveLoad.View
         /// <summary>
         /// 处理保存按钮点击事件
         /// </summary>
-        public virtual void HandleSaveButtonClick()
+        /// <param name="slotInfo">存档槽信息，如果为null则使用当前选中的存档槽</param>
+        public virtual void HandleSaveButtonClick(SaveSlotInfo slotInfo = null)
         {
-            if (m_controller != null && currentSelectedSlotInfo != null)
+            // 如果提供了slotInfo参数，则使用它；否则使用当前选中的存档槽
+            var targetSlotInfo = slotInfo ?? currentSelectedSlotInfo;
+            
+            if (m_controller != null && targetSlotInfo != null)
             {
                 // 显示保存确认面板
-                ShowConfirmPanel(ConfirmActionType.Save, currentSelectedSlotInfo.SlotName);
+                ShowConfirmPanel(ConfirmType.Overwrite, targetSlotInfo.SlotName);
             }
         }
         
         /// <summary>
         /// 处理加载按钮点击事件
         /// </summary>
-        public virtual void HandleLoadButtonClick()
+        /// <param name="slotInfo">存档槽信息，如果为null则使用当前选中的存档槽</param>
+        public virtual void HandleLoadButtonClick(SaveSlotInfo slotInfo = null)
         {
-            if (m_controller != null && currentSelectedSlotInfo != null)
+            // 如果提供了slotInfo参数，则使用它；否则使用当前选中的存档槽
+            var targetSlotInfo = slotInfo ?? currentSelectedSlotInfo;
+            
+            if (m_controller != null && targetSlotInfo != null)
             {
                 // 显示加载确认面板
-                ShowConfirmPanel(ConfirmActionType.Load, currentSelectedSlotInfo.SlotName);
+                ShowConfirmPanel(ConfirmType.Load, targetSlotInfo.SlotName);
             }
         }
         
         /// <summary>
         /// 处理删除按钮点击事件
         /// </summary>
-        public virtual void HandleDeleteButtonClick()
+        /// <param name="slotInfo">存档槽信息，如果为null则使用当前选中的存档槽</param>
+        public virtual void HandleDeleteButtonClick(SaveSlotInfo slotInfo = null)
         {
-            if (m_controller != null && currentSelectedSlotInfo != null)
+            // 如果提供了slotInfo参数，则使用它；否则使用当前选中的存档槽
+            var targetSlotInfo = slotInfo ?? currentSelectedSlotInfo;
+            
+            if (m_controller != null && targetSlotInfo != null)
             {
                 // 调用确认删除方法显示确认面板
-                ConfirmDeleteSave(currentSelectedSlotInfo.SlotName);
+                ConfirmDeleteSave(targetSlotInfo.SlotName);
             }
         }
         
@@ -635,7 +660,7 @@ namespace MyGame.UI.SaveLoad.View
         protected virtual void ConfirmDeleteSave(string slotName)
         {
             // 显示删除确认面板
-            ShowConfirmPanel(ConfirmActionType.Delete, slotName);
+            ShowConfirmPanel(ConfirmType.Delete, slotName);
         }
         
         /// <summary>
@@ -643,7 +668,7 @@ namespace MyGame.UI.SaveLoad.View
         /// </summary>
         /// <param name="actionType">确认操作类型</param>
         /// <param name="slotName">存档槽名称</param>
-        protected virtual void ShowConfirmPanel(ConfirmActionType actionType, string slotName)
+        protected virtual void ShowConfirmPanel(ConfirmType actionType, string slotName)
         {
             // 设置当前确认操作类型和存档槽名称
             _currentConfirmActionType = actionType;
@@ -654,14 +679,14 @@ namespace MyGame.UI.SaveLoad.View
             {
                 switch (actionType)
                 {
-                    case ConfirmActionType.Save:
+                    case ConfirmType.Overwrite:
                         // 保存操作通常不需要确认文本或使用通用文本
                         confirmDirectionText.text = m_controller.Config.OverwriteSaveConfirmText;
                         break;
-                    case ConfirmActionType.Load:
+                    case ConfirmType.Load:
                         confirmDirectionText.text = m_controller.Config.LoadSaveConfirmText;
                         break;
-                    case ConfirmActionType.Delete:
+                    case ConfirmType.Delete:
                         confirmDirectionText.text = m_controller.Config.DeleteSaveConfirmText;
                         break;
                 }
@@ -673,6 +698,62 @@ namespace MyGame.UI.SaveLoad.View
                 confirmPanel.SetActive(true);
                 // 显示确认面板时可以隐藏二级菜单或保持显示，根据设计需求决定
                 // HideSaveOptionsMenu();
+            }
+        }
+        
+        /// <summary>
+        /// ISaveSlotMenuHandler接口实现：显示确认面板
+        /// </summary>
+        /// <param name="actionType">确认操作类型</param>
+        /// <param name="slotName">存档槽名称</param>
+        void ISaveSlotMenuHandler.ShowConfirmPanel(ConfirmType actionType, string slotName)
+        {
+            // 直接调用内部的ShowConfirmPanel方法，无需类型转换
+            ShowConfirmPanel(actionType, slotName);
+        }
+        
+        /// <summary>
+        /// ISaveSlotMenuHandler接口实现：隐藏确认面板
+        /// </summary>
+        void ISaveSlotMenuHandler.HideConfirmPanel()
+        {
+            // 调用内部的HideConfirmPanel方法
+            HideConfirmPanel();
+        }
+        
+        /// <summary>
+        /// ISaveSlotMenuHandler接口实现：处理保存游戏操作
+        /// </summary>
+        /// <param name="slotName">存档槽名称</param>
+        void ISaveSlotMenuHandler.HandleSaveGame(string slotName)
+        {
+            if (m_controller != null)
+            {
+                m_controller.HandleSaveGame(slotName);
+            }
+        }
+        
+        /// <summary>
+        /// ISaveSlotMenuHandler接口实现：处理加载游戏操作
+        /// </summary>
+        /// <param name="slotName">存档槽名称</param>
+        void ISaveSlotMenuHandler.HandleLoadGame(string slotName)
+        {
+            if (m_controller != null)
+            {
+                m_controller.HandleLoadGame(slotName);
+            }
+        }
+        
+        /// <summary>
+        /// ISaveSlotMenuHandler接口实现：处理删除存档操作
+        /// </summary>
+        /// <param name="slotName">存档槽名称</param>
+        void ISaveSlotMenuHandler.HandleDeleteSave(string slotName)
+        {
+            if (m_controller != null)
+            {
+                m_controller.HandleDeleteSave(slotName);
             }
         }
         
@@ -697,13 +778,15 @@ namespace MyGame.UI.SaveLoad.View
             {
                 switch (_currentConfirmActionType)
                 {
-                    case ConfirmActionType.Save:
+                    case ConfirmType.Overwrite:
                         m_controller.HandleSaveGame(_currentConfirmSlotName);
+                        // 保存完成后更新特定存档槽的视图显示
+                        UpdateView(UpdateViewType.SpecificSlot);
                         break;
-                    case ConfirmActionType.Load:
+                    case ConfirmType.Load:
                         m_controller.HandleLoadGame(_currentConfirmSlotName);
                         break;
-                    case ConfirmActionType.Delete:
+                    case ConfirmType.Delete:
                         m_controller.HandleDeleteSave(_currentConfirmSlotName);
                         break;
                 }

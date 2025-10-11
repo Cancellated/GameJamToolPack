@@ -5,7 +5,7 @@ using MyGame.UI.SaveLoad.Events;
 using MyGame.Events;
 using MyGame.UI.SaveLoad.View;
 using MyGame.Managers;
-using static MyGame.UI.SaveLoad.View.SaveLoadMenuView;
+using static MyGame.UI.SaveLoad.SaveLoadMenuView;
 
 namespace MyGame.UI.SaveLoad.Controller
 {
@@ -202,6 +202,11 @@ namespace MyGame.UI.SaveLoad.Controller
             SaveLoadMenuEvents.OnCreateNewGame += HandleCreateNewGame;
             SaveLoadMenuEvents.OnBackToMainMenu += HandleBackToMainMenu;
             SaveLoadMenuEvents.OnSaveSlotSelected += HandleSaveSlotSelected;
+            
+            // 注册全局游戏事件，确保存档操作完成后更新视图
+            GameEvents.OnSaveGame += OnGameSaveCompleted;
+            GameEvents.OnAutoSave += OnGameSaveCompleted; // 添加对自动保存事件的订阅
+            GameEvents.OnDeleteSave += OnGameDeleteCompleted;
         }
         
         /// <summary>
@@ -216,6 +221,11 @@ namespace MyGame.UI.SaveLoad.Controller
             SaveLoadMenuEvents.OnCreateNewGame -= HandleCreateNewGame;
             SaveLoadMenuEvents.OnBackToMainMenu -= HandleBackToMainMenu;
             SaveLoadMenuEvents.OnSaveSlotSelected -= HandleSaveSlotSelected;
+            
+            // 注销全局游戏事件
+            GameEvents.OnSaveGame -= OnGameSaveCompleted;
+            GameEvents.OnAutoSave -= OnGameSaveCompleted; // 注销自动保存事件订阅
+            GameEvents.OnDeleteSave -= OnGameDeleteCompleted;
         }
         #endregion
         
@@ -271,9 +281,7 @@ namespace MyGame.UI.SaveLoad.Controller
                     if (saveData != null)
                     {
                         slot.SaveData = saveData;
-                        // 使用正确的属性名saveTime而不是LastModified
                         slot.LastModified = saveData.saveTime;
-                        // 使用正确的属性名version而不是Version
                         slot.Version = saveData.version;
                         // 从gameProgress中构建进度文本
                         string progress = "无进度信息";
@@ -370,11 +378,18 @@ namespace MyGame.UI.SaveLoad.Controller
         
         /// <summary>
         /// 处理创建新游戏操作
+        /// 不需要加参数，自动使用当前选中的存档槽
+        /// 创建新游戏时会自动触发保存事件
         /// </summary>
         public void HandleCreateNewGame()
         {
-            // 通过GameEvents触发创建新游戏操作
-            GameEvents.TriggerCreateNewGame();
+            // 获取当前选中的存档槽名称
+            string selectedSlotName = _model?.SelectedSaveSlotName;
+            
+            // 触发创建新游戏操作
+            // SaveManager中的HandleCreateNewGame方法会自动调用SaveCurrentGame
+            // SaveCurrentGame方法中会在保存成功后触发GameEvents.TriggerSaveGame事件
+            GameEvents.TriggerCreateNewGame(selectedSlotName);
         }
         
         /// <summary>
@@ -399,6 +414,85 @@ namespace MyGame.UI.SaveLoad.Controller
             if (_view != null)
             {
                 _view.UpdateView();
+            }
+        }
+        
+        /// <summary>
+        /// 处理游戏保存完成事件
+        /// 当GameEvents.OnSaveGame触发时，只刷新被保存的存档槽数据并更新视图
+        /// 优化逻辑：只关注被操作的slot而不是重建所有存档槽
+        /// </summary>
+        /// <param name="slotName">已保存的存档槽名称</param>
+        private void OnGameSaveCompleted(string slotName)
+        {
+            UpdateSpecificSaveSlot(slotName);
+        }
+        
+        /// <summary>
+        /// 处理游戏删除完成事件
+        /// 当GameEvents.OnDeleteSave触发时，只刷新被删除的存档槽数据并更新视图
+        /// 优化逻辑：只关注被操作的slot而不是重建所有存档槽
+        /// </summary>
+        /// <param name="slotName">已删除的存档槽名称</param>
+        private void OnGameDeleteCompleted(string slotName)
+        {
+            UpdateSpecificSaveSlot(slotName);
+        }
+        
+        /// <summary>
+        /// 更新指定的存档槽数据
+        /// </summary>
+        /// <param name="slotName">要更新的存档槽名称</param>
+        private void UpdateSpecificSaveSlot(string slotName)
+        {
+            if (_model == null || _view == null || string.IsNullOrEmpty(slotName))
+                return;
+            
+            // 获取当前存档槽列表
+            List<SaveSlotInfo> currentSlots = _model.SaveSlots;
+            if (currentSlots == null)
+                currentSlots = new List<SaveSlotInfo>();
+            
+            // 查找要更新的存档槽
+            SaveSlotInfo slotToUpdate = currentSlots.Find(slot => slot.SlotName == slotName);
+            
+            // 如果找到存档槽，更新其信息
+            if (slotToUpdate != null)
+            {
+                // 检查存档是否存在
+                slotToUpdate.HasSave = SaveManager.Instance.DoesSaveExist(slotName);
+                
+                // 如果存档存在，加载并更新数据
+                if (slotToUpdate.HasSave)
+                {
+                    SaveData saveData = SaveManager.Instance.LoadSaveData(slotName);
+                    if (saveData != null)
+                    {
+                        slotToUpdate.SaveData = saveData;
+                        slotToUpdate.LastModified = saveData.saveTime;
+                        slotToUpdate.Version = saveData.version;
+                        // 从gameProgress中构建进度文本
+                        string progress = "无进度信息";
+                        if (saveData.gameProgress != null)
+                        {
+                            progress = string.Format("关卡: {0}, 完成: {1}个", 
+                                                   saveData.gameProgress.currentLevel, 
+                                                   saveData.gameProgress.completedLevels.Count);
+                        }
+                        slotToUpdate.ProgressText = progress;
+                    }
+                }
+                else
+                {
+                    // 如果存档不存在，清除数据
+                    slotToUpdate.SaveData = null;
+                    slotToUpdate.LastModified = null;
+                    slotToUpdate.Version = null;
+                    slotToUpdate.ProgressText = null;
+                }
+                
+                // 通知视图只更新特定存档槽
+                _view.UpdateSpecificSaveSlotUI(slotName);
             }
         }
         

@@ -83,7 +83,7 @@ namespace MyGame.UI.SaveLoad.Utils
         
         /// <summary>
         /// 更新选择UI状态
-        /// 用于在不重新创建存档槽UI的情况下更新选中状态
+        /// 用于更新选中状态
         /// </summary>
         public void UpdateSelectionUI()
         {
@@ -93,10 +93,7 @@ namespace MyGame.UI.SaveLoad.Utils
             // 更新所有存档槽的选择状态
             for (int i = 0; i < _saveSlotUIs.Count; i++)
             {
-                if (_saveSlotUIs[i] != null)
-                {
-                    _saveSlotUIs[i].SetSelected(i == _currentSelectedIndex);
-                }
+                _saveSlotUIs[i]?.SetSelected(i == _currentSelectedIndex);
             }
             
             // 如果有选中的存档槽，确保它在视口中可见
