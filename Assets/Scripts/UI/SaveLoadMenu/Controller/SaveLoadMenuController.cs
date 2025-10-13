@@ -1,535 +1,329 @@
 using System.Collections.Generic;
-using UnityEngine;
 using MyGame.Data;
-using MyGame.UI.SaveLoad.Events;
 using MyGame.Events;
+using MyGame.UI.SaveLoad.Model;
 using MyGame.UI.SaveLoad.View;
-using MyGame.Managers;
-using static MyGame.UI.SaveLoad.SaveLoadMenuView;
+using MyGame.UI.SaveLoad;
+using MyGame.UI.SaveLoadMenu.View.Components;
 
 namespace MyGame.UI.SaveLoad.Controller
 {
     /// <summary>
     /// 存档菜单控制器类
-    /// 负责处理存档菜单的用户交互和业务逻辑
-    /// 继承自BaseController以保持架构一致性
+    /// 负责连接模型和视图，处理用户交互
     /// </summary>
     public class SaveLoadMenuController : BaseController<SaveLoadMenuView, SaveLoadMenuModel>
     {
-        #region 成员变量
-        [Header("MVC Components")]
-        [SerializeField] private SaveLoadMenuModel _model;
-        [SerializeField] private SaveLoadMenuView _view;
-        
-        [Header("配置文件")]
-        [Tooltip("存档菜单配置文件，包含存档设置、UI配置、文本配置等")]
-        [SerializeField] private SaveLoadMenuConfig _config;
-        #endregion
-        
-        #region 属性
-        /// <summary>
-        /// 存档菜单配置文件
-        /// </summary>
-        public SaveLoadMenuConfig Config
+        #region 生命周期
+    /// <summary>
+    /// 初始化控制器和MVC组件
+    /// </summary>
+    private void Awake()
+    {
+        Initialize();
+    }
+
+    /// <summary>
+    /// 当对象启用时
+    /// </summary>
+    private void OnEnable()
+    {
+        // 确保MVC组件正确初始化
+        if (m_model == null)
         {
-            get { return _config; }
-            set { _config = value; }
-        }
-        
-        /// <summary>
-        /// 模型组件
-        /// 提供对具体类型的访问
-        /// </summary>
-        public SaveLoadMenuModel Model
-        {
-            get { return m_model; }
-            set { base.SetModel(value); }
-        }
-        
-        /// <summary>
-        /// 视图组件
-        /// 提供对具体类型的访问
-        /// </summary>
-        public SaveLoadMenuView View
-        {
-            get { return m_view; }
-            set { base.SetView(value); }
-        }
-        #endregion
-        
-        #region 生命周期方法
-        /// <summary>
-        /// 初始化MVC组件
-        /// </summary>
-        private void Awake()
-        {
-            InitializeMVC();
             Initialize();
         }
-        
+    }
+
+    /// <summary>
+    /// 当对象被销毁时
+    /// </summary>
+    private void OnDestroy()
+    {
+        Cleanup();
+    }
+    #endregion
+
+
+
+        #region 初始化和清理方法
         /// <summary>
-        /// 启用组件时注册事件
+        /// 控制器初始化
+        /// 调用基类Initialize并执行初始化逻辑
         /// </summary>
-        private void OnEnable()
+        public override void Initialize()
         {
-            RegisterEvents();
+            // 创建并初始化模型
+            if (m_model == null)
+            {
+                m_model = new SaveLoadMenuModel();
+                m_model.Initialize();
+                SetModel(m_model);
+            }
+
+            base.Initialize();
         }
-        
+
         /// <summary>
-        /// 禁用组件时注销事件
-        /// </summary>
-        private void OnDisable()
-        {
-            UnregisterEvents();
-        }
-        
-        /// <summary>
-        /// 初始化逻辑
-        /// 重写基类OnInitialize方法
+        /// 初始化控制器逻辑
         /// </summary>
         protected override void OnInitialize()
         {
-            base.OnInitialize();
-            // 初始化逻辑已在InitializeMVC中实现
+            // 注册事件监听
+            RegisterEvents();
         }
-        
+
         /// <summary>
-        /// 清理逻辑
-        /// 重写基类OnCleanup方法
+        /// 清理控制器资源
+        /// </summary>
+        public override void Cleanup()
+        {
+            // 取消注册事件
+            UnregisterEvents();
+
+            base.Cleanup();
+        }
+
+        /// <summary>
+        /// 清理控制器逻辑
         /// </summary>
         protected override void OnCleanup()
         {
-            base.OnCleanup();
-            UnregisterEvents();
-            if (m_view != null)
-            {
-                m_view.Cleanup();
-            }
+            // 清理模型资源
+            m_model?.Cleanup();
         }
         #endregion
-        
-        #region MVC关系管理
-        /// <summary>
-        /// 设置模型组件
-        /// 重写基类SetModel方法
-        /// </summary>
-        /// <param name="model">模型实例</param>
-        public override void SetModel(SaveLoadMenuModel model)
-        {
-            if (m_model != null)
-            {
-                // 移除旧模型的事件监听
-                m_model.OnSaveSlotsUpdated -= HandleSaveSlotsUpdated;
-                m_model.OnSelectedSaveSlotChanged -= HandleSelectedSaveSlotChanged;
-            }
-            
-            base.SetModel(model);
-            
-            if (m_model != null)
-            {
-                m_model.Initialize();
-                // 添加新模型的事件监听
-                m_model.OnSaveSlotsUpdated += HandleSaveSlotsUpdated;
-                m_model.OnSelectedSaveSlotChanged += HandleSelectedSaveSlotChanged;
-                
-                // 如果视图已设置，同步模型引用
-                if (m_view != null)
-                {
-                    m_view.Model = m_model;
-                }
-            }
-        }
-        
-        /// <summary>
-        /// 设置视图组件
-        /// 重写基类SetView方法
-        /// </summary>
-        /// <param name="view">视图实例</param>
-        public override void SetView(SaveLoadMenuView view)
-        {
-            if (m_view != null)
-            {
-                // 移除旧视图的引用
-                m_view.Controller = null;
-            }
-            
-            base.SetView(view);
-            
-            if (m_view != null)
-            {
-                m_view.Initialize();
-                m_view.Controller = this;
-                
-                if (m_model != null)
-                {
-                    m_view.SetModel(m_model);
-                }
-            }
-        }
-        
-        /// <summary>
-        /// 初始化MVC组件关系
-        /// </summary>
-        private void InitializeMVC()
-        {
-            // 确保模型和视图不为空
-            _model ??= new SaveLoadMenuModel();
-            
-            if (_view == null)
-            {
-                _view = GetComponentInChildren<SaveLoadMenuView>();
-            }
-            
-            // 设置MVC关系
-            SetModel(_model);
-            SetView(_view);
-            
-            // 初始化存档槽
-            InitializeSaveSlots();
-        }
-        #endregion
-        
-        #region 事件管理
+
+        #region 事件注册
         /// <summary>
         /// 注册事件
         /// </summary>
-        private void RegisterEvents()
+        protected void RegisterEvents()
         {
-            // 注册存档菜单相关事件
-            SaveLoadMenuEvents.OnSaveGame += HandleSaveGame;
-            SaveLoadMenuEvents.OnLoadGame += HandleLoadGame;
-            SaveLoadMenuEvents.OnDeleteSave += HandleDeleteSave;
-            SaveLoadMenuEvents.OnCreateNewGame += HandleCreateNewGame;
-            SaveLoadMenuEvents.OnBackToMainMenu += HandleBackToMainMenu;
-            SaveLoadMenuEvents.OnSaveSlotSelected += HandleSaveSlotSelected;
-            
-            // 注册全局游戏事件，确保存档操作完成后更新视图
-            GameEvents.OnSaveGame += OnGameSaveCompleted;
-            GameEvents.OnAutoSave += OnGameSaveCompleted; // 添加对自动保存事件的订阅
-            GameEvents.OnDeleteSave += OnGameDeleteCompleted;
+            if (m_model != null)
+            {
+                // 注册模型事件
+                m_model.OnMenuModeChanged += HandleMenuModeChanged;
+                m_model.OnPageChanged += HandlePageChanged;
+            }
         }
-        
+
         /// <summary>
-        /// 注销事件
+        /// 解除注册事件
         /// </summary>
-        private void UnregisterEvents()
+        protected void UnregisterEvents()
         {
-            // 注销存档菜单相关事件
-            SaveLoadMenuEvents.OnSaveGame -= HandleSaveGame;
-            SaveLoadMenuEvents.OnLoadGame -= HandleLoadGame;
-            SaveLoadMenuEvents.OnDeleteSave -= HandleDeleteSave;
-            SaveLoadMenuEvents.OnCreateNewGame -= HandleCreateNewGame;
-            SaveLoadMenuEvents.OnBackToMainMenu -= HandleBackToMainMenu;
-            SaveLoadMenuEvents.OnSaveSlotSelected -= HandleSaveSlotSelected;
-            
-            // 注销全局游戏事件
-            GameEvents.OnSaveGame -= OnGameSaveCompleted;
-            GameEvents.OnAutoSave -= OnGameSaveCompleted; // 注销自动保存事件订阅
-            GameEvents.OnDeleteSave -= OnGameDeleteCompleted;
+            if (m_model != null)
+            {
+                // 解除注册模型事件
+                m_model.OnMenuModeChanged -= HandleMenuModeChanged;
+                m_model.OnPageChanged -= HandlePageChanged;
+            }
         }
         #endregion
-        
-        #region 存档槽操作
+
+        #region 菜单显示控制
         /// <summary>
-        /// 初始化存档槽
+        /// 显示存档菜单（默认保存模式）
         /// </summary>
-        private void InitializeSaveSlots()
+        public virtual void Show()
         {
-            if (_model == null)
-                return;
-            
-            List<SaveSlotInfo> slots = new()
+            ShowSaveMenu();
+        }
+
+        /// <summary>
+        /// 显示保存模式的菜单
+        /// </summary>
+        public virtual void ShowSaveMenu()
+        {
+            m_model?.SetMenuMode(SaveLoadMenuModel.MenuMode.Save);
+
+            if (m_view != null)
             {
-                // 添加自动存档槽
-                new SaveSlotInfo
-                {
-                    SlotName = SaveLoadMenuConstants.AUTO_SAVE_SLOT,
-                    DisplayName = "自动存档",
-                    IsAutoSave = true,
-                    HasSave = SaveManager.Instance.DoesSaveExist(SaveLoadMenuConstants.AUTO_SAVE_SLOT)
-                }
-            };
-            
-            // 添加手动存档槽
-            int saveSlotCount = SaveLoadMenuConstants.DEFAULT_SAVE_SLOT_COUNT;
-            
-            // 如果有配置文件，使用配置中的存档槽数量
-            if (_config != null)
-            {
-                saveSlotCount = _config.MaxManualSaveCount;
+                m_view.Show();
             }
-            
-            for (int i = 1; i <= saveSlotCount; i++)
+        }
+
+        /// <summary>
+        /// 显示读取模式的菜单
+        /// </summary>
+        public virtual void ShowLoadMenu()
+        {
+            m_model?.SetMenuMode(SaveLoadMenuModel.MenuMode.Load);
+
+            if (m_view != null)
             {
-                string slotName = string.Format("save_{0}", i);
-                
-                slots.Add(new SaveSlotInfo
-                {
-                    SlotName = slotName,
-                    DisplayName = string.Format("存档槽 {0}", i),
-                    IsAutoSave = false,
-                    HasSave = SaveManager.Instance.DoesSaveExist(slotName)
-                });
+                m_view.Show();
             }
-            
-            // 更新存档数据
-            foreach (var slot in slots)
+        }
+
+        /// <summary>
+        /// 隐藏菜单
+        /// </summary>
+        public virtual void Hide()
+        {
+            if (m_view != null)
             {
-                if (slot.HasSave)
-                {
-                    SaveData saveData = SaveManager.Instance.LoadSaveData(slot.SlotName);
-                    if (saveData != null)
-                    {
-                        slot.SaveData = saveData;
-                        slot.LastModified = saveData.saveTime;
-                        slot.Version = saveData.version;
-                        // 从gameProgress中构建进度文本
-                        string progress = "无进度信息";
-                        if (saveData.gameProgress != null)
-                        {
-                            progress = string.Format("关卡: {0}, 完成: {1}个", 
-                                                   saveData.gameProgress.currentLevel, 
-                                                   saveData.gameProgress.completedLevels.Count);
-                        }
-                        slot.ProgressText = progress;
-                    }
-                }
+                m_view.Hide();
             }
-            
-            // 更新模型中的存档槽列表
-            _model.UpdateSaveSlots(slots);
         }
         #endregion
-        
-        #region 事件处理方法
+
+        #region 分页操作
         /// <summary>
-        /// 处理存档槽选中事件
-        /// 根据当前游戏状态处理空存档槽的点击行为
-        /// - 在主菜单状态下点击空存档槽：创建新游戏
-        /// - 在游戏中点击空存档槽：直接进行存档操作
+        /// 处理上一页请求
         /// </summary>
-        /// <param name="slotName">存档槽名称</param>
+        public void HandlePrevPage()
+        {
+            m_model?.GoToPreviousPage();
+        }
+
+        /// <summary>
+        /// 处理下一页请求
+        /// </summary>
+        public void HandleNextPage()
+        {
+            m_model?.GoToNextPage();
+        }
+        #endregion
+
+        #region 存档操作
+        /// <summary>
+        /// 获取当前页的存档槽数据
+        /// </summary>
+        /// <returns>当前页的存档槽信息列表</returns>
+        public List<SaveSlotInfo> GetCurrentPageSaveSlots()
+        {
+            return m_model?.GetCurrentPageSaveSlots;
+        }
+
+        /// <summary>
+        /// 处理存档槽点击事件
+        /// </summary>
+        /// <param name="slotName">点击的存档槽名称</param>
         /// <param name="saveData">存档数据</param>
-        public void HandleSaveSlotSelected(string slotName, SaveData saveData = null)
+        public void HandleSaveSlotClick(string slotName, SaveData saveData)
         {
-            if (_model == null)
-                return;
-            
             // 设置选中的存档槽
-            _model.SetSelectedSaveSlot(slotName, saveData);
-            
-            // 处理空存档槽的特殊逻辑
-            if (saveData == null)
+            m_model?.SetSelectedSaveSlot(slotName, saveData);
+        }
+        #endregion
+
+        #region 视图数据刷新
+        /// <summary>
+        /// 刷新视图数据
+        /// </summary>
+        public void RefreshViewData()
+        {
+            if (m_model != null && m_view != null)
             {
-                // 安全检查：确保GameManager实例存在
-                if (GameManager.Instance != null)
-                {
-                    // 获取当前游戏状态
-                    GameState currentState = GameManager.Instance.State;
-                    
-                    if (currentState == GameState.Menu)
-                    {
-                        // 在主菜单状态下点击空存档槽，触发创建新游戏操作
-                        HandleCreateNewGame();
-                    }
-                    else if (currentState == GameState.Playing || currentState == GameState.Paused)
-                    {
-                        // 在游戏中点击空存档槽，直接进行存档操作
-                        HandleSaveGame(slotName);
-                    }
-                }
-                else
-                {
-                    // 如果GameManager不存在，默认行为是不做任何特殊处理
-                    // 这通常只在测试场景中出现
-                }
+                // 刷新菜单模式
+                m_view.HandleMenuModeChanged(m_model.CurrentMenuMode);
+                // 刷新页码
+                m_view.HandlePageChanged(m_model.CurrentPage, m_model.TotalPages);
             }
         }
-        
+        #endregion
+
+        #region 存档操作处理
         /// <summary>
-        /// 处理存档操作
+        /// 处理保存游戏操作
         /// </summary>
         /// <param name="slotName">存档槽名称</param>
-        public void HandleSaveGame(string slotName)
+        private void HandleSaveGame(string slotName)
         {
-            // 通过GameEvents触发存档操作
+            if (string.IsNullOrEmpty(slotName))
+                return;
+
+            // 检查是否需要显示覆盖确认（如果是已有存档的槽位）
+            if (m_model != null && m_model.SaveSlots != null)
+            {
+                var slotInfo = m_model.SaveSlots.Find(slot => slot.SlotName == slotName);
+                if (slotInfo != null && slotInfo.HasSave)
+                {
+                    // 显示覆盖存档确认对话框
+                    m_view.ShowConfirmDialog(
+                        ConfirmDialogState.Save,
+                        () => GameEvents.TriggerSaveGame(slotName),
+                        null);
+                    return;
+                }
+            }
+
+            // 直接触发保存游戏事件（如果是新存档槽位）
             GameEvents.TriggerSaveGame(slotName);
         }
-        
+
         /// <summary>
         /// 处理加载游戏操作
         /// </summary>
         /// <param name="slotName">存档槽名称</param>
-        public void HandleLoadGame(string slotName)
+        private void HandleLoadGame(string slotName)
         {
-            // 通过GameEvents触发加载游戏操作
-            GameEvents.TriggerLoadGame(slotName);
+            if (string.IsNullOrEmpty(slotName))
+                return;
+
+            // 显示加载存档确认对话框
+            m_view.ShowConfirmDialog(
+                ConfirmDialogState.Load,
+                () =>
+                {
+                    // 触发加载游戏事件
+                    GameEvents.TriggerLoadGame(slotName);
+                    // 隐藏菜单
+                    Hide();
+                },
+                null);
         }
-        
+
         /// <summary>
         /// 处理删除存档操作
         /// </summary>
         /// <param name="slotName">存档槽名称</param>
-        public void HandleDeleteSave(string slotName)
+        private void HandleDeleteGame(string slotName)
         {
-            // 通过GameEvents触发删除存档操作
-            GameEvents.TriggerDeleteSave(slotName);
-        }
-        
-        /// <summary>
-        /// 处理创建新游戏操作
-        /// 不需要加参数，自动使用当前选中的存档槽
-        /// 创建新游戏时会自动触发保存事件
-        /// </summary>
-        public void HandleCreateNewGame()
-        {
-            // 获取当前选中的存档槽名称
-            string selectedSlotName = _model?.SelectedSaveSlotName;
-            
-            // 触发创建新游戏操作
-            // SaveManager中的HandleCreateNewGame方法会自动调用SaveCurrentGame
-            // SaveCurrentGame方法中会在保存成功后触发GameEvents.TriggerSaveGame事件
-            GameEvents.TriggerCreateNewGame(selectedSlotName);
-        }
-        
-        /// <summary>
-        /// 处理返回主菜单操作
-        /// </summary>
-        public void HandleBackToMainMenu()
-        {
-            // 处理返回主菜单逻辑
-            if (_view != null)
-            {
-                _view.Hide();
-            }
-            
-            // 可以在这里添加返回主菜单的其他逻辑
-        }
-        
-        /// <summary>
-        /// 处理存档槽更新事件
-        /// </summary>
-        private void HandleSaveSlotsUpdated()
-        {
-            if (_view != null)
-            {
-                _view.UpdateView();
-            }
-        }
-        
-        /// <summary>
-        /// 处理游戏保存完成事件
-        /// 当GameEvents.OnSaveGame触发时，只刷新被保存的存档槽数据并更新视图
-        /// 优化逻辑：只关注被操作的slot而不是重建所有存档槽
-        /// </summary>
-        /// <param name="slotName">已保存的存档槽名称</param>
-        private void OnGameSaveCompleted(string slotName)
-        {
-            UpdateSpecificSaveSlot(slotName);
-        }
-        
-        /// <summary>
-        /// 处理游戏删除完成事件
-        /// 当GameEvents.OnDeleteSave触发时，只刷新被删除的存档槽数据并更新视图
-        /// 优化逻辑：只关注被操作的slot而不是重建所有存档槽
-        /// </summary>
-        /// <param name="slotName">已删除的存档槽名称</param>
-        private void OnGameDeleteCompleted(string slotName)
-        {
-            UpdateSpecificSaveSlot(slotName);
-        }
-        
-        /// <summary>
-        /// 更新指定的存档槽数据
-        /// </summary>
-        /// <param name="slotName">要更新的存档槽名称</param>
-        private void UpdateSpecificSaveSlot(string slotName)
-        {
-            if (_model == null || _view == null || string.IsNullOrEmpty(slotName))
+            if (string.IsNullOrEmpty(slotName))
                 return;
-            
-            // 获取当前存档槽列表
-            List<SaveSlotInfo> currentSlots = _model.SaveSlots;
-            if (currentSlots == null)
-                currentSlots = new List<SaveSlotInfo>();
-            
-            // 查找要更新的存档槽
-            SaveSlotInfo slotToUpdate = currentSlots.Find(slot => slot.SlotName == slotName);
-            
-            // 如果找到存档槽，更新其信息
-            if (slotToUpdate != null)
-            {
-                // 检查存档是否存在
-                slotToUpdate.HasSave = SaveManager.Instance.DoesSaveExist(slotName);
-                
-                // 如果存档存在，加载并更新数据
-                if (slotToUpdate.HasSave)
+
+            // 显示删除存档确认对话框
+            m_view.ShowConfirmDialog(
+                ConfirmDialogState.Delete,
+                () =>
                 {
-                    SaveData saveData = SaveManager.Instance.LoadSaveData(slotName);
-                    if (saveData != null)
-                    {
-                        slotToUpdate.SaveData = saveData;
-                        slotToUpdate.LastModified = saveData.saveTime;
-                        slotToUpdate.Version = saveData.version;
-                        // 从gameProgress中构建进度文本
-                        string progress = "无进度信息";
-                        if (saveData.gameProgress != null)
-                        {
-                            progress = string.Format("关卡: {0}, 完成: {1}个", 
-                                                   saveData.gameProgress.currentLevel, 
-                                                   saveData.gameProgress.completedLevels.Count);
-                        }
-                        slotToUpdate.ProgressText = progress;
-                    }
-                }
-                else
-                {
-                    // 如果存档不存在，清除数据
-                    slotToUpdate.SaveData = null;
-                    slotToUpdate.LastModified = null;
-                    slotToUpdate.Version = null;
-                    slotToUpdate.ProgressText = null;
-                }
-                
-                // 通知视图只更新特定存档槽
-                _view.UpdateSpecificSaveSlotUI(slotName);
+                    // 触发删除存档事件
+                    GameEvents.TriggerDeleteSave(slotName);
+                },
+                null);
+        }
+
+        /// <summary>
+        /// 处理返回按钮点击事件
+        /// </summary>
+        private void HandleBackButtonClicked()
+        {
+            Hide();
+        }
+
+        /// <summary>
+        /// 处理菜单模式变更
+        /// </summary>
+        /// <param name="mode">新的菜单模式</param>
+        private void HandleMenuModeChanged(SaveLoadMenuModel.MenuMode mode)
+        {
+            if (m_view != null)
+            {
+                m_view.HandleMenuModeChanged(mode);
             }
         }
-        
+
         /// <summary>
-        /// 处理选中存档槽变更事件
+        /// 处理页码变更
         /// </summary>
-        private void HandleSelectedSaveSlotChanged()
+        private void HandlePageChanged()
         {
-            if (_view != null)
+            if (m_model != null && m_view != null)
             {
-                _view.UpdateView(UpdateViewType.Selection);
-            }
-        }
-        #endregion
-        
-        #region 菜单控制方法
-        /// <summary>
-        /// 显示存档菜单
-        /// </summary>
-        public void Show()
-        {
-            if (_view != null)
-            {
-                _view.Show();
-                // 显示前刷新存档数据
-                InitializeSaveSlots();
-            }
-        }
-        
-        /// <summary>
-        /// 隐藏存档菜单
-        /// </summary>
-        public void Hide()
-        {
-            if (_view != null)
-            {
-                _view.Hide();
+                m_view.HandlePageChanged(m_model.CurrentPage, m_model.TotalPages);
             }
         }
         #endregion

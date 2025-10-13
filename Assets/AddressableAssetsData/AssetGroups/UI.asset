@@ -41,6 +41,11 @@ MonoBehaviour:
     m_SerializedLabels:
     - Animes
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 96ade19f618d0054aa307b6873d1bec0
+    m_Address: Assets/Config/SaveLoadMenuConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a045f6281080a484f9666ad5d8bd2389
     m_Address: Assets/Art Asset/Animes/Loading/LoadingScreen.controller
     m_ReadOnly: 0

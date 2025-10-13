@@ -7,6 +7,7 @@ using Logger;
 using MyGame.UI.SaveLoad.View;
 using MyGame.Data;
 using MyGame.UI.SaveLoad.View.Components;
+using MyGame.UI.SaveLoad.Model;
 
 namespace MyGame.UI.SaveLoad.Utils
 {
@@ -172,104 +173,6 @@ namespace MyGame.UI.SaveLoad.Utils
                 }
             }
         }
-
-        /// <summary>
-        /// 异步创建存档槽UI
-        /// </summary>
-        /// <param name="prefabRef">存档槽预制件引用</param>
-        /// <param name="container">容器变换</param>
-        /// <param name="count">创建数量</param>
-        /// <param name="saveSlotInfos">存档槽信息列表</param>
-        /// <param name="view">视图引用</param>
-        /// <param name="onAllCreated">全部创建完成回调</param>
-        /// <param name="onProgress">进度回调</param>
-        public IEnumerator CreateSaveSlotUIs(AssetReference prefabRef, Transform container, int count, List<SaveSlotInfo> saveSlotInfos, 
-            SaveLoadMenuView view, System.Action<List<ISaveSlotUI>> onAllCreated, System.Action<float> onProgress = null)
-        {
-            if (prefabRef == null || container == null || count <= 0 || view == null)
-            {
-                Log.Error(LOG_MODULE, "无效的参数");
-                yield break;
-            }
-
-            // 确保存档槽信息列表有足够的元素
-            while (saveSlotInfos.Count < count)
-            {
-                saveSlotInfos.Add(new SaveSlotInfo());
-            }
-
-            List<ISaveSlotUI> saveSlotUIs = new();
-            int createdCount = 0;
-            bool hasError = false;
-
-            // 先加载预制件一次
-            AsyncOperationHandle<GameObject> prefabHandle = Addressables.LoadAssetAsync<GameObject>(prefabRef);
-            yield return prefabHandle;
-
-            if (prefabHandle.Status != AsyncOperationStatus.Succeeded)
-            {
-                Log.Error(LOG_MODULE, "加载存档槽预制件失败: " + prefabHandle.OperationException?.Message);
-                Addressables.Release(prefabHandle);
-                yield break;
-            }
-
-            GameObject saveSlotPrefab = prefabHandle.Result;
-
-            // 然后实例化所需数量的预制件
-            for (int i = 0; i < count && !hasError; i++)
-            {
-                try
-                {
-                    // 直接实例化预制件（同步）
-                    GameObject instance = Object.Instantiate(saveSlotPrefab, container);
-                    instance.name = "SaveSlot_" + i;
-                    
-                    // 获取SaveSlot组件
-                    if (instance.TryGetComponent<SaveSlot>(out var saveSlotComponent))
-                    {
-                        saveSlotComponent.Initialize(saveSlotInfos[i], view);
-                        saveSlotUIs.Add(saveSlotComponent); // 自动转换为ISaveSlotUI接口
-                        createdCount++;
-                    }
-                    else
-                    {
-                        Log.Error(LOG_MODULE, string.Format("存档槽预制件缺少ISaveSlotUI组件"));
-                        Object.Destroy(instance);
-                        hasError = true;
-                    }
-
-                    // 更新进度
-                    if (onProgress != null)
-                    {
-                        float progress = (float)createdCount / count;
-                        onProgress(progress);
-                    }
-
-                    // 每创建几个对象就暂停一帧，避免帧卡顿
-                    bool shouldYield = createdCount % 5 == 0;
-                }
-                catch (System.Exception e)
-                {
-                    Log.Error(LOG_MODULE, "创建存档槽UI时出错: " + e.Message);
-                    hasError = true;
-                }
-
-                if (createdCount % 5 == 0 && !hasError)
-                {
-                    yield return null;
-                }
-            }
-
-            // 释放预制件资源
-            Addressables.Release(prefabHandle);
-
-            // 如果没有错误，调用完成回调
-            if (!hasError && onAllCreated != null)
-            {
-                onAllCreated(saveSlotUIs);
-            }
-        }
-
         /// <summary>
         /// 清理存档槽UI
         /// </summary>

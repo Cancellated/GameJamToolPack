@@ -203,8 +203,6 @@ namespace MyGame.Data
             
             // 删除存档
             bool success = m_saveSystem.DeleteGame(saveSlot);
-            
-            // 删除成功后，存档列表会自动更新，无需再次触发删除事件
             if (success)
             {
                 Log.Info(LOG_MODULE, "存档删除成功");

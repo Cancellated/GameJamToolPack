@@ -72,7 +72,6 @@
     <Compile Include="Assets\Scripts\UI\Components\ToggleSwitch\ToggleSwitch.cs" />
     <Compile Include="Assets\Scripts\GameData\DataModels\GameSettings.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_A.cs" />
-    <Compile Include="Assets\Scripts\UI\SaveLoadMenu\Model\SaveLoadMenuConstants.cs" />
     <Compile Include="Assets\Scripts\UI\Settings\Model\SettingsModel.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01_UGUI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\SimpleScript.cs" />
@@ -87,9 +86,7 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_FrameRateCounter.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
     <Compile Include="Assets\Scripts\UI\About\View\AboutPanelView.cs" />
-    <Compile Include="Assets\Scripts\UI\SaveLoadMenu\View\Components\ConfirmType.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\Model\ItemDatabase.cs" />
-    <Compile Include="Assets\Scripts\UI\SaveLoadMenu\View\Components\ISaveSlotMenuHandler.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshSpawner.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\View\InventorySlot.cs" />
@@ -116,12 +113,10 @@
     <Compile Include="Assets\Scripts\UI\SaveLoadMenu\Utils\SaveLoadAsyncOperationHelper.cs" />
     <Compile Include="Assets\Scripts\GameData\SaveSystem\JsonSaveSystem.cs" />
     <Compile Include="Assets\Scripts\UI\Core\BaseMVC\BaseModel.cs" />
-    <Compile Include="Assets\Scripts\UI\SaveLoadMenu\Utils\SaveLoadUIEventHandler.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\Controller\HUDController.cs" />
     <Compile Include="Assets\Scripts\UI\SaveLoadMenu\View\SaveLoadMenuView.cs" />
     <Compile Include="Assets\Scripts\UI\PauseMenu\View\PauseMenuView.cs" />
     <Compile Include="Assets\Scripts\GameData\Manager\SaveManager.cs" />
-    <Compile Include="Assets\Scripts\Core\Utils\Utils.cs" />
     <Compile Include="Assets\Scripts\GameData\DataModels\GameProgress.cs" />
     <Compile Include="Assets\Scripts\UI\Core\BaseMVC\BaseController.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_ExampleScript_01.cs" />
@@ -156,6 +151,7 @@
     <Compile Include="Assets\Scripts\Core\Scene\SceneSwitcher.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_B.cs" />
     <Compile Include="Assets\Scripts\UI\Core\UIManager.cs" />
+    <Compile Include="Assets\Scripts\UI\SaveLoadMenu\View\Components\IConfirm.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\SkewTextExample.cs" />
     <Compile Include="Assets\Scripts\GameData\DataModels\SaveData.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\WarpTextExample.cs" />
@@ -167,6 +163,7 @@
     <Compile Include="Assets\Scripts\UI\Core\BaseMVC\BaseView.cs" />
     <Compile Include="Assets\Scripts\UI\MainMenu\Model\MainMenuModel.cs" />
     <Compile Include="Assets\Scripts\UI\Settings\Controller\SettingsPanelController.cs" />
+    <Compile Include="Assets\Scripts\UI\SaveLoadMenu\View\Components\ConfirmDialog.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextInfoDebugTool.cs" />
     <Compile Include="Assets\Scripts\UI\Settings\View\Components\ControlsSettingsComponent.cs" />
   </ItemGroup>
