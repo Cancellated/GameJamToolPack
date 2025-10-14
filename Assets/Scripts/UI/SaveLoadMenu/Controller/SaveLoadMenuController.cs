@@ -5,6 +5,9 @@ using MyGame.UI.SaveLoad.Events;
 using MyGame.Events;
 using MyGame.UI.SaveLoad.View;
 using MyGame.Managers;
+using System;
+using Logger;
+using MyGame.UI.SaveLoadMenu.View;
 
 namespace MyGame.UI.SaveLoad.Controller
 {
@@ -22,6 +25,8 @@ namespace MyGame.UI.SaveLoad.Controller
         [Header("配置文件")]
         [Tooltip("存档菜单配置文件，包含存档设置、UI配置、文本配置等")]
         [SerializeField] private SaveLoadMenuConfig _config;
+
+        private const string Log_MODULE = LogModules.SAVELOADMENU;
         
         /// <summary>
         /// 存档菜单配置文件
@@ -216,25 +221,36 @@ namespace MyGame.UI.SaveLoad.Controller
             if (_model == null)
                 return;
             
-            List<SaveSlotInfo> slots = new()
-            {
-                // 添加自动存档槽
-                new SaveSlotInfo
-                {
-                    SlotName = SaveLoadMenuConstants.AUTO_SAVE_SLOT,
-                    DisplayName = "自动存档",
-                    IsAutoSave = true,
-                    HasSave = SaveManager.Instance.DoesSaveExist(SaveLoadMenuConstants.AUTO_SAVE_SLOT)
-                }
-            };
+            List<SaveSlotInfo> slots = new();
             
-            // 添加手动存档槽
-            int saveSlotCount = SaveLoadMenuConstants.DEFAULT_SAVE_SLOT_COUNT;
+            // 从配置中获取自动存档槽名称
+            string autoSaveSlotName = "AutoSave";
             
-            // 如果有配置文件，使用配置中的存档槽数量
+            // 添加自动存档槽
             if (_config != null)
             {
-                saveSlotCount = _config.MaxManualSaveCount;
+                autoSaveSlotName = _config.AutoSaveSlotName;
+                
+                slots.Add(new SaveSlotInfo
+                {
+                    SlotName = autoSaveSlotName,
+                    DisplayName = "自动存档",
+                    IsAutoSave = true,
+                    NotEmpty = SaveManager.Instance.DoesSaveExist(autoSaveSlotName)
+                });
+            }
+            int saveSlotCount = 4;
+
+            // 优先使用配置中的存档槽数量
+            if (_config != null)
+            {
+                saveSlotCount = _config.SlotsPerPage;
+                
+                // 如果添加了自动存档槽，则减少一个手动存档槽的数量
+                if (slots.Count > 0 && slots[0].IsAutoSave)
+                {
+                    saveSlotCount = Math.Max(0, saveSlotCount - 1);
+                }
             }
             
             for (int i = 1; i <= saveSlotCount; i++)
@@ -246,14 +262,14 @@ namespace MyGame.UI.SaveLoad.Controller
                     SlotName = slotName,
                     DisplayName = string.Format("存档槽 {0}", i),
                     IsAutoSave = false,
-                    HasSave = SaveManager.Instance.DoesSaveExist(slotName)
+                    NotEmpty = SaveManager.Instance.DoesSaveExist(slotName)
                 });
             }
             
             // 更新存档数据
             foreach (var slot in slots)
             {
-                if (slot.HasSave)
+                if (slot.NotEmpty)
                 {
                     SaveData saveData = SaveManager.Instance.LoadSaveData(slot.SlotName);
                     if (saveData != null)
@@ -308,7 +324,8 @@ namespace MyGame.UI.SaveLoad.Controller
                     if (currentState == GameState.Menu)
                     {
                         // 在主菜单状态下点击空存档槽，触发创建新游戏操作
-                        HandleCreateNewGame();
+
+                        m_view.ShowConfirmPanel(ConfirmActionType.Create, slotName);
                     }
                     else if (currentState == GameState.Playing || currentState == GameState.Paused)
                     {
@@ -316,12 +333,8 @@ namespace MyGame.UI.SaveLoad.Controller
                         HandleSaveGame(slotName);
                     }
                 }
-                else
-                {
-                    // 如果GameManager不存在，默认行为是不做任何特殊处理
-                    // 这通常只在测试场景中出现
-                }
             }
+            Log.Info(Log_MODULE, $"存档槽{slotName}被点击");
         }
         
         /// <summary>
@@ -373,8 +386,6 @@ namespace MyGame.UI.SaveLoad.Controller
             {
                 _view.Hide();
             }
-            
-            // 可以在这里添加返回主菜单的其他逻辑
         }
         
         /// <summary>

@@ -11,7 +11,8 @@ namespace MyGame.UI.MainMenu.Model
         #region 字段与属性
 
         // 默认关卡场景名称
-        private string m_defaultGameScene = "GameLevel1";
+        private string m_defaultGameScene = "Level Select";
+        private bool m_isLoadGameVisible = false;
         private bool m_isSettingsVisible = false;
         private bool m_isAboutVisible = false;
 
@@ -23,6 +24,16 @@ namespace MyGame.UI.MainMenu.Model
             get { return m_defaultGameScene; }
             set { SetProperty(ref m_defaultGameScene, value, nameof(DefaultGameScene)); }
         }
+        /// <summary>
+        /// 加载游戏菜单是否可见
+        /// </summary>
+        public bool IsLoadGameVisible 
+        {
+            get { return m_isLoadGameVisible; }
+            set { SetProperty(ref m_isLoadGameVisible, value, nameof(IsLoadGameVisible)); }
+        }
+
+
 
         /// <summary>
         /// 设置面板是否可见

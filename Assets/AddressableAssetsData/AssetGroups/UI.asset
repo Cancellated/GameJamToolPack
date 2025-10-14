@@ -41,6 +41,18 @@ MonoBehaviour:
     m_SerializedLabels:
     - Animes
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8adfa6bc68d21ee47830af0fdbc0ba91
+    m_Address: Assets/Config/PanelAddressConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - config
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 96ade19f618d0054aa307b6873d1bec0
+    m_Address: Assets/Config/SaveLoadMenuConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - config
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a045f6281080a484f9666ad5d8bd2389
     m_Address: Assets/Art Asset/Animes/Loading/LoadingScreen.controller
     m_ReadOnly: 0
@@ -49,6 +61,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a09f6ea8de86cb64ba63f73cdbd54a0f
     m_Address: Assets/Art Asset/Prefabs/UI/HUD/HUD.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Prefabs
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dd8cf88d22398dd41a8de98f4a39d21d
+    m_Address: Assets/Art Asset/Prefabs/UI/SaveLoad/Slot.prefab
     m_ReadOnly: 0
     m_SerializedLabels:
     - Prefabs

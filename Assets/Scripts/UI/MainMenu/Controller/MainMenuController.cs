@@ -199,6 +199,18 @@ namespace MyGame.UI.MainMenu.Controller
         }
 
         /// <summary>
+        /// 显示加载游戏菜单
+        /// </summary>
+        public void OnShowLoadGameMenu()
+        {
+            if (m_model != null)
+            {
+                m_model.IsLoadGameVisible = true;
+                GameEvents.TriggerMenuShow(UIType.SaveLoadMenu, true);
+            }
+        }
+
+        /// <summary>
         /// 显示设置面板
         /// </summary>
         public void OnShowSettings()

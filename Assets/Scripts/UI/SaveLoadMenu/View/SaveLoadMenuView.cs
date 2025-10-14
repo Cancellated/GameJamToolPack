@@ -1,14 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 using System.Collections.Generic;
 using TMPro;
 using MyGame.Data;
 using Logger;
 using MyGame.UI.SaveLoad.Controller;
+using System;
 using System.Collections;
-using UnityEditor.EditorTools;
+using MyGame.UI.SaveLoadMenu.View;
 
 namespace MyGame.UI.SaveLoad.View
 {
@@ -22,71 +21,36 @@ namespace MyGame.UI.SaveLoad.View
         [Header("存档槽")]
         [Tooltip("存档槽容器，用于放置所有存档槽UI")]
         [SerializeField] protected Transform saveSlotsContainer;
-        [Tooltip("存档槽预制件引用")]
-        [SerializeField] protected AssetReference saveSlotPrefabRef;
+        [Tooltip("存档槽预制件")]
+        [SerializeField] protected GameObject saveSlotPrefab;
         [Tooltip("最大存档槽数量")]
-        [SerializeField] protected int maxSaveSlots = 10;
+        [SerializeField] protected int maxSaveSlots;
 
         
-        // 二级菜单UI元素 - 直接整合到父视图中
-        [Header("二级菜单UI元素")]
-        [Tooltip("二级菜单面板")]
-        [SerializeField] protected GameObject saveOptionsPanel;
+        [Tooltip("保存选项菜单组件")]
+        [SerializeField] protected SaveOptions saveOptions;
         
-        [Tooltip("保存按钮")]
-        [SerializeField] protected Button saveButton;
-        
-        [Tooltip("加载按钮")]
-        [SerializeField] protected Button loadButton;
-        
-        [Tooltip("删除按钮")]
-        [SerializeField] protected Button deleteButton;
-        
-        
-        [Header("主要选项")]  // 一级菜单：仅保留返回按钮
         [Tooltip("返回按钮")]
         [SerializeField] protected Button backButton;
 
-        [Header("确认面板UI元素")]
-        [Tooltip("确认面板游戏对象")]
-        [SerializeField] private GameObject confirmPanel;
-        
-        [Tooltip("确认按钮")]
-        [SerializeField] private Button confirmButton;
-        
-        [Tooltip("取消按钮")]
-        [SerializeField] private Button cancelButton;
-        
-        [Tooltip("确认信息文本")]
-        [SerializeField] private TextMeshProUGUI confirmDirectionText;
-        
-        // 确认操作类型枚举
-        protected enum ConfirmActionType
-        {
-            Save,
-            Load,
-            Delete
-        }
-        
-        // 当前确认操作类型
-        private ConfirmActionType _currentConfirmActionType;
+        [Header("确认面板")]
+        [Tooltip("确认对话框组件")]
+        [SerializeField] private ConfirmDialog confirmDialog;
         
         // 当前确认操作的存档槽名称
         private string _currentConfirmSlotName;
 
-        [Header("自定义UI元素")]
-        [Tooltip("菜单标题文本")]
         [SerializeField]
         private TextMeshProUGUI _menuTitleText;
 
         protected SaveLoadMenuModel _model;
-        protected List<ISaveSlotUI> _saveSlotUIs = new();
+        protected List<SaveSlot> _saveSlots = new();
         
         // 当前选中的存档槽信息
         private SaveSlotInfo currentSelectedSlotInfo;
         
 
-        private const string LOG_MODULE = LogModules.SAVE;
+        private const string LOG_MODULE = LogModules.SAVELOADMENU;
         
         /// <summary>
         /// 控制器组件
@@ -116,12 +80,6 @@ namespace MyGame.UI.SaveLoad.View
             base.Initialize();
             BindButtonEvents();
             
-            // 隐藏二级菜单
-            if (saveOptionsPanel != null)
-            {
-                saveOptionsPanel.SetActive(false);
-            }
-            
             // Set initial title
             if (_menuTitleText != null)
             {
@@ -134,7 +92,6 @@ namespace MyGame.UI.SaveLoad.View
         /// </summary>
         protected override void TryBindController()
         {
-            // Try to find controller component
             var controller = GetComponentInParent<SaveLoadMenuController>();
             if (controller != null)
             {
@@ -190,61 +147,283 @@ namespace MyGame.UI.SaveLoad.View
         
         /// <summary>
         /// 更新视图显示
+        /// 优先使用UpdateSaveSlotUIs更新现有槽位，只有在必要时才创建新槽位
         /// </summary>
         public virtual void UpdateView()
         {
-            CreateSaveSlotUIs();
-            UpdateSaveOptionsButtonStates();
+            // 优先尝试更新现有存档槽
+            if (_saveSlots.Count > 0 && _model != null && _model.SaveSlots != null && _model.SaveSlots.Count > 0)
+            {
+                UpdateSaveSlotUIs();
+            }
+            else
+            {
+
+                CreateSaveSlotUIs();
+            }
+
         }
 
         
         // 用于跟踪异步加载操作
-        private readonly List<AsyncOperationHandle<GameObject>> _prefabLoadHandles = new();
-        
         /// <summary>
         /// 创建存档槽UI
-        /// 使用Addressable Assets异步加载预制件
+        /// 仅在需要时创建新的存档槽
         /// </summary>
-        protected virtual async void CreateSaveSlotUIs()
+        protected virtual void CreateSaveSlotUIs()
         {
-            if (_model == null || saveSlotsContainer == null)
-                return;
-            
-            // 清除现有的存档槽UI
-            ClearSaveSlotUIs();
-            
-            if (_model.SaveSlots == null || _model.SaveSlots.Count == 0)
-                return;
-            
-            // 创建存档槽UI
-            for (int i = 0; i < _model.SaveSlots.Count && i < maxSaveSlots; i++)
+            // 参数校验
+            if (_model == null || saveSlotsContainer == null || saveSlotPrefab == null)
             {
-                var slotInfo = _model.SaveSlots[i];
+                Log.Error(LOG_MODULE, "CreateSaveSlotUIs: 缺少必要组件，无法创建存档槽UI");
+                return;
+            }
+            
+            // 检查存档槽数据
+            if (_model.SaveSlots == null || _model.SaveSlots.Count == 0)
+            {
+                Log.Info(LOG_MODULE, "CreateSaveSlotUIs: 没有可用的存档槽数据，将创建空存档槽");
                 
-                // 异步加载存档槽预制件
-                var handle = saveSlotPrefabRef.LoadAssetAsync<GameObject>();
-                _prefabLoadHandles.Add(handle);
-                await handle.Task;
+                // 创建一个默认的存档槽列表，用于显示空存档槽
+                List<SaveSlotInfo> emptySlots = new();
+                int slotCount = 4; // 默认创建4个空存档槽
                 
-                if (handle.Status == AsyncOperationStatus.Succeeded)
+                // 从配置中获取存档槽数量
+                if (m_controller.Config != null)
                 {
-                    // 实例化存档槽UI
-                    var saveSlotGO = Instantiate(handle.Result, saveSlotsContainer);
-                    
-                    // 获取ISaveSlotUI组件
-                    if (saveSlotGO.TryGetComponent<ISaveSlotUI>(out var saveSlotUI))
+                    slotCount = m_controller.Config.SlotsPerPage;
+                }
+                
+                // 创建空存档槽信息
+                for (int i = 1; i <= slotCount; i++)
+                {
+                    emptySlots.Add(new SaveSlotInfo
                     {
-                        // 初始化存档槽UI
+                        SlotName = string.Format("save_{0}", i),
+                        DisplayName = string.Format("存档槽 {0}", i),
+                        IsAutoSave = false,
+                        NotEmpty = false,
+                        SaveData = null
+                    });
+                }
+                
+                // 设置临时的空存档槽数据
+                int actualTargetCount = slotCount;
+                
+                // 如果需要，创建新的存档槽
+                if (_saveSlots.Count < actualTargetCount)
+                {
+                    for (int i = _saveSlots.Count; i < actualTargetCount; i++)
+                    {
+                        var slotInfo = emptySlots[i];
+                        try
+                        {
+                            // 实例化存档槽UI
+                            var saveSlotGO = Instantiate(saveSlotPrefab, saveSlotsContainer);
+                            
+                            // 获取SaveSlot组件
+                            if (saveSlotGO.TryGetComponent(out SaveSlot saveSlotUI))
+                            {
+                                // 初始化存档槽UI
+                                saveSlotUI.Initialize(slotInfo, this);
+                                
+                                // 添加到存档槽UI列表
+                                _saveSlots.Add(saveSlotUI);
+                                
+                                // 添加点击事件
+                                saveSlotGO.GetComponent<Button>().onClick.AddListener(() => OnSaveSlotClick(saveSlotUI.SlotName, slotInfo.SaveData));
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(LOG_MODULE, "创建存档槽UI失败 (槽索引: " + i + "): " + ex.Message);
+                            // 继续创建其他存档槽
+                            continue;
+                        }
+                    }
+                }
+                
+                // 确保所有创建的存档槽都是激活状态
+                for (int i = 0; i < _saveSlots.Count && i < actualTargetCount; i++)
+                {
+                    var saveSlotUI = _saveSlots[i];
+                    if (saveSlotUI != null && saveSlotUI is MonoBehaviour monoBehaviour)
+                    {
+                        monoBehaviour.gameObject.SetActive(true);
+                        // 更新显示为空存档槽
+                        var slotInfo = emptySlots[i];
                         saveSlotUI.Initialize(slotInfo, this);
+                        saveSlotUI.UpdateDisplay();
+                    }
+                }
+                
+                // 如果存档槽数量过多，隐藏多余的存档槽
+                if (_saveSlots.Count > actualTargetCount)
+                {
+                    for (int i = actualTargetCount; i < _saveSlots.Count; i++)
+                    {
+                        var saveSlotUI = _saveSlots[i];
+                        if (saveSlotUI != null && saveSlotUI is MonoBehaviour monoBehaviour)
+                        {
+                            monoBehaviour.gameObject.SetActive(false);
+                        }
+                    }
+                }
+                
+                return;
+            }
+            
+            int targetCount = Math.Min(_model.SaveSlots.Count, maxSaveSlots);
+            
+            // 如果需要，创建新的存档槽
+            if (_saveSlots.Count < targetCount)
+            {
+                for (int i = _saveSlots.Count; i < targetCount; i++)
+                {
+                    var slotInfo = _model.SaveSlots[i];
+                    try
+                    {
+                        // 实例化存档槽UI
+                        var saveSlotGO = Instantiate(saveSlotPrefab, saveSlotsContainer);
                         
-                        // 添加到存档槽UI列表
-                        _saveSlotUIs.Add(saveSlotUI);
-                        
-                        // 添加点击事件
-                        saveSlotGO.GetComponent<Button>().onClick.AddListener(() => OnSaveSlotClick(saveSlotUI.SlotName, slotInfo.SaveData));
+                        // 获取SaveSlot组件
+                        if (saveSlotGO.TryGetComponent(out SaveSlot saveSlotUI))
+                        {
+                            // 初始化存档槽UI
+                            saveSlotUI.Initialize(slotInfo, this);
+                            
+                            // 添加到存档槽UI列表
+                            _saveSlots.Add(saveSlotUI);
+                            
+                            // 添加点击事件
+                            saveSlotGO.GetComponent<Button>().onClick.AddListener(() => OnSaveSlotClick(saveSlotUI.SlotName, slotInfo.SaveData));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(LOG_MODULE, "创建存档槽UI失败 (槽索引: " + i + "): " + ex.Message);
+                        // 继续创建其他存档槽
+                        continue;
                     }
                 }
             }
+            
+            // 如果存档槽数量过多，隐藏或移除多余的存档槽
+            if (_saveSlots.Count > targetCount)
+            {
+                // 注意：这里我们不删除多余的存档槽，而是保留它们以备后续使用
+                // 只需要确保它们不显示即可
+                for (int i = targetCount; i < _saveSlots.Count; i++)
+                {
+                    var saveSlotUI = _saveSlots[i];
+                    if (saveSlotUI != null && saveSlotUI is MonoBehaviour monoBehaviour)
+                    {
+                        monoBehaviour.gameObject.SetActive(false);
+                    }
+                }
+            }
+            
+            Log.Info(LOG_MODULE, "存档槽UI创建完成");
+        }
+
+        /// <summary>
+        /// 更新现有存档槽的数据
+        /// 单独的方法用于更新槽位内容
+        /// </summary>
+        protected virtual void UpdateSaveSlotUIs()
+        {
+            // 参数校验
+            if (_model == null || _saveSlots.Count == 0)
+            {
+                Log.Error(LOG_MODULE, "UpdateSaveSlotUIs: 缺少必要数据，无法更新存档槽UI");
+                return;
+            }
+            
+            // 检查存档槽数据
+            if (_model.SaveSlots == null || _model.SaveSlots.Count == 0)
+            {
+                Log.Info(LOG_MODULE, "UpdateSaveSlotUIs: 没有可用的存档槽数据，将显示空存档槽");
+                
+                // 创建一个默认的存档槽列表，用于显示空存档槽
+                List<SaveSlotInfo> emptySlots = new();
+                int slotCount = Math.Min(_saveSlots.Count, m_controller.Config != null ? m_controller.Config.SlotsPerPage : 4); 
+                
+                // 从配置中获取存档槽数量
+                if (m_controller.Config != null)
+                {
+                    slotCount = Math.Min(_saveSlots.Count, m_controller.Config.SlotsPerPage);
+                }
+                
+                // 创建空存档槽信息
+                for (int i = 1; i <= slotCount; i++)
+                {
+                    emptySlots.Add(new SaveSlotInfo
+                    {
+                        SlotName = string.Format("save_{0}", i),
+                        DisplayName = string.Format("存档槽 {0}", i),
+                        IsAutoSave = false,
+                        NotEmpty = false,
+                        SaveData = null
+                    });
+                }
+                
+                // 确保所有存档槽都是激活状态，并更新为显示空存档槽
+                for (int i = 0; i < _saveSlots.Count; i++)
+                {
+                    var saveSlotUI = _saveSlots[i];
+                    if (saveSlotUI != null && saveSlotUI is MonoBehaviour monoBehaviour)
+                    {
+                        // 根据索引获取对应的空存档槽信息
+                        SaveSlotInfo slotInfo = null;
+                        if (i < emptySlots.Count)
+                        {
+                            slotInfo = emptySlots[i];
+                        }
+                        else
+                        {
+                            // 为超出默认数量的槽位创建新的空存档槽信息
+                            slotInfo = new SaveSlotInfo
+                            {
+                                SlotName = string.Format("save_{0}", i + 1),
+                                DisplayName = string.Format("存档槽 {0}", i + 1),
+                                IsAutoSave = false,
+                                NotEmpty = false,
+                                SaveData = null
+                            };
+                        }
+                        
+                        monoBehaviour.gameObject.SetActive(true);
+                        saveSlotUI.Initialize(slotInfo, this);
+                        saveSlotUI.UpdateDisplay();
+                    }
+                }
+                
+                return;
+            }
+            
+            int targetCount = Math.Min(_model.SaveSlots.Count, maxSaveSlots);
+            
+            // 更新现有存档槽的数据
+            for (int i = 0; i < _saveSlots.Count && i < targetCount; i++)
+            {
+                var saveSlotUI = _saveSlots[i];
+                var slotInfo = _model.SaveSlots[i];
+                
+                if (saveSlotUI != null && slotInfo != null)
+                {
+                    // 更新存档槽数据
+                    saveSlotUI.Initialize(slotInfo, this);
+                    saveSlotUI.UpdateDisplay();
+                    
+                    // 确保正在显示的存档槽是激活状态
+                    if (saveSlotUI is MonoBehaviour monoBehaviour && !monoBehaviour.gameObject.activeSelf)
+                    {
+                        monoBehaviour.gameObject.SetActive(true);
+                    }
+                }
+            }
+            
+            Log.Info(LOG_MODULE, "存档槽UI更新完成");
         }
         
         /// <summary>
@@ -253,7 +432,7 @@ namespace MyGame.UI.SaveLoad.View
         protected virtual void ClearSaveSlotUIs()
         {
             // 清除所有存档槽UI对象
-            foreach (var saveSlotUI in _saveSlotUIs)
+            foreach (var saveSlotUI in _saveSlots)
             {
                 if (saveSlotUI != null && saveSlotUI is MonoBehaviour monoBehaviour)
                 {
@@ -261,26 +440,7 @@ namespace MyGame.UI.SaveLoad.View
                 }
             }
             
-            _saveSlotUIs.Clear();
-            
-            // 清除加载句柄
-            ClearLoadHandles();
-        }
-        
-        /// <summary>
-        /// 清除加载句柄
-        /// </summary>
-        protected virtual void ClearLoadHandles()
-        {
-            foreach (var handle in _prefabLoadHandles)
-            {
-                if (handle.IsValid())
-                {
-                    Addressables.Release(handle);
-                }
-            }
-            
-            _prefabLoadHandles.Clear();
+            _saveSlots.Clear();
         }
         
         /// <summary>
@@ -301,31 +461,11 @@ namespace MyGame.UI.SaveLoad.View
                 backButton.onClick.AddListener(HandleBackButtonClick);
             }
             
-            // 绑定二级菜单按钮事件
-            if (saveButton != null)
+            // 绑定确认对话框事件
+            if (confirmDialog != null)
             {
-                saveButton.onClick.AddListener(HandleSaveButtonClick);
-            }
-            
-            if (loadButton != null)
-            {
-                loadButton.onClick.AddListener(HandleLoadButtonClick);
-            }
-            
-            if (deleteButton != null)
-            {
-                deleteButton.onClick.AddListener(HandleDeleteButtonClick);
-            }
-            
-            // 绑定确认面板按钮事件
-            if (confirmButton != null)
-            {
-                confirmButton.onClick.AddListener(HandleConfirmButtonClick);
-            }
-            
-            if (cancelButton != null)
-            {
-                cancelButton.onClick.AddListener(HandleCancelButtonClick);
+                confirmDialog.OnConfirmAction += HandleConfirmAction;
+                confirmDialog.OnCancelAction += HandleCancelAction;
             }
         }
         
@@ -339,31 +479,11 @@ namespace MyGame.UI.SaveLoad.View
                 backButton.onClick.RemoveListener(HandleBackButtonClick);
             }
             
-            // 解绑二级菜单按钮事件
-            if (saveButton != null)
+            // 解绑确认对话框事件
+            if (confirmDialog != null)
             {
-                saveButton.onClick.RemoveListener(HandleSaveButtonClick);
-            }
-            
-            if (loadButton != null)
-            {
-                loadButton.onClick.RemoveListener(HandleLoadButtonClick);
-            }
-            
-            if (deleteButton != null)
-            {
-                deleteButton.onClick.RemoveListener(HandleDeleteButtonClick);
-            }
-            
-            // 解绑确认面板按钮事件
-            if (confirmButton != null)
-            {
-                confirmButton.onClick.RemoveListener(HandleConfirmButtonClick);
-            }
-            
-            if (cancelButton != null)
-            {
-                cancelButton.onClick.RemoveListener(HandleCancelButtonClick);
+                confirmDialog.OnConfirmAction -= HandleConfirmAction;
+                confirmDialog.OnCancelAction -= HandleCancelAction;
             }
         }
         
@@ -393,64 +513,21 @@ namespace MyGame.UI.SaveLoad.View
         
         /// <summary>
         /// 处理存档槽点击事件
-        /// - 如果是非空存档槽，显示二级菜单
-        /// - 如果是空存档槽，直接选中但不显示二级菜单
         /// </summary>
         /// <param name="slotName">存档槽名称</param>
-        /// <param name="saveData">存档数据，如果为null表示空存档槽</param>
         public virtual void OnSaveSlotClick(string slotName, SaveData saveData = null)
         {
             if (m_controller != null)
             {
                 m_controller.HandleSaveSlotSelected(slotName, saveData);
             }
-            
-            // 点击非空存档槽时显示二级菜单
-            if (saveData != null)
-            {
-                // 查找对应的存档槽信息
-                var slotInfo = _model.SaveSlots.Find(slot => slot.SlotName == slotName);
-                if (slotInfo != null)
-                {
-                    // 使用整合后的二级菜单
-                    ShowSaveOptionsMenu(slotInfo);
-                }
-            }
-            else
-            {
-                // 隐藏二级菜单
-                HideSaveOptionsMenu();
-            }
         }
-        
-        /// <summary>
-        /// 显示保存选项菜单
-        /// </summary>
-        /// <param name="slotInfo">存档槽信息</param>
-        public virtual void ShowSaveOptionsMenu(SaveSlotInfo slotInfo)
-        {
-            currentSelectedSlotInfo = slotInfo;
-            
-            // 更新按钮状态
-            UpdateSaveOptionsButtonStates();
-            
-            // 显示二级菜单面板
-            if (saveOptionsPanel != null)
-            {
-                saveOptionsPanel.SetActive(true);
-                // 添加点击面板外部区域隐藏菜单的检测
-                StartCoroutine(CheckForClickOutsidePanel());
-            }
-        }
-        
-
         
         /// <summary>
         /// 处理返回按钮点击事件
         /// </summary>
         public virtual void HandleBackButtonClick()
         {
-            HideSaveOptionsMenu();
             if (m_controller != null)
             {
                 m_controller.HandleBackToMainMenu();
@@ -501,178 +578,48 @@ namespace MyGame.UI.SaveLoad.View
         protected virtual void ConfirmDeleteSave(string slotName)
         {
             // 显示删除确认面板
-            ShowConfirmPanel(ConfirmActionType.Delete, slotName);
+            if (confirmDialog != null && m_controller != null && m_controller.Config != null)
+            {
+                confirmDialog.ShowConfirmPanel(ConfirmActionType.Delete, slotName);
+            }
         }
         
         /// <summary>
-        /// 显示确认面板
+        /// 处理确认操作事件
         /// </summary>
         /// <param name="actionType">确认操作类型</param>
         /// <param name="slotName">存档槽名称</param>
-        protected virtual void ShowConfirmPanel(ConfirmActionType actionType, string slotName)
+        protected virtual void HandleConfirmAction(ConfirmActionType actionType, string slotName)
         {
-            // 设置当前确认操作类型和存档槽名称
-            _currentConfirmActionType = actionType;
-            _currentConfirmSlotName = slotName;
-            
-            // 设置确认信息文本
-            if (confirmDirectionText != null && m_controller != null && m_controller.Config != null)
+            if (m_controller != null)
             {
                 switch (actionType)
                 {
                     case ConfirmActionType.Save:
-                        // 保存操作通常不需要确认文本或使用通用文本
-                        confirmDirectionText.text = "确定要保存到该存档槽吗？这将覆盖该存档的内容。";
+                        m_controller.HandleSaveGame(slotName);
                         break;
                     case ConfirmActionType.Load:
-                        confirmDirectionText.text = m_controller.Config.LoadSaveConfirmText;
+                        m_controller.HandleLoadGame(slotName);
                         break;
                     case ConfirmActionType.Delete:
-                        confirmDirectionText.text = m_controller.Config.DeleteSaveConfirmText;
+                        m_controller.HandleDeleteSave(slotName);
+                        break;
+                    case ConfirmActionType.Create:
+                        m_controller.HandleCreateNewGame();
                         break;
                 }
             }
-            
-            // 显示确认面板
-            if (confirmPanel != null)
-            {
-                confirmPanel.SetActive(true);
-                // 显示确认面板时可以隐藏二级菜单或保持显示，根据设计需求决定
-                // HideSaveOptionsMenu();
-            }
         }
         
         /// <summary>
-        /// 隐藏确认面板
+        /// 处理取消操作事件
         /// </summary>
-        protected virtual void HideConfirmPanel()
+        protected virtual void HandleCancelAction()
         {
-            if (confirmPanel != null)
-            {
-                confirmPanel.SetActive(false);
-            }
+            // 取消操作不需要额外处理
         }
         
-        /// <summary>
-        /// 处理确认按钮点击事件
-        /// 根据当前确认操作类型执行相应的操作
-        /// </summary>
-        protected virtual void HandleConfirmButtonClick()
-        {
-            if (m_controller != null)
-            {
-                switch (_currentConfirmActionType)
-                {
-                    case ConfirmActionType.Save:
-                        m_controller.HandleSaveGame(_currentConfirmSlotName);
-                        break;
-                    case ConfirmActionType.Load:
-                        m_controller.HandleLoadGame(_currentConfirmSlotName);
-                        break;
-                    case ConfirmActionType.Delete:
-                        m_controller.HandleDeleteSave(_currentConfirmSlotName);
-                        break;
-                }
-            }
-            
-            // 隐藏确认面板
-            HideConfirmPanel();
-        }
         
-        /// <summary>
-        /// 处理取消按钮点击事件
-        /// </summary>
-        protected virtual void HandleCancelButtonClick()
-        {
-            // 隐藏确认面板
-            HideConfirmPanel();
-        }
-        
-        /// <summary>
-        /// 检查点击是否在面板外部，如果是则隐藏菜单
-        /// </summary>
-        private IEnumerator CheckForClickOutsidePanel()
-        {
-            while (saveOptionsPanel != null && saveOptionsPanel.activeSelf)
-            {
-                // 等待下一个帧
-                yield return null;
-                
-                // 检查是否有鼠标点击
-                if (Input.GetMouseButtonDown(0))
-                {
-                    // 获取鼠标点击位置
-                    Vector2 clickPosition = Input.mousePosition;
-                    
-                    // 检查点击是否在面板内部或任何确认面板上
-                    if (saveOptionsPanel.TryGetComponent<RectTransform>(out var panelRectTransform))
-                    {
-                        // 将面板矩形转换为屏幕空间
-                        Rect panelRect = new(
-                            panelRectTransform.position.x - panelRectTransform.sizeDelta.x * panelRectTransform.pivot.x,
-                            panelRectTransform.position.y - panelRectTransform.sizeDelta.y * panelRectTransform.pivot.y,
-                            panelRectTransform.sizeDelta.x,
-                            panelRectTransform.sizeDelta.y
-                        );
-                        
-                        // 检查点击是否在面板外部，并且不在任何确认面板上
-                        if (!panelRect.Contains(clickPosition) && !IsClickOnAnyConfirmationPanel(clickPosition))
-                        {
-                            HideSaveOptionsMenu();
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        
-        /// <summary>
-        /// 检查点击是否在任何确认面板上
-        /// </summary>
-        /// <param name="clickPosition">点击位置</param>
-        /// <returns>点击是否在确认面板上</returns>
-        private bool IsClickOnAnyConfirmationPanel(Vector2 clickPosition)
-        {
-            // 检查确认面板是否存在且激活，并判断点击是否在面板上
-            if (confirmPanel != null && confirmPanel.activeSelf && confirmPanel.TryGetComponent<RectTransform>(out var panelRectTransform))
-            {
-                // 将面板矩形转换为屏幕空间
-                Rect panelRect = new(
-                    panelRectTransform.position.x - panelRectTransform.sizeDelta.x * panelRectTransform.pivot.x,
-                    panelRectTransform.position.y - panelRectTransform.sizeDelta.y * panelRectTransform.pivot.y,
-                    panelRectTransform.sizeDelta.x,
-                    panelRectTransform.sizeDelta.y
-                );
-                
-                return panelRect.Contains(clickPosition);
-            }
-            
-            return false;
-        }
-        
-        /// <summary>
-        /// 更新保存选项菜单的按钮状态
-        /// </summary>
-        protected virtual void UpdateSaveOptionsButtonStates()
-        {
-            // 检查存档数据是否存在来更新按钮状态
-            bool hasSaveData = currentSelectedSlotInfo != null && currentSelectedSlotInfo.SaveData != null;
-            
-            if (saveButton != null)
-            {
-                saveButton.interactable = true; // 保存按钮始终可用
-            }
-            
-            if (loadButton != null)
-            {
-                loadButton.interactable = hasSaveData; // 加载按钮仅在有存档数据时可用
-            }
-            
-            if (deleteButton != null)
-            {
-                deleteButton.interactable = hasSaveData; // 删除按钮仅在有存档数据时可用
-            }
-        }
         
 
         
@@ -684,36 +631,58 @@ namespace MyGame.UI.SaveLoad.View
             UpdateView();
         }
         
-
-        
+        #region 视图操作
         /// <summary>
         /// 显示视图
         /// </summary>
         public override void Show()
         {
-            gameObject.SetActive(true);
-            HideSaveOptionsMenu();
+            m_canvasGroup.alpha = 1;
+            m_canvasGroup.interactable = true;
+            m_canvasGroup.blocksRaycasts = true;
+
         }
 
-        /// <summary>
-        /// 隐藏保存选项菜单
-        /// </summary>
-        protected virtual void HideSaveOptionsMenu()
-        {
-            // 隐藏整合后的二级菜单面板
-            if (saveOptionsPanel != null)
-            {
-                saveOptionsPanel.SetActive(false);
-            }
-        }
-        
         /// <summary>
         /// 隐藏视图
         /// </summary>
         public override void Hide()
         {
-            gameObject.SetActive(false);
+            m_canvasGroup.alpha = 0;
+            m_canvasGroup.interactable = false;
+            m_canvasGroup.blocksRaycasts = false;
         }
+
+
+
+        /// <summary>
+        /// 显示确认面板
+        /// </summary>
+        /// <param name="actionType">确认操作类型</param>
+        /// <param name="slotName">存档槽名称</param>
+        public void ShowConfirmPanel(ConfirmActionType actionType, string slotName)
+        {
+            // 设置当前确认操作的存档槽名称
+            _currentConfirmSlotName = slotName;
+            
+            if (confirmDialog != null)
+            {
+                confirmDialog.ShowConfirmPanel(actionType, slotName);
+            }
+        }
+        
+        /// <summary>
+        /// 隐藏确认面板
+        /// </summary>
+        protected virtual void HideConfirmPanel()
+        {
+            if (confirmDialog != null)
+            {
+                confirmDialog.HideConfirmPanel();
+            }
+        }
+        #endregion
+
         
         /// <summary>
         /// 清理资源
@@ -723,9 +692,17 @@ namespace MyGame.UI.SaveLoad.View
             UnbindButtonEvents();
             UnsubscribeFromModelEvents();
             ClearSaveSlotUIs();
-            
-            // 重置整合后的二级菜单状态
-            currentSelectedSlotInfo = null;
         }
+
+        /// <summary>
+        /// 当对象被销毁时
+        /// 重写基类方法，确保正确释放资源
+        /// </summary>
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            Cleanup();
+        }
+    
     }
 }

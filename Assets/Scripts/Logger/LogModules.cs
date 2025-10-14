@@ -22,6 +22,7 @@ namespace Logger
         public const string MAINMENU = "MainMenu";
         public const string SETTINGS = "Settings";
         public const string ABOUT = "About";
+        public const string SAVELOADMENU = "SaveLoadMenu";
         public const string PAUSEMENU = "PauseMenu";
         public const string HUD = "HUD";
         public const string UI_COMPONENTS = "UIComponents";

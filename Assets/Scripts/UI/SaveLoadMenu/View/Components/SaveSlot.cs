@@ -1,8 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using MyGame.Data;
-using MyGame.UI.SaveLoad.View;
+
 
 namespace MyGame.UI.SaveLoad.View
 {
@@ -11,7 +10,7 @@ namespace MyGame.UI.SaveLoad.View
     /// 负责显示单个存档槽的信息并处理用户交互
     /// 挂载到存档槽预制体上使用
     /// </summary>
-    public class SaveSlot : MonoBehaviour, ISaveSlotUI
+    public class SaveSlot : MonoBehaviour
     {
         [Header("存档槽UI组件")]
         [SerializeField]
@@ -25,10 +24,6 @@ namespace MyGame.UI.SaveLoad.View
         [SerializeField]
         [Tooltip("显示游戏进度的文本组件")]
         private TextMeshProUGUI _gameProgressText;
-        
-        [SerializeField]
-        [Tooltip("显示选中状态的高亮图片组件")]
-        private Image _highlightImage;
         
         [SerializeField]
         [Tooltip("点击存档槽时触发的按钮组件")]
@@ -62,14 +57,30 @@ namespace MyGame.UI.SaveLoad.View
             }
             
             UpdateDisplay();
-            UpdateHighlight();
         }
 
         /// <summary>
         /// 更新显示内容
+        /// 优先使用SaveData中的存档信息，确保UI能反映存档的实际名称和类型
         /// </summary>
         public void UpdateDisplay()
         {
+            // 更新存档槽名称显示
+            if (_slotNameText != null)
+            {
+                // 优先使用SaveData中的存档名称，如果存在
+                if (_slotInfo.SaveData != null && !string.IsNullOrEmpty(_slotInfo.SaveData.saveSlotName))
+                {
+                    string displayName = _slotInfo.SaveData.saveSlotName;
+                    _slotNameText.text = displayName;
+                }
+                // 否则使用槽位信息中的存档名称
+                else
+                {
+                    _slotNameText.text = _slotInfo.SlotName;
+                }
+            }
+            
             // 设置存档时间
             if (_saveTimeText != null)
             {
@@ -104,7 +115,6 @@ namespace MyGame.UI.SaveLoad.View
         public void SetSelected(bool selected)
         {
             _isSelected = selected;
-            UpdateHighlight();
         }
 
         /// <summary>
@@ -113,17 +123,6 @@ namespace MyGame.UI.SaveLoad.View
         public string SlotName
         {
             get { return _slotInfo != null ? _slotInfo.SlotName : string.Empty; }
-        }
-
-        /// <summary>
-        /// 更新存档槽高亮状态
-        /// </summary>
-        private void UpdateHighlight()
-        {
-            if (_highlightImage != null)
-            {
-                _highlightImage.enabled = _isSelected;
-            }
         }
 
         /// <summary>

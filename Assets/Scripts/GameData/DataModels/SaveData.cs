@@ -43,6 +43,13 @@ namespace MyGame.Data
         /// </summary>
         public string version;
 
+        /// <summary>
+        /// 是否自动保存
+        /// </summary>
+        public bool isAutoSave;
+
+        public string saveSlotName; // 存档槽名
+
         #endregion
 
         #region 构造函数

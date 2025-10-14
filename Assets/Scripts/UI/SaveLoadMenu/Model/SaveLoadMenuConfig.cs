@@ -9,32 +9,28 @@ namespace MyGame.UI.SaveLoad
     [CreateAssetMenu(fileName = "SaveLoadMenuConfig", menuName = "UI/SaveLoadMenuConfig")]
     public class SaveLoadMenuConfig : ScriptableObject
     {
-        [Header("存档配置")]
-        [Tooltip("是否启用自动存档")]
-        public bool EnableAutoSave = true;
-        
-        [Tooltip("自动存档间隔（秒）")]
-        public float AutoSaveInterval = 300f; // 5分钟
-        
+        [Header("存档槽配置")]
+        [Tooltip("单页存档槽数量")]
+        public int SlotsPerPage = 4;
         [Tooltip("最大自动存档数量")]
-        public int MaxAutoSaveCount = 1;
+        public int MaxAutoSaveCount = 2;
         
         [Tooltip("最大手动存档数量")]
-        public int MaxManualSaveCount = 10;
+        public int MaxManualSaveCount = 36;
+        
+        [Tooltip("自动存档槽名称")]
+        public string AutoSaveSlotName = "AutoSave";
         
         [Header("UI配置")]
         [Tooltip("存档槽预制件的Addressable Address")]
-        public string SaveSlotPrefabAddress = "SaveSlotPrefab";
-        
-        [Tooltip("存档菜单动画时长")]
-        public float MenuAnimationDuration = 0.3f;
-        
-        [Tooltip("存档槽动画时长")]
-        public float SlotAnimationDuration = 0.2f;
+        public string SaveSlotPrefabAddress = "Assets/Art Asset/Prefabs/UI/SaveLoad/Slot.prefab";
         
         [Header("文本配置")]
         [Tooltip("新建游戏确认文本")]
-        public string NewGameConfirmText = "确定要创建新游戏吗？这将覆盖当前进度。";
+        public string NewGameConfirmText = "确定要创建新游戏吗？";
+
+        [Tooltip("保存存档确认文本")]
+        public string SaveConfirmText = "确定要保存到该存档吗？";
         
         [Tooltip("删除存档确认文本")]
         public string DeleteSaveConfirmText = "确定要删除该存档吗？此操作不可恢复。";
@@ -57,18 +53,5 @@ namespace MyGame.UI.SaveLoad
         
         [Tooltip("创建新游戏音效")]
         public AudioClip CreateNewGameSound = null;
-        
-        [Header("视觉反馈配置")]
-        [Tooltip("选中存档槽颜色")]
-        public Color SelectedSlotColor = Color.yellow;
-        
-        [Tooltip("自动存档槽颜色")]
-        public Color AutoSaveSlotColor = Color.blue;
-        
-        [Tooltip("手动存档槽颜色")]
-        public Color ManualSaveSlotColor = Color.green;
-        
-        [Tooltip("空存档槽颜色")]
-        public Color EmptySlotColor = Color.gray;
     }
 }

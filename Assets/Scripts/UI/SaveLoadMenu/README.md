@@ -38,12 +38,11 @@ flowchart TD
 
 ```
 Assets/Scripts/UI/SaveLoadMenu/
-├── SaveLoadMenuConstants.cs      # 常量定义
 ├── SaveLoadMenuModel.cs          # 数据模型
 ├── SaveLoadMenuController.cs     # 控制器
 ├── SaveLoadMenuView.cs           # 视图基类
 ├── SaveLoadMenuPanel.cs          # 面板实现
-├── SaveLoadMenuConfig.cs         # 配置文件
+├── SaveLoadMenuConfig.cs         # 配置文件（包含常量定义）
 └── README.md                     # 文档说明
 ```
 
@@ -78,9 +77,11 @@ GameEvents.TriggerMenuShow(UIType.SaveLoadMenu, true);
 
 ## 代码结构说明
 
-### 1. 常量定义 (SaveLoadMenuConstants)
+### 1. 配置文件 (SaveLoadMenuConfig)
 
-定义了存档菜单使用的各种常量，如自动存档槽名称、默认存档槽数量和日期格式等。
+ScriptableObject配置文件，包含存档菜单的所有配置项和常量定义，如自动存档槽名称、默认存档槽数量、日期格式等。
+
+通过配置文件可以在Unity编辑器中方便地调整存档菜单的行为和外观。
 
 ### 2. 数据模型 (SaveLoadMenuModel)
 

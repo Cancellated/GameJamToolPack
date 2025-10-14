@@ -121,6 +121,7 @@ namespace MyGame.Data
         /// <summary>
         /// 保存当前游戏数据到指定存档槽。
         /// 包含延迟初始化逻辑，确保在第一次访问时初始化存档系统。
+        /// 保存前会设置存档数据的saveSlotName和isAutoSave属性。
         /// </summary>
         /// <param name="slotName">存档槽名称，如果为空则使用自动存档槽。</param>
         /// <returns>保存操作是否成功。</returns>
@@ -136,6 +137,10 @@ namespace MyGame.Data
             string saveSlot = string.IsNullOrEmpty(slotName) ? DEFAULT_SAVE_SLOT : slotName;
             
             Log.Info(LOG_MODULE, $"开始保存游戏到存档槽: {saveSlot}");
+            
+            // 设置存档数据的存档槽信息
+            m_currentSaveData.saveSlotName = saveSlot;
+            m_currentSaveData.isAutoSave = saveSlot.Equals(DEFAULT_SAVE_SLOT, StringComparison.OrdinalIgnoreCase);
             
             // 保存数据
             bool success = m_saveSystem.SaveGame(m_currentSaveData, saveSlot);
@@ -269,12 +274,18 @@ namespace MyGame.Data
         
         /// <summary>
         /// 创建一个新的游戏存档。
+        /// 初始化新的存档数据并设置默认的存档槽信息。
         /// </summary>
         public void NewGame()
         {
             // 初始化新的存档数据
-            m_currentSaveData = new SaveData();
-            
+            m_currentSaveData = new SaveData
+            {
+                // 设置默认的存档槽信息
+                saveSlotName = DEFAULT_SAVE_SLOT,
+                isAutoSave = true
+            };
+
             Log.Info(LOG_MODULE, "创建了新游戏存档");
         }
         

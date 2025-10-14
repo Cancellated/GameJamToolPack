@@ -15,7 +15,7 @@ MonoBehaviour:
   m_DefaultGroup: 7cc7899dbe730fa46949013946aefbf2
   m_currentHash:
     serializedVersion: 2
-    Hash: 3cc754054eeccd4bdfe0e3c03435de9f
+    Hash: c81aabc6bae5cd4e1c11b1296d9cf1ca
   m_OptimizeCatalogSize: 0
   m_BuildRemoteCatalog: 0
   m_BundleLocalCatalog: 0
@@ -89,6 +89,7 @@ MonoBehaviour:
     - default
     - Prefabs
     - Animes
+    - config
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: 7cd92c22e9e5a7241a8b217ac85d9ae9, type: 2}
