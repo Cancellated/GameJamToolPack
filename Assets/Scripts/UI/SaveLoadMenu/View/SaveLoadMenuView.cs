@@ -40,8 +40,6 @@ namespace MyGame.UI.SaveLoad.View
         // 当前确认操作的存档槽名称
         private string _currentConfirmSlotName;
 
-        [SerializeField]
-        private TextMeshProUGUI _menuTitleText;
 
         protected SaveLoadMenuModel _model;
         protected List<SaveSlot> _saveSlots = new();
@@ -78,13 +76,9 @@ namespace MyGame.UI.SaveLoad.View
         public override void Initialize()
         {
             base.Initialize();
+            SetModel(m_controller.Model);
             BindButtonEvents();
-            
-            // Set initial title
-            if (_menuTitleText != null)
-            {
-                _menuTitleText.text = "存档/读档菜单";
-            }
+            UpdateView();
         }
         
         /// <summary>
@@ -109,6 +103,13 @@ namespace MyGame.UI.SaveLoad.View
             {
                 Model = m_controller.Model;
             }
+            
+            // 初始化SaveOptions组件，设置控制器引用
+            if (saveOptions != null)
+            {
+                saveOptions.SetController(m_controller);
+                Log.Info(LOG_MODULE, "SaveOptions组件初始化完成");
+            }
         }
         
         /// <summary>
@@ -116,7 +117,7 @@ namespace MyGame.UI.SaveLoad.View
         /// </summary>
         protected override void OnControllerUnbound()
         {
-            // When controller is unbound, clear model reference
+
             if (_model != null)
             {
                 UnsubscribeFromModelEvents();
@@ -253,7 +254,6 @@ namespace MyGame.UI.SaveLoad.View
                         // 更新显示为空存档槽
                         var slotInfo = emptySlots[i];
                         saveSlotUI.Initialize(slotInfo, this);
-                        saveSlotUI.UpdateDisplay();
                     }
                 }
                 
@@ -445,10 +445,52 @@ namespace MyGame.UI.SaveLoad.View
         
         /// <summary>
         /// 处理选中存档槽变更事件
+        /// 当模型中的选中存档槽发生变化时，更新UI以高亮显示当前选中的存档槽并更新操作菜单
         /// </summary>
         protected virtual void OnSelectedSaveSlotChanged()
         {
-            // 不再需要更新按钮状态，由二级菜单控制器处理
+            // 如果模型为空，不执行任何操作
+            if (_model == null)
+            {
+                Log.Info(LOG_MODULE, "OnSelectedSaveSlotChanged - 模型为空，不执行操作");
+                return;
+            }
+            
+            Log.Info(LOG_MODULE, string.Format("OnSelectedSaveSlotChanged - 触发事件，尝试更新UI显示"));
+            
+            // 获取当前选中的存档槽信息
+            SaveSlotInfo selectedSlotInfo = null;
+            string selectedSlotName = _model.SelectedSaveSlotName;
+            
+            // 更新存档槽的选中状态显示
+            if (_saveSlots != null && _saveSlots.Count > 0)
+            {
+                // 遍历所有存档槽，设置它们的选中状态
+                foreach (var saveSlot in _saveSlots)
+                {
+                    if (saveSlot != null)
+                    {
+                        // 根据存档槽名称判断是否为当前选中的存档槽
+                        bool isSelected = !string.IsNullOrEmpty(selectedSlotName) && 
+                                         saveSlot.SlotName == selectedSlotName;
+                        
+                        // 设置存档槽的选中状态，这会触发背景颜色的变化
+                        saveSlot.SetSelected(isSelected);
+                        
+                        // 保存当前选中的存档槽信息
+                        if (isSelected)
+                        {
+                            selectedSlotInfo = _model.SaveSlots.Find(slot => slot.SlotName == selectedSlotName);
+                            Log.Info(LOG_MODULE, string.Format("OnSelectedSaveSlotChanged - 获取到的存档信息: {0}", selectedSlotInfo == null ? "空" : selectedSlotInfo.SlotName));
+                        }
+                    }
+                }
+            }
+            
+            if (saveOptions != null)
+            {
+                saveOptions.UpdateSaveOptionsMenu(selectedSlotInfo);
+            }
         }
         
         /// <summary>
@@ -605,7 +647,7 @@ namespace MyGame.UI.SaveLoad.View
                         m_controller.HandleDeleteSave(slotName);
                         break;
                     case ConfirmActionType.Create:
-                        m_controller.HandleCreateNewGame();
+                        m_controller.HandleCreateNewGame(slotName);
                         break;
                 }
             }

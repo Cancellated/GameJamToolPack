@@ -29,6 +29,10 @@ namespace MyGame.UI.SaveLoad.View
         [Tooltip("点击存档槽时触发的按钮组件")]
         private Button _slotButton;
 
+        [SerializeField]
+        [Tooltip("背景图片")]
+        private Image _backgroundImage;
+
         private SaveSlotInfo _slotInfo;
         private SaveLoadMenuView _view;
         private bool _isSelected = false;
@@ -115,6 +119,21 @@ namespace MyGame.UI.SaveLoad.View
         public void SetSelected(bool selected)
         {
             _isSelected = selected;
+            
+            // 当存档槽被选中时改变背景颜色
+            if (_backgroundImage != null)
+            {
+                if (selected)
+                {
+                    // 选中状态使用半透明蓝色作为背景
+                    _backgroundImage.color = new Color(0.2f, 0.4f, 1.0f);
+                }
+                else
+                {
+                    // 未选中状态使用白色背景
+                    _backgroundImage.color = Color.gray;
+                }
+            }
         }
 
         /// <summary>

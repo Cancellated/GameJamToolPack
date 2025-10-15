@@ -1690,6 +1690,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 516726237}
   m_CullTransparentMesh: 1
+--- !u!1 &541964893
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 541964895}
+  - component: {fileID: 541964894}
+  m_Layer: 0
+  m_Name: Debug
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &541964894
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 541964893}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfbe6e60d1b4fe94e93ddf487bcc1b45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &541964895
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 541964893}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1243.1895, y: 645.766, z: -3.852537}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &558912380 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7174676498187163783, guid: 61cbbcb34fac11a4ba2ff461275b3ba5,
@@ -2258,7 +2302,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ad049b7adf31604d897cb426f564ea6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _view: {fileID: 840153397}
   _config: {fileID: 11400000, guid: 96ade19f618d0054aa307b6873d1bec0, type: 2}
 --- !u!114 &840153397
 MonoBehaviour:
@@ -2279,10 +2322,9 @@ MonoBehaviour:
   saveSlotPrefab: {fileID: 4166141445064324919, guid: dd8cf88d22398dd41a8de98f4a39d21d,
     type: 3}
   maxSaveSlots: 40
-  saveOptions: {fileID: 0}
+  saveOptions: {fileID: 8627650366872401371}
   backButton: {fileID: 215651831}
   confirmDialog: {fileID: 255380174}
-  _menuTitleText: {fileID: 92442588}
 --- !u!1 &871693828
 GameObject:
   m_ObjectHideFlags: 0
@@ -4152,6 +4194,7 @@ GameObject:
   - component: {fileID: 2018898481}
   - component: {fileID: 2018898482}
   - component: {fileID: 2018898483}
+  - component: {fileID: 2018898484}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -4280,6 +4323,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _panelAddressConfig: {fileID: 11400000, guid: 8adfa6bc68d21ee47830af0fdbc0ba91,
     type: 2}
+--- !u!114 &2018898484
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2018898473}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e178e52aacbbc1448ec760a688a387f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  config: {fileID: 11400000, guid: 19f4031ad127d31409d1393341f5b390, type: 2}
 --- !u!1001 &2082632374
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7733,3 +7789,4 @@ SceneRoots:
   - {fileID: 2018898475}
   - {fileID: 886188588}
   - {fileID: 1855985981}
+  - {fileID: 541964895}

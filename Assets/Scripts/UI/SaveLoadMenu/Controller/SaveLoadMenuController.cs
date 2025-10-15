@@ -8,6 +8,7 @@ using MyGame.Managers;
 using System;
 using Logger;
 using MyGame.UI.SaveLoadMenu.View;
+using MyGame.Core;
 
 namespace MyGame.UI.SaveLoad.Controller
 {
@@ -18,9 +19,6 @@ namespace MyGame.UI.SaveLoad.Controller
     /// </summary>
     public class SaveLoadMenuController : BaseController<SaveLoadMenuView, SaveLoadMenuModel>
     {
-        [Header("MVC Components")]
-        [SerializeField] private SaveLoadMenuModel _model;
-        [SerializeField] private SaveLoadMenuView _view;
         
         [Header("配置文件")]
         [Tooltip("存档菜单配置文件，包含存档设置、UI配置、文本配置等")]
@@ -62,34 +60,37 @@ namespace MyGame.UI.SaveLoad.Controller
         /// </summary>
         private void Awake()
         {
-            InitializeMVC();
             Initialize();
         }
         
         /// <summary>
-        /// 启用组件时注册事件
-        /// </summary>
-        private void OnEnable()
-        {
-            RegisterEvents();
-        }
-        
-        /// <summary>
-        /// 禁用组件时注销事件
-        /// </summary>
-        private void OnDisable()
-        {
-            UnregisterEvents();
-        }
-        
-        /// <summary>
         /// 初始化逻辑
-        /// 重写基类OnInitialize方法
+        /// 重写基类OnInitialize方法，确保在初始化时正确加载存档数据
         /// </summary>
         protected override void OnInitialize()
         {
             base.OnInitialize();
-            // 初始化逻辑已在InitializeMVC中实现
+            
+            // 确保配置文件不为空
+            if (_config == null)
+            {
+                // 尝试查找配置文件
+                _config = Resources.Load<SaveLoadMenuConfig>("SaveLoadMenuConfig");
+                if (_config == null)
+                {
+                    Log.Warning(Log_MODULE, "未找到存档菜单配置文件，使用默认配置");
+                }
+            }
+            
+            // 确保模型已初始化
+            if (m_model == null)
+            {
+                m_model = CreateAndInitializeModel();
+                SetModel(m_model);
+            }
+            
+            // 提前初始化存档槽数据，确保在视图显示前就有有效的数据
+            InitializeSaveSlots();
         }
         
         /// <summary>
@@ -164,26 +165,7 @@ namespace MyGame.UI.SaveLoad.Controller
             }
         }
         
-        /// <summary>
-        /// 初始化MVC组件关系
-        /// </summary>
-        private void InitializeMVC()
-        {
-            // 确保模型和视图不为空
-            _model ??= new SaveLoadMenuModel();
-            
-            if (_view == null)
-            {
-                _view = GetComponentInChildren<SaveLoadMenuView>();
-            }
-            
-            // 设置MVC关系
-            SetModel(_model);
-            SetView(_view);
-            
-            // 初始化存档槽
-            InitializeSaveSlots();
-        }
+
         
         /// <summary>
         /// 注册事件
@@ -218,7 +200,7 @@ namespace MyGame.UI.SaveLoad.Controller
         /// </summary>
         private void InitializeSaveSlots()
         {
-            if (_model == null)
+            if (m_model == null)
                 return;
             
             List<SaveSlotInfo> slots = new();
@@ -293,7 +275,8 @@ namespace MyGame.UI.SaveLoad.Controller
             }
             
             // 更新模型中的存档槽列表
-            _model.UpdateSaveSlots(slots);
+            m_model.UpdateSaveSlots(slots);
+            m_view.UpdateView();
         }
         
         /// <summary>
@@ -306,11 +289,14 @@ namespace MyGame.UI.SaveLoad.Controller
         /// <param name="saveData">存档数据</param>
         public void HandleSaveSlotSelected(string slotName, SaveData saveData = null)
         {
-            if (_model == null)
+            if (m_model == null)
+            {
+                Log.Info(Log_MODULE, "HandleSaveSlotSelected - 模型为空，无法设置选中存档槽");
                 return;
+            }
             
-            // 设置选中的存档槽
-            _model.SetSelectedSaveSlot(slotName, saveData);
+            Log.Info(Log_MODULE, string.Format("HandleSaveSlotSelected - 存档槽{0}被点击，为空存档：{1}", 
+                slotName, saveData == null ? "是" : "否"));
             
             // 处理空存档槽的特殊逻辑
             if (saveData == null)
@@ -323,17 +309,22 @@ namespace MyGame.UI.SaveLoad.Controller
                     
                     if (currentState == GameState.Menu)
                     {
-                        // 在主菜单状态下点击空存档槽，触发创建新游戏操作
-
+                        // 在主菜单状态下点击空存档槽，直接显示创建新游戏的确认面板
+                        // 注意：不在此处设置选中存档槽，避免触发可能导致空引用异常的视图更新
                         m_view.ShowConfirmPanel(ConfirmActionType.Create, slotName);
+                        return; // 提前返回，避免后续代码执行
                     }
                     else if (currentState == GameState.Playing || currentState == GameState.Paused)
                     {
                         // 在游戏中点击空存档槽，直接进行存档操作
                         HandleSaveGame(slotName);
+                        return; // 提前返回，避免后续代码执行
                     }
                 }
             }
+            
+            // 对于有存档数据的槽或其他游戏状态，正常设置选中的存档槽
+            m_model.SetSelectedSaveSlot(slotName, saveData);
             Log.Info(Log_MODULE, $"存档槽{slotName}被点击");
         }
         
@@ -345,6 +336,7 @@ namespace MyGame.UI.SaveLoad.Controller
         {
             // 通过GameEvents触发存档操作
             GameEvents.TriggerSaveGame(slotName);
+            m_view.UpdateView();
         }
         
         /// <summary>
@@ -370,10 +362,19 @@ namespace MyGame.UI.SaveLoad.Controller
         /// <summary>
         /// 处理创建新游戏操作
         /// </summary>
-        public void HandleCreateNewGame()
+        public void HandleCreateNewGame(string slotName = "AutoSave")
         {
-            // 通过GameEvents触发创建新游戏操作
-            GameEvents.TriggerCreateNewGame();
+            // 使用GameFlowCoordinator统一管理游戏流程
+            if (GameFlowCoordinator.Instance != null)
+            {
+                GameFlowCoordinator.Instance.StartNewGame(slotName);
+            }
+            else
+            {
+                // 降级处理：如果协调器不存在，仍然直接触发事件
+                Log.Warning(Log_MODULE, "GameFlowCoordinator实例不存在，直接触发CreateNewGame事件");
+                GameEvents.TriggerCreateNewGame(slotName);
+            }
         }
         
         /// <summary>
@@ -382,9 +383,9 @@ namespace MyGame.UI.SaveLoad.Controller
         public void HandleBackToMainMenu()
         {
             // 处理返回主菜单逻辑
-            if (_view != null)
+            if (m_view != null)
             {
-                _view.Hide();
+                m_view.Hide();
             }
         }
         
@@ -393,9 +394,9 @@ namespace MyGame.UI.SaveLoad.Controller
         /// </summary>
         private void HandleSaveSlotsUpdated()
         {
-            if (_view != null)
+            if (m_view != null)
             {
-                _view.UpdateView();
+                m_view.UpdateView();
             }
         }
         
@@ -404,9 +405,9 @@ namespace MyGame.UI.SaveLoad.Controller
         /// </summary>
         private void HandleSelectedSaveSlotChanged()
         {
-            if (_view != null)
+            if (m_view != null)
             {
-                _view.UpdateView();
+                m_view.UpdateView();
             }
         }
         
@@ -415,9 +416,9 @@ namespace MyGame.UI.SaveLoad.Controller
         /// </summary>
         public void Show()
         {
-            if (_view != null)
+            if (m_view != null)
             {
-                _view.Show();
+                m_view.Show();
                 // 显示前刷新存档数据
                 InitializeSaveSlots();
             }
@@ -428,9 +429,9 @@ namespace MyGame.UI.SaveLoad.Controller
         /// </summary>
         public void Hide()
         {
-            if (_view != null)
+            if (m_view != null)
             {
-                _view.Hide();
+                m_view.Hide();
             }
         }
     }

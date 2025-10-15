@@ -8,7 +8,7 @@ using Logger;
 using MyGame.UI;
 
 
-namespace MyGame.DevTool
+namespace MyGame.DevTools
 {
     /// <summary>
     /// 调试控制台视图，负责UI展示和用户输入事件捕获

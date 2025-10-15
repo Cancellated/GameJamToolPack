@@ -6,6 +6,7 @@ using MyGame.Data;
 using MyGame.UI.SaveLoad.Controller;
 using MyGame.UI.SaveLoad;
 using UnityEditor.EditorTools;
+using Logger;
 
 namespace MyGame.UI.SaveLoadMenu.View
 {
@@ -43,6 +44,8 @@ namespace MyGame.UI.SaveLoadMenu.View
         /// 当前选中的存档槽信息
         /// </summary>
         protected SaveSlotInfo currentSelectedSlotInfo;
+
+        private static readonly string LOG_MODULE = "SaveOptions";
         
         #region 生命周期
         /// <summary>
@@ -124,6 +127,7 @@ namespace MyGame.UI.SaveLoadMenu.View
             if (m_controller != null && currentSelectedSlotInfo != null)
             {
                 // 显示保存确认面板
+                Log.Info(LOG_MODULE, "保存被按钮点击");
                 if (confirmDialog != null)
                 {
                     confirmDialog.ShowConfirmPanel(ConfirmActionType.Save, currentSelectedSlotInfo.SlotName);
@@ -139,6 +143,7 @@ namespace MyGame.UI.SaveLoadMenu.View
             if (m_controller != null && currentSelectedSlotInfo != null)
             {
                 // 显示加载确认面板
+                Log.Info(LOG_MODULE, "加载被按钮点击");
                 if (confirmDialog != null)
                 {
                     confirmDialog.ShowConfirmPanel(ConfirmActionType.Load, currentSelectedSlotInfo.SlotName);
@@ -154,25 +159,17 @@ namespace MyGame.UI.SaveLoadMenu.View
             if (m_controller != null && currentSelectedSlotInfo != null)
             {
                 // 调用确认删除方法显示确认面板
-                ConfirmDeleteSave(currentSelectedSlotInfo.SlotName);
+                Log.Info(LOG_MODULE, "删除被按钮点击");
+                if (confirmDialog != null)
+                {
+                    confirmDialog.ShowConfirmPanel(ConfirmActionType.Delete, currentSelectedSlotInfo.SlotName);
+                }
             }
         }
         #endregion
 
         
-        /// <summary>
-        /// 确认删除存档
-        /// 显示删除确认面板
-        /// </summary>
-        /// <param name="slotName">要删除的存档槽名称</param>
-        protected virtual void ConfirmDeleteSave(string slotName)
-        {
-            // 显示删除确认面板
-            if (confirmDialog != null && m_controller != null && m_controller.Config != null)
-            {
-                confirmDialog.ShowConfirmPanel(ConfirmActionType.Delete, slotName);
-            }
-        }
+
         
         /// <summary>
         /// 更新保存选项菜单的按钮状态
@@ -206,12 +203,18 @@ namespace MyGame.UI.SaveLoadMenu.View
         /// 显示保存选项菜单（更新存档信息和按钮状态）
         /// </summary>
         /// <param name="slotInfo">存档槽信息</param>
-        public virtual void ShowSaveOptionsMenu(SaveSlotInfo slotInfo)
+        public virtual void UpdateSaveOptionsMenu(SaveSlotInfo slotInfo)
         {
             currentSelectedSlotInfo = slotInfo;
             
             // 更新按钮状态
             UpdateSaveOptionsButtonStates();
+            
+            // 安全地访问slotInfo的属性，避免空引用异常
+            if (slotInfo != null)
+            {
+                Log.Info(LOG_MODULE, string.Format("更新保存选项菜单，存档：{0}", slotInfo.SlotName));
+            }
 
         }
     }

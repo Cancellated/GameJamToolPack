@@ -4,7 +4,7 @@ using System.Reflection;
 using UnityEngine;
 using Logger;
 
-namespace MyGame.DevTool
+namespace MyGame.DevTools
 {
     /// <summary>
     /// 调试命令模型，负责管理所有调试命令的注册、查找和执行

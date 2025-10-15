@@ -502,6 +502,7 @@ MonoBehaviour:
   _saveTimeText: {fileID: 3053465468157942089}
   _gameProgressText: {fileID: 7262743627310491244}
   _slotButton: {fileID: 4476843843463892416}
+  _backgroundImage: {fileID: 5486964143883693683}
 --- !u!114 &4476843843463892416
 MonoBehaviour:
   m_ObjectHideFlags: 0

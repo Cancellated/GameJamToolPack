@@ -1,3 +1,5 @@
+using Logger;
+using MyGame.Core;
 using MyGame.Events;
 using MyGame.Managers;
 using MyGame.UI.MainMenu.Model;
@@ -100,7 +102,7 @@ namespace MyGame.UI.MainMenu.Controller
                 m_view = gameObject.GetComponentInChildren<MainMenuView>(true);
                 if (m_view == null)
                 {
-                    Debug.LogWarning("MainMenuController: MainMenuView not found, attempting to create.");
+
                     
                     // 创建视图对象
                     GameObject viewObject = new("MainMenuView");
@@ -188,14 +190,21 @@ namespace MyGame.UI.MainMenu.Controller
 
         /// <summary>
         /// 开始游戏
-        /// 先触发创建新游戏事件以自动保存新存档，然后触发游戏开始事件
+        /// 只触发创建新游戏事件，游戏开始和场景加载会在新游戏创建过程中自动触发
         /// </summary>
         public void OnStartGame()
         {
-            // 先触发创建新游戏事件，这样会自动保存新存档到自动存档槽
-            GameEvents.TriggerCreateNewGame();
-            // 然后触发游戏开始事件
-            GameEvents.TriggerGameStart();
+            // 使用GameFlowCoordinator统一管理游戏流程，传递明确的触发源
+            if (GameFlowCoordinator.Instance != null)
+            {
+                GameFlowCoordinator.Instance.StartNewGame("AutoSave", "MainMenuButton");
+            }
+            else
+            {
+                // 降级处理：如果协调器不存在，仍然直接触发事件
+                Log.Warning("MAIN_MENU", "GameFlowCoordinator实例不存在，直接触发CreateNewGame事件");
+                GameEvents.TriggerCreateNewGame("AutoSave");
+            }
         }
 
         /// <summary>
@@ -203,11 +212,15 @@ namespace MyGame.UI.MainMenu.Controller
         /// </summary>
         public void OnShowLoadGameMenu()
         {
-            if (m_model != null)
+            if (m_model == null)
             {
-                m_model.IsLoadGameVisible = true;
-                GameEvents.TriggerMenuShow(UIType.SaveLoadMenu, true);
+                Log.Error("MAIN_MENU", "OnShowLoadGameMenu: 模型未初始化");
+                return;
             }
+            
+            m_model.IsLoadGameVisible = true;
+            Log.Info("MAIN_MENU", "已触发显示加载游戏菜单事件");
+            GameEvents.TriggerMenuShow(UIType.SaveLoadMenu, true);
         }
 
         /// <summary>
@@ -215,11 +228,15 @@ namespace MyGame.UI.MainMenu.Controller
         /// </summary>
         public void OnShowSettings()
         {
-            if (m_model != null)
+            if (m_model == null)
             {
-                m_model.IsSettingsVisible = true;
-                GameEvents.TriggerMenuShow(UIType.SettingsPanel, true);
+                Log.Error("MAIN_MENU", "OnShowSettings: 模型未初始化");
+                return;
             }
+            
+            m_model.IsSettingsVisible = true;
+            Log.Info("MAIN_MENU", "已触发显示设置面板事件");
+            GameEvents.TriggerMenuShow(UIType.SettingsPanel, true);
         }
 
         /// <summary>
@@ -227,11 +244,15 @@ namespace MyGame.UI.MainMenu.Controller
         /// </summary>
         public void OnShowAbout()
         {
-            if (m_model != null)
+            if (m_model == null)
             {
-                m_model.IsAboutVisible = true;
-                GameEvents.TriggerMenuShow(UIType.AboutPanel, true);
+                Log.Error("MAIN_MENU", "OnShowAbout: 模型未初始化");
+                return;
             }
+            
+            m_model.IsAboutVisible = true;
+            Log.Info("MAIN_MENU", "已触发显示关于面板事件");
+            GameEvents.TriggerMenuShow(UIType.AboutPanel, true);
         }
 
         /// <summary>
@@ -239,6 +260,7 @@ namespace MyGame.UI.MainMenu.Controller
         /// </summary>
         public void OnExitGame()
         {
+            Log.Info("MAIN_MENU", "触发退出游戏操作");
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
 #else

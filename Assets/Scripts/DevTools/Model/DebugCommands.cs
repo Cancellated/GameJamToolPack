@@ -6,7 +6,7 @@ using MyGame.Events;
 using MyGame.UI;
 using Logger;
 
-namespace MyGame.DevTool
+namespace MyGame.DevTools
 {
     /// <summary>
     /// 调试命令集，集中管理所有调试命令

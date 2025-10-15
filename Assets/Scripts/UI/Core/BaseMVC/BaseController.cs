@@ -100,6 +100,16 @@ namespace MyGame.UI
         #endregion
         
         #region 公共方法
+
+        /// <summary>
+        /// 初始化控制器
+        /// 设置视图和模型引用
+        /// </summary>
+        public override void Initialize()
+        {
+            SetView(m_view);
+            SetModel(CreateAndInitializeModel());
+        }
         
         /// <summary>
         /// 创建并初始化模型实例
@@ -123,12 +133,61 @@ namespace MyGame.UI
         }
         
         /// <summary>
-        /// 设置视图引用
+        /// 设置视图引用并建立双向绑定
         /// </summary>
         /// <param name="view">视图实例</param>
         public virtual void SetView(TView view)
         {
+            // 如果已经有视图引用，先解绑旧的视图
+            if (m_view != null && m_view != view)
+            {
+                // 尝试调用旧视图的UnbindController方法（如果存在）
+                var unbindMethod = typeof(TView).GetMethod("UnbindController", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic, null, System.Type.EmptyTypes, null);
+                unbindMethod?.Invoke(m_view, null);
+            }
+            
+            // 设置新的视图引用
             m_view = view;
+            
+            // 如果传入的视图为null，尝试自动查找视图
+            m_view ??= TryFindView();
+            
+            // 如果找到了视图，尝试建立双向绑定
+            if (m_view != null)
+            {
+                // 尝试调用视图的BindController方法（如果存在）
+                var bindMethod = typeof(TView).GetMethod("BindController", 
+                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic,
+                    null, 
+                    new[] { this.GetType() },
+                    null);
+                
+                if (bindMethod != null)
+                {
+                    bindMethod.Invoke(m_view, new object[] { this });
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 尝试自动查找视图实例
+        /// 按照特定的查找策略尝试找到匹配的视图
+        /// </summary>
+        /// <returns>找到的视图实例，如果没有找到则返回null</returns>
+        protected virtual TView TryFindView()
+        {
+            // 尝试从同一GameObject获取视图组件
+            
+            // 如果同一GameObject没有找到，则尝试从子对象中查找
+            if (!TryGetComponent<TView>(out var view))
+            {
+                view = GetComponentInChildren<TView>();
+            }
+            
+            // 如果还没找到，则尝试从父对象中查找
+            view ??= GetComponentInParent<TView>();
+            
+            return view;
         }
         
         /// <summary>

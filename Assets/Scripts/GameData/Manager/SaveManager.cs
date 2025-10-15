@@ -326,12 +326,12 @@ namespace MyGame.Data
         /// <summary>
         /// 处理新游戏创建事件。
         /// </summary>
-        private void HandleCreateNewGame()
+        private void HandleCreateNewGame(string slotName)
         {
             // 新游戏创建时自动保存
-            Log.Info(LOG_MODULE, "新游戏创建，触发自动保存");
+            Log.Info(LOG_MODULE, string.Format("新游戏创建，保存到存档槽: {0}", slotName));
             NewGame();
-            SaveCurrentGame();
+            SaveCurrentGame(slotName);
         }
 
         private void HandleSaveGame(string slotName)

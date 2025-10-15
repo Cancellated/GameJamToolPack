@@ -127,12 +127,12 @@ namespace MyGame.Events
         /// <summary>
         /// 新游戏创建事件
         /// </summary>
-        public static event Action OnCreateNewGame;
+        public static event Action<string> OnCreateNewGame;
         
-        public static void TriggerCreateNewGame()
+        public static void TriggerCreateNewGame(string slotName = "AutoSave")
         {
-            Log.Info(module, "触发新游戏创建事件");
-            OnCreateNewGame?.Invoke();
+            Log.Info(module, string.Format("触发新游戏创建事件，存档槽: {0}", slotName));
+            OnCreateNewGame?.Invoke(slotName);
         }
 
         /// <summary>

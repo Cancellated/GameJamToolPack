@@ -21,10 +21,6 @@ namespace MyGame.UI.HUD.Controller
             if (!IsInitialized)
             {
                 Log.Info(LOG_MODULE, "初始化HUD控制器");
-                
-                // 创建并初始化模型
-                CreateAndInitializeModel();
-                
                 // 调用基类初始化
                 base.Initialize();
             }

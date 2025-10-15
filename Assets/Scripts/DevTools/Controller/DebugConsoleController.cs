@@ -1,7 +1,7 @@
 using UnityEngine;
 using Logger;
 
-namespace MyGame.DevTool
+namespace MyGame.DevTools
 {
     /// <summary>
     /// 调试控制台控制器，连接模型和视图，处理用户输入和命令执行

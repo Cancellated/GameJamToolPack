@@ -32,7 +32,7 @@ namespace MyGame.UI.SaveLoad.Events
         /// <summary>
         /// 创建新游戏事件
         /// </summary>
-        public delegate void CreateNewGameDelegate();
+        public delegate void CreateNewGameDelegate(string slotName);
         public static event CreateNewGameDelegate OnCreateNewGame;
         
         /// <summary>
@@ -77,9 +77,10 @@ namespace MyGame.UI.SaveLoad.Events
         /// <summary>
         /// 触发创建新游戏操作
         /// </summary>
-        public static void TriggerCreateNewGame()
+        /// <param name="slotName">存档槽名称</param>
+        public static void TriggerCreateNewGame(string slotName)
         {
-            OnCreateNewGame?.Invoke();
+            OnCreateNewGame?.Invoke(slotName);
         }
         
         /// <summary>

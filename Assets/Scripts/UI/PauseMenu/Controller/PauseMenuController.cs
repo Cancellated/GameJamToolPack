@@ -22,9 +22,6 @@ namespace MyGame.UI.PauseMenu.Controller
             {
                 Log.Info(LOG_MODULE, "初始化暂停菜单控制器");
                 
-                // 创建并初始化模型
-                CreateAndInitializeModel();
-                
                 // 调用基类初始化
                 base.Initialize();
             }

@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System;
+using MyGame.Managers;
 
 namespace MyGame.UI
 {
@@ -122,11 +123,12 @@ namespace MyGame.UI
         }
         
         /// <summary>
-        /// 初始化面板，此方法在基类为空
+        /// 初始化面板
+        /// 尝试自动绑定控制器
         /// </summary>
         public virtual void Initialize()
         {
-            // 子类可以重写此方法进行初始化
+            TryBindController();
         }
         
         /// <summary>
@@ -179,7 +181,28 @@ namespace MyGame.UI
         /// 尝试自动绑定控制器
         /// 可以在子类中重写以提供自定义的绑定逻辑
         /// </summary>
-        protected virtual void TryBindController() { }
+        protected virtual void TryBindController() 
+        {
+            if (m_controller == null)
+            {
+                // 尝试从同一GameObject获取控制器组件
+                
+                // 如果同一GameObject没有找到，则尝试从子对象中查找
+                if (!TryGetComponent<TController>(out var controller))
+                {
+                    controller = GetComponentInChildren<TController>();
+                }
+                
+                // 如果还没找到，则尝试从父对象中查找
+                controller ??= GetComponentInParent<TController>();
+                
+                // 如果找到了控制器，则进行绑定
+                if (controller != null)
+                {
+                    BindController(controller);
+                }
+            }
+        }
         
         #endregion
         

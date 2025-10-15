@@ -67,6 +67,7 @@
     <Compile Include="Assets\Scripts\UI\SaveLoadMenu\Model\SaveLoadMenuConfig.cs" />
     <Compile Include="Assets\Scripts\UI\About\Controller\AboutPanelController.cs" />
     <Compile Include="Assets\Scripts\Logger\LogModules.cs" />
+    <Compile Include="Assets\Scripts\Debug\FlowTestSceneHelper.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\EnvMapAnimator.cs" />
     <Compile Include="Assets\Scripts\UI\Components\ToggleSwitch\ToggleSwitch.cs" />
     <Compile Include="Assets\Scripts\GameData\DataModels\GameSettings.cs" />
@@ -75,6 +76,7 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01_UGUI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\SimpleScript.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark04.cs" />
+    <Compile Include="Assets\Scripts\Debug\CoordinatorTest.cs" />
     <Compile Include="Assets\Scripts\UI\Loading\Model\LoadingScreenModel.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerController.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\ChatController.cs" />
@@ -85,6 +87,7 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_FrameRateCounter.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
     <Compile Include="Assets\Scripts\UI\About\View\AboutPanelView.cs" />
+    <Compile Include="Assets\Scripts\Core\GameFlow\GameFlowCoordinatorConfig.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\Model\ItemDatabase.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshSpawner.cs" />
@@ -108,13 +111,13 @@
     <Compile Include="Assets\Scripts\UI\MainMenu\View\MainMenuView.cs" />
     <Compile Include="Assets\Scripts\Core\Events\GameEvents.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark03.cs" />
+    <Compile Include="Assets\Scripts\Core\GameFlow\GameFlowCoordinator.cs" />
     <Compile Include="Assets\Scripts\GameData\SaveSystem\JsonSaveSystem.cs" />
     <Compile Include="Assets\Scripts\UI\Core\BaseMVC\BaseModel.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\Controller\HUDController.cs" />
     <Compile Include="Assets\Scripts\UI\SaveLoadMenu\View\SaveLoadMenuView.cs" />
     <Compile Include="Assets\Scripts\UI\PauseMenu\View\PauseMenuView.cs" />
     <Compile Include="Assets\Scripts\GameData\Manager\SaveManager.cs" />
-    <Compile Include="Assets\Scripts\Core\Utils\Utils.cs" />
     <Compile Include="Assets\Scripts\GameData\DataModels\GameProgress.cs" />
     <Compile Include="Assets\Scripts\UI\Core\BaseMVC\BaseController.cs" />
     <Compile Include="Assets\Scripts\UI\SaveLoadMenu\View\Components\SaveOptions.cs" />
@@ -157,6 +160,7 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshProFloatingText.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\ShaderPropAnimator.cs" />
     <Compile Include="Assets\Scripts\DevTools\Model\DebugCommandModel.cs" />
+    <Compile Include="Assets\Scripts\Debug\GameFlowTest.cs" />
     <Compile Include="Assets\Scripts\UI\Settings\View\Components\GraphicsSettingsComponent.cs" />
     <Compile Include="Assets\Scripts\UI\Core\BaseMVC\BaseView.cs" />
     <Compile Include="Assets\Scripts\UI\MainMenu\Model\MainMenuModel.cs" />

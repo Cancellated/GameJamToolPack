@@ -32,12 +32,7 @@ namespace MyGame.UI.Settings.Controller
         protected virtual void Awake()
         {
             Log.Info(LOG_MODULE, "设置面板控制器初始化");
-            base.CreateAndInitializeModel();
-            // 设置视图引用
-            if (m_settingsPanelView != null)
-            {
-                SetView(m_settingsPanelView);
-            }
+            base.Initialize();
         }
 
         /// <summary>
