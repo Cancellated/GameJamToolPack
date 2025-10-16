@@ -26,7 +26,7 @@ namespace MyGame.UI
         /// <summary>
         /// 是否显示面板
         /// </summary>
-        public bool IsVisible { get; protected set; }
+        public bool IsVisible { get; protected set; } = true;
         
         /// <summary>
         /// 面板类型，用于UIManager进行状态管理
@@ -44,9 +44,7 @@ namespace MyGame.UI
         
         /// <summary>
         /// 初始化面板：
-        /// 1. 自动获取CanvasGroup组件
-        /// 2. 初始状态为隐藏
-        /// 3. 尝试自动绑定控制器
+        /// 获取canvasgroup并启动initialize方法
         /// </summary>
         protected virtual void Awake()
         {
@@ -59,13 +57,7 @@ namespace MyGame.UI
                     m_canvasGroup = gameObject.AddComponent<CanvasGroup>();
                 }
             }
-            
-            // 初始状态为隐藏
-            SetCanvasVisible(false);
-            IsVisible = false;
-            
-            // 尝试自动绑定控制器
-            TryBindController();
+            Initialize();
         }
         
         /// <summary>
@@ -81,7 +73,7 @@ namespace MyGame.UI
         /// </summary>
         protected virtual void OnEnable()
         {
-            Initialize();
+
         }
 
         /// <summary>
@@ -89,7 +81,7 @@ namespace MyGame.UI
         /// </summary>
         protected virtual void OnDisable()
         {
-            UnbindController();
+
         }
         
         #endregion
@@ -124,10 +116,16 @@ namespace MyGame.UI
         
         /// <summary>
         /// 初始化面板
-        /// 尝试自动绑定控制器
+        /// 尝试自动绑定控制器和隐藏面板
         /// </summary>
         public virtual void Initialize()
         {
+            // 确保CanvasGroup的alpha值为0，使面板不可见
+            if (m_canvasGroup != null)
+            {
+                m_canvasGroup.alpha = 0f;
+            }
+            Hide();
             TryBindController();
         }
         
@@ -136,6 +134,31 @@ namespace MyGame.UI
         /// </summary>
         public virtual void Cleanup()
         {
+        }
+
+        /// <summary>
+        /// 尝试自动绑定控制器
+        /// 可以在子类中重写以提供自定义的绑定逻辑
+        /// </summary>
+        protected virtual void TryBindController() 
+        {
+            if (m_controller == null)
+            {
+                // 如果同一GameObject没有找到，则尝试从子对象中查找
+                if (!TryGetComponent<TController>(out var controller))
+                {
+                    controller = GetComponentInChildren<TController>();
+                }
+                
+                // 如果还没找到，则尝试从父对象中查找
+                controller ??= GetComponentInParent<TController>();
+                
+                // 如果找到了控制器，则进行绑定
+                if (controller != null)
+                {
+                    BindController(controller);
+                }
+            }
         }
         
         /// <summary>
@@ -175,35 +198,7 @@ namespace MyGame.UI
         /// 控制器解绑后的回调
         /// 子类可以重写此方法来处理控制器解绑后的逻辑
         /// </summary>
-        protected virtual void OnControllerUnbound() { }
-        
-        /// <summary>
-        /// 尝试自动绑定控制器
-        /// 可以在子类中重写以提供自定义的绑定逻辑
-        /// </summary>
-        protected virtual void TryBindController() 
-        {
-            if (m_controller == null)
-            {
-                // 尝试从同一GameObject获取控制器组件
-                
-                // 如果同一GameObject没有找到，则尝试从子对象中查找
-                if (!TryGetComponent<TController>(out var controller))
-                {
-                    controller = GetComponentInChildren<TController>();
-                }
-                
-                // 如果还没找到，则尝试从父对象中查找
-                controller ??= GetComponentInParent<TController>();
-                
-                // 如果找到了控制器，则进行绑定
-                if (controller != null)
-                {
-                    BindController(controller);
-                }
-            }
-        }
-        
+        protected virtual void OnControllerUnbound() { }      
         #endregion
         
         #region 辅助方法

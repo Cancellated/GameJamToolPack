@@ -1,5 +1,6 @@
 using MyGame.Events;
 using MyGame.Managers;
+using MyGame.UI.SaveLoad.Events;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -148,6 +149,8 @@ namespace MyGame.Data
             if (success)
             {
                 Log.Info(LOG_MODULE, "游戏保存成功");
+                // 触发存档完成事件，通知UI刷新
+                SaveLoadMenuEvents.TriggerSaveComplete(saveSlot);
             }
             else
             {
@@ -190,6 +193,8 @@ namespace MyGame.Data
                 ApplyLoadedSettings();
                 
                 Log.Info(LOG_MODULE, "游戏加载成功");
+                // 触发加载完成事件，通知UI刷新
+                SaveLoadMenuEvents.TriggerSaveComplete(saveSlot);
                 return true;
             }
             else
@@ -203,6 +208,7 @@ namespace MyGame.Data
         /// <summary>
         /// 删除指定存档槽的游戏数据。
         /// 包含延迟初始化逻辑，确保在第一次访问时初始化存档系统。
+        /// 删除成功后会触发SaveLoadMenuEvents.OnSaveComplete事件通知UI刷新。
         /// </summary>
         /// <param name="slotName">存档槽名称，如果为空则使用默认存档槽。</param>
         /// <returns>删除操作是否成功。</returns>
@@ -226,6 +232,15 @@ namespace MyGame.Data
             if (success)
             {
                 Log.Info(LOG_MODULE, "存档删除成功");
+                
+                // 如果删除的是当前加载的存档，重置当前存档数据
+                if (m_currentSaveData != null && string.Equals(m_currentSaveData.saveSlotName, saveSlot, StringComparison.OrdinalIgnoreCase))
+                {
+                    m_currentSaveData = new SaveData();
+                }
+                
+                // 触发存档完成事件，通知UI刷新
+                SaveLoadMenuEvents.TriggerSaveComplete(saveSlot);
             }
             else
             {

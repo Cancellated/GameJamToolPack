@@ -1,0 +1,507 @@
+[UIComponents] 初始化设置滑块组件
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.Components.SettingSlider.SettingSliderComponent:InitializeComponent () (at Assets/Scripts/UI/Components/SettingSlider/SettingSliderComponent.cs:133)
+MyGame.UI.Components.SettingSlider.SettingSliderComponent:Awake () (at Assets/Scripts/UI/Components/SettingSlider/SettingSliderComponent.cs:76)
+
+[DebugConsole] DebugConsole.PanelType 设置为: Console
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.DevTools.DebugConsole:Initialize () (at Assets/Scripts/DevTools/View/DebugConsole.cs:121)
+MyGame.UI.BaseView`1<MyGame.DevTools.DebugConsoleController>:OnEnable () (at Assets/Scripts/UI/Core/BaseMVC/BaseView.cs:84)
+
+[UIComponents] 初始化设置滑块组件
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.Components.SettingSlider.SettingSliderComponent:InitializeComponent () (at Assets/Scripts/UI/Components/SettingSlider/SettingSliderComponent.cs:133)
+MyGame.UI.Components.SettingSlider.SettingSliderComponent:Awake () (at Assets/Scripts/UI/Components/SettingSlider/SettingSliderComponent.cs:76)
+
+[GAME_FLOW_TEST] GameFlowTest实例初始化成功
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.DevTools.GameFlowTest:Awake () (at Assets/Scripts/Debug/GameFlowTest.cs:40)
+
+[GAME_FLOW_TEST] 注册游戏流程事件监听
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.DevTools.GameFlowTest:OnEnable () (at Assets/Scripts/Debug/GameFlowTest.cs:47)
+
+[Loading] 已设置加载界面Canvas排序层级为: 1000
+UnityEngine.Debug:Log (object,UnityEngine.Object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:20)
+MyGame.UI.Loading.View.LoadingScreenView:EnsureGlobalCanvasParent () (at Assets/Scripts/UI/Loading/View/LoadingScreenView.cs:82)
+MyGame.UI.Loading.View.LoadingScreenView:Awake () (at Assets/Scripts/UI/Loading/View/LoadingScreenView.cs:43)
+
+[SaveLoadMenu] CreateSaveSlotUIs: 没有可用的存档槽数据，将创建空存档槽
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:CreateSaveSlotUIs () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:221)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:UpdateView () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:186)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:SetModel (MyGame.UI.SaveLoad.SaveLoadMenuModel) (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:169)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:set_Model (MyGame.UI.SaveLoad.SaveLoadMenuModel) (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:69)
+MyGame.UI.SaveLoad.Controller.SaveLoadMenuController:SetModel (MyGame.UI.SaveLoad.SaveLoadMenuModel) (at Assets/Scripts/UI/SaveLoadMenu/Controller/SaveLoadMenuController.cs:136)
+MyGame.UI.BaseController`2<MyGame.UI.SaveLoad.View.SaveLoadMenuView, MyGame.UI.SaveLoad.SaveLoadMenuModel>:CreateAndInitializeModel () (at Assets/Scripts/UI/Core/BaseMVC/BaseController.cs:130)
+MyGame.UI.BaseController`2<MyGame.UI.SaveLoad.View.SaveLoadMenuView, MyGame.UI.SaveLoad.SaveLoadMenuModel>:Initialize () (at Assets/Scripts/UI/Core/BaseMVC/BaseController.cs:111)
+MyGame.UI.SaveLoad.Controller.SaveLoadMenuController:Awake () (at Assets/Scripts/UI/SaveLoadMenu/Controller/SaveLoadMenuController.cs:63)
+
+[SaveLoadMenu] CreateSaveSlotUIs: 没有可用的存档槽数据，将创建空存档槽
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:CreateSaveSlotUIs () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:221)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:UpdateView () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:186)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:SetModel (MyGame.UI.SaveLoad.SaveLoadMenuModel) (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:169)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:set_Model (MyGame.UI.SaveLoad.SaveLoadMenuModel) (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:69)
+MyGame.UI.SaveLoad.Controller.SaveLoadMenuController:SetModel (MyGame.UI.SaveLoad.SaveLoadMenuModel) (at Assets/Scripts/UI/SaveLoadMenu/Controller/SaveLoadMenuController.cs:136)
+MyGame.UI.BaseController`2<MyGame.UI.SaveLoad.View.SaveLoadMenuView, MyGame.UI.SaveLoad.SaveLoadMenuModel>:Initialize () (at Assets/Scripts/UI/Core/BaseMVC/BaseController.cs:111)
+MyGame.UI.SaveLoad.Controller.SaveLoadMenuController:Awake () (at Assets/Scripts/UI/SaveLoadMenu/Controller/SaveLoadMenuController.cs:63)
+
+[SaveLoadMenu] CreateSaveSlotUIs: 没有可用的存档槽数据，将创建空存档槽
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:CreateSaveSlotUIs () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:221)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:UpdateView () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:186)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:SetModel (MyGame.UI.SaveLoad.SaveLoadMenuModel) (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:169)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:Initialize () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:79)
+MyGame.UI.BaseView`1<MyGame.UI.SaveLoad.Controller.SaveLoadMenuController>:OnEnable () (at Assets/Scripts/UI/Core/BaseMVC/BaseView.cs:84)
+
+[SaveLoadMenu] CreateSaveSlotUIs: 没有可用的存档槽数据，将创建空存档槽
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:CreateSaveSlotUIs () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:221)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:UpdateView () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:186)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:Initialize () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:81)
+MyGame.UI.BaseView`1<MyGame.UI.SaveLoad.Controller.SaveLoadMenuController>:OnEnable () (at Assets/Scripts/UI/Core/BaseMVC/BaseView.cs:84)
+
+[Save] 存档管理器已初始化
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.Data.SaveManager:Awake () (at Assets/Scripts/GameData/Manager/SaveManager.cs:59)
+
+[UIManager] 已将全局Canvas设置为DontDestroyOnLoad
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.Core.PanelLoader:UpdateCanvasReference (bool,string) (at Assets/Scripts/UI/Core/PanelLoader.cs:109)
+MyGame.UI.Core.PanelLoader:Awake () (at Assets/Scripts/UI/Core/PanelLoader.cs:148)
+
+[UIManager] 已更新全局Canvas引用
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.Core.PanelLoader:UpdateCanvasReference (bool,string) (at Assets/Scripts/UI/Core/PanelLoader.cs:112)
+MyGame.UI.Core.PanelLoader:Awake () (at Assets/Scripts/UI/Core/PanelLoader.cs:148)
+
+[UIManager] 从配置文件加载面板地址映射: Loading -> Assets/Art Asset/Prefabs/UI/Loading/LoadingScreen.prefab
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.Core.PanelLoader:InitializePanelAddressMap () (at Assets/Scripts/UI/Core/PanelLoader.cs:170)
+MyGame.UI.Core.PanelLoader:Awake () (at Assets/Scripts/UI/Core/PanelLoader.cs:151)
+
+[UIManager] 从配置文件加载面板地址映射: HUD -> Assets/Art Asset/Prefabs/UI/HUD/HUD.prefab
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.Core.PanelLoader:InitializePanelAddressMap () (at Assets/Scripts/UI/Core/PanelLoader.cs:170)
+MyGame.UI.Core.PanelLoader:Awake () (at Assets/Scripts/UI/Core/PanelLoader.cs:151)
+
+[GAME_FLOW] 游戏流程协调器初始化成功
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.Core.GameFlowCoordinator:Awake () (at Assets/Scripts/Core/GameFlow/GameFlowCoordinator.cs:59)
+
+[GAME_FLOW] 🐞 配置参数: 调试模式=True
+UnityEngine.Debug:Log (object)
+Logger.Log:DebugLog (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:79)
+MyGame.Core.GameFlowCoordinator:DebugLog (string,object[]) (at Assets/Scripts/Core/GameFlow/GameFlowCoordinator.cs:208)
+MyGame.Core.GameFlowCoordinator:Awake () (at Assets/Scripts/Core/GameFlow/GameFlowCoordinator.cs:60)
+
+[DebugConsole] 调试命令初始化完成，共加载了9个命令
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.DevTools.DebugCommandModel:InitializeCommands () (at Assets/Scripts/DevTools/Model/DebugCommandModel.cs:38)
+MyGame.DevTools.DebugConsoleController:Awake () (at Assets/Scripts/DevTools/Controller/DebugConsoleController.cs:31)
+
+[MainMenu] 显示主菜单面板
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.MainMenu.View.MainMenuView:Show () (at Assets/Scripts/UI/MainMenu/View/MainMenuView.cs:86)
+MyGame.UI.MainMenu.View.MainMenuView:Initialize () (at Assets/Scripts/UI/MainMenu/View/MainMenuView.cs:109)
+MyGame.UI.BaseView`1<MyGame.UI.MainMenu.Controller.MainMenuController>:OnEnable () (at Assets/Scripts/UI/Core/BaseMVC/BaseView.cs:84)
+
+[SettingsController] 设置面板控制器初始化
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.Settings.Controller.SettingsPanelController:Awake () (at Assets/Scripts/UI/Settings/Controller/SettingsPanelController.cs:34)
+
+[SettingsController] 🐞 设置面板控制器启用
+UnityEngine.Debug:Log (object)
+Logger.Log:DebugLog (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:79)
+MyGame.UI.Settings.Controller.SettingsPanelController:OnEnable () (at Assets/Scripts/UI/Settings/Controller/SettingsPanelController.cs:43)
+
+[SettingsController] 🐞 设置面板控制器: 模型已设置
+UnityEngine.Debug:Log (object)
+Logger.Log:DebugLog (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:79)
+MyGame.UI.Settings.Controller.SettingsPanelController:SetModels () (at Assets/Scripts/UI/Settings/Controller/SettingsPanelController.cs:53)
+MyGame.UI.Settings.Controller.SettingsPanelController:OnEnable () (at Assets/Scripts/UI/Settings/Controller/SettingsPanelController.cs:44)
+
+[SettingsController] 绑定设置模型事件
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.Settings.Controller.SettingsPanelController:BindModelEvents () (at Assets/Scripts/UI/Settings/Controller/SettingsPanelController.cs:102)
+MyGame.UI.Settings.Controller.SettingsPanelController:SetModels () (at Assets/Scripts/UI/Settings/Controller/SettingsPanelController.cs:54)
+MyGame.UI.Settings.Controller.SettingsPanelController:OnEnable () (at Assets/Scripts/UI/Settings/Controller/SettingsPanelController.cs:44)
+
+[SettingsView] 查找所有设置组件
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.Settings.View.SettingsPanelView:FindAllSettingsComponents () (at Assets/Scripts/UI/Settings/View/SettingsPanelView.cs:184)
+MyGame.UI.Settings.View.SettingsPanelView:Awake () (at Assets/Scripts/UI/Settings/View/SettingsPanelView.cs:51)
+
+[SettingsView] 成功添加 3 个设置组件到集合
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.Settings.View.SettingsPanelView:FindSettingsComponentsByBaseClass () (at Assets/Scripts/UI/Settings/View/SettingsPanelView.cs:214)
+MyGame.UI.Settings.View.SettingsPanelView:FindAllSettingsComponents () (at Assets/Scripts/UI/Settings/View/SettingsPanelView.cs:190)
+MyGame.UI.Settings.View.SettingsPanelView:Awake () (at Assets/Scripts/UI/Settings/View/SettingsPanelView.cs:51)
+
+[SettingsView] 初始化设置面板
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.Settings.View.SettingsPanelView:Initialize () (at Assets/Scripts/UI/Settings/View/SettingsPanelView.cs:80)
+MyGame.UI.BaseView`1<MyGame.UI.Settings.Controller.SettingsPanelController>:OnEnable () (at Assets/Scripts/UI/Core/BaseMVC/BaseView.cs:84)
+
+[SettingsView] 所有设置组件初始化完成，成功初始化: 3/3
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.Settings.View.SettingsPanelView:InitializeAllSettingsComponents () (at Assets/Scripts/UI/Settings/View/SettingsPanelView.cs:250)
+MyGame.UI.Settings.View.SettingsPanelView:Initialize () (at Assets/Scripts/UI/Settings/View/SettingsPanelView.cs:83)
+MyGame.UI.BaseView`1<MyGame.UI.Settings.Controller.SettingsPanelController>:OnEnable () (at Assets/Scripts/UI/Core/BaseMVC/BaseView.cs:84)
+
+[GAME_FLOW_TEST] 游戏流程测试开始
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.DevTools.GameFlowTest:Start () (at Assets/Scripts/Debug/GameFlowTest.cs:64)
+
+[GAME_FLOW_TEST] 请通过主菜单或存档菜单测试创建新游戏功能
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.DevTools.GameFlowTest:Start () (at Assets/Scripts/Debug/GameFlowTest.cs:65)
+
+[GameEvents] 游戏状态变更：Init -> Menu
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.Events.GameEvents:TriggerGameStateChanged (MyGame.Managers.GameState,MyGame.Managers.GameState) (at Assets/Scripts/Core/Events/GameEvents.cs:70)
+MyGame.Managers.GameManager:TryChangeState (MyGame.Managers.GameState) (at Assets/Scripts/Core/GameManager.cs:99)
+MyGame.Managers.GameManager:StartMenu () (at Assets/Scripts/Core/GameManager.cs:129)
+MyGame.Managers.GameManager:Start () (at Assets/Scripts/Core/GameManager.cs:61)
+
+[GameManager] 进入菜单
+UnityEngine.Debug:Log (object,UnityEngine.Object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:20)
+MyGame.Managers.GameManager:StartMenu () (at Assets/Scripts/Core/GameManager.cs:133)
+MyGame.Managers.GameManager:Start () (at Assets/Scripts/Core/GameManager.cs:61)
+
+[UIManager] 开始初始化面板映射
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.Managers.UIManager:InitializePanelMap () (at Assets/Scripts/UI/Core/UIManager.cs:95)
+MyGame.Managers.UIManager:Start () (at Assets/Scripts/UI/Core/UIManager.cs:79)
+
+[DebugConsole] DebugConsole.PanelType 设置为: Console
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.DevTools.DebugConsole:Initialize () (at Assets/Scripts/DevTools/View/DebugConsole.cs:121)
+MyGame.Managers.UIManager:AddPanelToMap (MyGame.UI.IUIPanel) (at Assets/Scripts/UI/Core/UIManager.cs:189)
+MyGame.Managers.UIManager:InitializePanelMap () (at Assets/Scripts/UI/Core/UIManager.cs:116)
+MyGame.Managers.UIManager:Start () (at Assets/Scripts/UI/Core/UIManager.cs:79)
+
+[MainMenu] 显示主菜单面板
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.MainMenu.View.MainMenuView:Show () (at Assets/Scripts/UI/MainMenu/View/MainMenuView.cs:86)
+MyGame.UI.MainMenu.View.MainMenuView:Initialize () (at Assets/Scripts/UI/MainMenu/View/MainMenuView.cs:109)
+MyGame.Managers.UIManager:AddPanelToMap (MyGame.UI.IUIPanel) (at Assets/Scripts/UI/Core/UIManager.cs:189)
+MyGame.Managers.UIManager:InitializePanelMap () (at Assets/Scripts/UI/Core/UIManager.cs:116)
+MyGame.Managers.UIManager:Start () (at Assets/Scripts/UI/Core/UIManager.cs:79)
+
+[SettingsView] 初始化设置面板
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.Settings.View.SettingsPanelView:Initialize () (at Assets/Scripts/UI/Settings/View/SettingsPanelView.cs:80)
+MyGame.Managers.UIManager:AddPanelToMap (MyGame.UI.IUIPanel) (at Assets/Scripts/UI/Core/UIManager.cs:189)
+MyGame.Managers.UIManager:InitializePanelMap () (at Assets/Scripts/UI/Core/UIManager.cs:116)
+MyGame.Managers.UIManager:Start () (at Assets/Scripts/UI/Core/UIManager.cs:79)
+
+[SettingsView] 所有设置组件初始化完成，成功初始化: 3/3
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.Settings.View.SettingsPanelView:InitializeAllSettingsComponents () (at Assets/Scripts/UI/Settings/View/SettingsPanelView.cs:250)
+MyGame.UI.Settings.View.SettingsPanelView:Initialize () (at Assets/Scripts/UI/Settings/View/SettingsPanelView.cs:83)
+MyGame.Managers.UIManager:AddPanelToMap (MyGame.UI.IUIPanel) (at Assets/Scripts/UI/Core/UIManager.cs:189)
+MyGame.Managers.UIManager:InitializePanelMap () (at Assets/Scripts/UI/Core/UIManager.cs:116)
+MyGame.Managers.UIManager:Start () (at Assets/Scripts/UI/Core/UIManager.cs:79)
+
+[SaveLoadMenu] CreateSaveSlotUIs: 没有可用的存档槽数据，将创建空存档槽
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:CreateSaveSlotUIs () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:221)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:UpdateView () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:186)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:SetModel (MyGame.UI.SaveLoad.SaveLoadMenuModel) (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:169)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:Initialize () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:79)
+MyGame.Managers.UIManager:AddPanelToMap (MyGame.UI.IUIPanel) (at Assets/Scripts/UI/Core/UIManager.cs:189)
+MyGame.Managers.UIManager:InitializePanelMap () (at Assets/Scripts/UI/Core/UIManager.cs:116)
+MyGame.Managers.UIManager:Start () (at Assets/Scripts/UI/Core/UIManager.cs:79)
+
+[SaveLoadMenu] CreateSaveSlotUIs: 没有可用的存档槽数据，将创建空存档槽
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:CreateSaveSlotUIs () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:221)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:UpdateView () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:186)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:Initialize () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:81)
+MyGame.Managers.UIManager:AddPanelToMap (MyGame.UI.IUIPanel) (at Assets/Scripts/UI/Core/UIManager.cs:189)
+MyGame.Managers.UIManager:InitializePanelMap () (at Assets/Scripts/UI/Core/UIManager.cs:116)
+MyGame.Managers.UIManager:Start () (at Assets/Scripts/UI/Core/UIManager.cs:79)
+
+[UIManager] 面板映射初始化完成，共包含 6 个面板类型
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.Managers.UIManager:InitializePanelMap () (at Assets/Scripts/UI/Core/UIManager.cs:121)
+MyGame.Managers.UIManager:Start () (at Assets/Scripts/UI/Core/UIManager.cs:79)
+
+[SettingsView] 隐藏设置面板
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.Settings.View.SettingsPanelView:Hide () (at Assets/Scripts/UI/Settings/View/SettingsPanelView.cs:140)
+MyGame.Managers.UIManager:HideAllUI () (at Assets/Scripts/UI/Core/UIManager.cs:263)
+MyGame.Managers.UIManager:Start () (at Assets/Scripts/UI/Core/UIManager.cs:81)
+
+[UIManager] 尝试显示/隐藏UI类型: SettingsPanel, show: False
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.Managers.UIManager:SetUIState (MyGame.UI.UIType,bool) (at Assets/Scripts/UI/Core/UIManager.cs:348)
+MyGame.Managers.UIManager:SetUIState (MyGame.UI.UIType,bool) (at Assets/Scripts/UI/Core/UIManager.cs:293)
+MyGame.Managers.UIManager:Start () (at Assets/Scripts/UI/Core/UIManager.cs:85)
+
+[SettingsView] 隐藏设置面板
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.Settings.View.SettingsPanelView:Hide () (at Assets/Scripts/UI/Settings/View/SettingsPanelView.cs:140)
+MyGame.Managers.UIManager:SetUIState (MyGame.UI.UIType,bool) (at Assets/Scripts/UI/Core/UIManager.cs:358)
+MyGame.Managers.UIManager:SetUIState (MyGame.UI.UIType,bool) (at Assets/Scripts/UI/Core/UIManager.cs:293)
+MyGame.Managers.UIManager:Start () (at Assets/Scripts/UI/Core/UIManager.cs:85)
+
+[UIManager] 尝试显示/隐藏UI类型: AboutPanel, show: False
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.Managers.UIManager:SetUIState (MyGame.UI.UIType,bool) (at Assets/Scripts/UI/Core/UIManager.cs:348)
+MyGame.Managers.UIManager:SetUIState (MyGame.UI.UIType,bool) (at Assets/Scripts/UI/Core/UIManager.cs:294)
+MyGame.Managers.UIManager:Start () (at Assets/Scripts/UI/Core/UIManager.cs:85)
+
+[UIManager] 尝试显示/隐藏UI类型: SaveLoadMenu, show: False
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.Managers.UIManager:SetUIState (MyGame.UI.UIType,bool) (at Assets/Scripts/UI/Core/UIManager.cs:348)
+MyGame.Managers.UIManager:SetUIState (MyGame.UI.UIType,bool) (at Assets/Scripts/UI/Core/UIManager.cs:295)
+MyGame.Managers.UIManager:Start () (at Assets/Scripts/UI/Core/UIManager.cs:85)
+
+[UIManager] 尝试显示/隐藏UI类型: MainMenu, show: True
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.Managers.UIManager:SetUIState (MyGame.UI.UIType,bool) (at Assets/Scripts/UI/Core/UIManager.cs:348)
+MyGame.Managers.UIManager:Start () (at Assets/Scripts/UI/Core/UIManager.cs:85)
+
+[MainMenu] 显示主菜单面板
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.MainMenu.View.MainMenuView:Show () (at Assets/Scripts/UI/MainMenu/View/MainMenuView.cs:86)
+MyGame.Managers.UIManager:SetUIState (MyGame.UI.UIType,bool) (at Assets/Scripts/UI/Core/UIManager.cs:354)
+MyGame.Managers.UIManager:Start () (at Assets/Scripts/UI/Core/UIManager.cs:85)
+
+[SaveLoadMenu] CreateSaveSlotUIs: 没有可用的存档槽数据，将创建空存档槽
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:CreateSaveSlotUIs () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:221)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:UpdateView () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:186)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:SetModel (MyGame.UI.SaveLoad.SaveLoadMenuModel) (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:169)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:set_Model (MyGame.UI.SaveLoad.SaveLoadMenuModel) (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:69)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView/<DelayedInitialize>d__20:MoveNext () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:116)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+[SaveLoadMenu] 延迟初始化: 模型设置完成
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView/<DelayedInitialize>d__20:MoveNext () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:117)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+[SaveLoadMenu] SaveOptions组件初始化完成
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView/<DelayedInitialize>d__20:MoveNext () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:124)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+[SaveLoadMenu] CreateSaveSlotUIs: 没有可用的存档槽数据，将创建空存档槽
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:CreateSaveSlotUIs () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:221)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:UpdateView () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:186)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:SetModel (MyGame.UI.SaveLoad.SaveLoadMenuModel) (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:169)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:set_Model (MyGame.UI.SaveLoad.SaveLoadMenuModel) (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:69)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView/<DelayedInitialize>d__20:MoveNext () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:116)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+[SaveLoadMenu] 延迟初始化: 模型设置完成
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView/<DelayedInitialize>d__20:MoveNext () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:117)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+[SaveLoadMenu] SaveOptions组件初始化完成
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView/<DelayedInitialize>d__20:MoveNext () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:124)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+[SaveLoadMenu] CreateSaveSlotUIs: 没有可用的存档槽数据，将创建空存档槽
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:CreateSaveSlotUIs () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:221)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:UpdateView () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:186)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:SetModel (MyGame.UI.SaveLoad.SaveLoadMenuModel) (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:169)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:set_Model (MyGame.UI.SaveLoad.SaveLoadMenuModel) (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:69)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView/<DelayedInitialize>d__20:MoveNext () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:116)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+[SaveLoadMenu] 延迟初始化: 模型设置完成
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView/<DelayedInitialize>d__20:MoveNext () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:117)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+[SaveLoadMenu] SaveOptions组件初始化完成
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView/<DelayedInitialize>d__20:MoveNext () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:124)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+[SaveLoadMenu] CreateSaveSlotUIs: 没有可用的存档槽数据，将创建空存档槽
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:CreateSaveSlotUIs () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:221)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:UpdateView () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:186)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:SetModel (MyGame.UI.SaveLoad.SaveLoadMenuModel) (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:169)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:set_Model (MyGame.UI.SaveLoad.SaveLoadMenuModel) (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:69)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView/<DelayedInitialize>d__20:MoveNext () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:116)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+[SaveLoadMenu] 延迟初始化: 模型设置完成
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView/<DelayedInitialize>d__20:MoveNext () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:117)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+[SaveLoadMenu] SaveOptions组件初始化完成
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView/<DelayedInitialize>d__20:MoveNext () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:124)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+[UI] UI控制器初始化完成
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.Control.UIController/<InitializeInputActionsCoroutine>d__3:MoveNext () (at Assets/Scripts/UI/Control/UIController.cs:43)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+[SaveLoadMenu] CreateSaveSlotUIs: 没有可用的存档槽数据，将创建空存档槽
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:CreateSaveSlotUIs () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:221)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:UpdateView () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:186)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:SetModel (MyGame.UI.SaveLoad.SaveLoadMenuModel) (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:169)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:set_Model (MyGame.UI.SaveLoad.SaveLoadMenuModel) (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:69)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView/<DelayedInitialize>d__20:MoveNext () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:116)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+[SaveLoadMenu] 延迟初始化: 模型设置完成
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView/<DelayedInitialize>d__20:MoveNext () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:117)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+[SaveLoadMenu] SaveOptions组件初始化完成
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView/<DelayedInitialize>d__20:MoveNext () (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:124)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+[MAIN_MENU] 已触发显示加载游戏菜单事件
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.MainMenu.Controller.MainMenuController:OnShowLoadGameMenu () (at Assets/Scripts/UI/MainMenu/Controller/MainMenuController.cs:222)
+MyGame.UI.MainMenu.View.MainMenuView:OnLoadGameButtonClick () (at Assets/Scripts/UI/MainMenu/View/MainMenuView.cs:188)
+UnityEngine.EventSystems.EventSystem:Update () (at ./Library/PackageCache/com.unity.ugui@1.0.0/Runtime/EventSystem/EventSystem.cs:530)
+
+[GameEvents] UI切换：SaveLoadMenu 显示：True
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.Events.GameEvents:TriggerMenuShow (MyGame.UI.UIType,bool) (at Assets/Scripts/Core/Events/GameEvents.cs:221)
+MyGame.UI.MainMenu.Controller.MainMenuController:OnShowLoadGameMenu () (at Assets/Scripts/UI/MainMenu/Controller/MainMenuController.cs:223)
+MyGame.UI.MainMenu.View.MainMenuView:OnLoadGameButtonClick () (at Assets/Scripts/UI/MainMenu/View/MainMenuView.cs:188)
+UnityEngine.EventSystems.EventSystem:Update () (at ./Library/PackageCache/com.unity.ugui@1.0.0/Runtime/EventSystem/EventSystem.cs:530)
+
+[UIManager] 尝试显示/隐藏UI类型: AboutPanel, show: False
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.Managers.UIManager:SetUIState (MyGame.UI.UIType,bool) (at Assets/Scripts/UI/Core/UIManager.cs:348)
+MyGame.Managers.UIManager:SetUIState (MyGame.UI.UIType,bool) (at Assets/Scripts/UI/Core/UIManager.cs:317)
+MyGame.Managers.UIManager:OnMenuShow (MyGame.UI.UIType,bool) (at Assets/Scripts/UI/Core/UIManager.cs:407)
+MyGame.Events.GameEvents:TriggerMenuShow (MyGame.UI.UIType,bool) (at Assets/Scripts/Core/Events/GameEvents.cs:222)
+MyGame.UI.MainMenu.Controller.MainMenuController:OnShowLoadGameMenu () (at Assets/Scripts/UI/MainMenu/Controller/MainMenuController.cs:223)
+MyGame.UI.MainMenu.View.MainMenuView:OnLoadGameButtonClick () (at Assets/Scripts/UI/MainMenu/View/MainMenuView.cs:188)
+UnityEngine.EventSystems.EventSystem:Update () (at ./Library/PackageCache/com.unity.ugui@1.0.0/Runtime/EventSystem/EventSystem.cs:530)
+
+[UIManager] 尝试显示/隐藏UI类型: SettingsPanel, show: False
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.Managers.UIManager:SetUIState (MyGame.UI.UIType,bool) (at Assets/Scripts/UI/Core/UIManager.cs:348)
+MyGame.Managers.UIManager:SetUIState (MyGame.UI.UIType,bool) (at Assets/Scripts/UI/Core/UIManager.cs:318)
+MyGame.Managers.UIManager:OnMenuShow (MyGame.UI.UIType,bool) (at Assets/Scripts/UI/Core/UIManager.cs:407)
+MyGame.Events.GameEvents:TriggerMenuShow (MyGame.UI.UIType,bool) (at Assets/Scripts/Core/Events/GameEvents.cs:222)
+MyGame.UI.MainMenu.Controller.MainMenuController:OnShowLoadGameMenu () (at Assets/Scripts/UI/MainMenu/Controller/MainMenuController.cs:223)
+MyGame.UI.MainMenu.View.MainMenuView:OnLoadGameButtonClick () (at Assets/Scripts/UI/MainMenu/View/MainMenuView.cs:188)
+UnityEngine.EventSystems.EventSystem:Update () (at ./Library/PackageCache/com.unity.ugui@1.0.0/Runtime/EventSystem/EventSystem.cs:530)
+
+[SettingsView] 隐藏设置面板
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.Settings.View.SettingsPanelView:Hide () (at Assets/Scripts/UI/Settings/View/SettingsPanelView.cs:140)
+MyGame.Managers.UIManager:SetUIState (MyGame.UI.UIType,bool) (at Assets/Scripts/UI/Core/UIManager.cs:358)
+MyGame.Managers.UIManager:SetUIState (MyGame.UI.UIType,bool) (at Assets/Scripts/UI/Core/UIManager.cs:318)
+MyGame.Managers.UIManager:OnMenuShow (MyGame.UI.UIType,bool) (at Assets/Scripts/UI/Core/UIManager.cs:407)
+MyGame.Events.GameEvents:TriggerMenuShow (MyGame.UI.UIType,bool) (at Assets/Scripts/Core/Events/GameEvents.cs:222)
+MyGame.UI.MainMenu.Controller.MainMenuController:OnShowLoadGameMenu () (at Assets/Scripts/UI/MainMenu/Controller/MainMenuController.cs:223)
+MyGame.UI.MainMenu.View.MainMenuView:OnLoadGameButtonClick () (at Assets/Scripts/UI/MainMenu/View/MainMenuView.cs:188)
+UnityEngine.EventSystems.EventSystem:Update () (at ./Library/PackageCache/com.unity.ugui@1.0.0/Runtime/EventSystem/EventSystem.cs:530)
+
+[UIManager] 尝试显示/隐藏UI类型: SaveLoadMenu, show: True
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.Managers.UIManager:SetUIState (MyGame.UI.UIType,bool) (at Assets/Scripts/UI/Core/UIManager.cs:348)
+MyGame.Managers.UIManager:OnMenuShow (MyGame.UI.UIType,bool) (at Assets/Scripts/UI/Core/UIManager.cs:407)
+MyGame.Events.GameEvents:TriggerMenuShow (MyGame.UI.UIType,bool) (at Assets/Scripts/Core/Events/GameEvents.cs:222)
+MyGame.UI.MainMenu.Controller.MainMenuController:OnShowLoadGameMenu () (at Assets/Scripts/UI/MainMenu/Controller/MainMenuController.cs:223)
+MyGame.UI.MainMenu.View.MainMenuView:OnLoadGameButtonClick () (at Assets/Scripts/UI/MainMenu/View/MainMenuView.cs:188)
+UnityEngine.EventSystems.EventSystem:Update () (at ./Library/PackageCache/com.unity.ugui@1.0.0/Runtime/EventSystem/EventSystem.cs:530)
+
+[SaveLoadMenu] HandleSaveSlotSelected - 存档槽save_1被点击，为空存档：是
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.Controller.SaveLoadMenuController:HandleSaveSlotSelected (string,MyGame.Data.SaveData) (at Assets/Scripts/UI/SaveLoadMenu/Controller/SaveLoadMenuController.cs:308)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:OnSaveSlotClick (string,MyGame.Data.SaveData) (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:599)
+MyGame.UI.SaveLoad.View.SaveSlot:HandleSlotButtonClick () (at Assets/Scripts/UI/SaveLoadMenu/View/Components/SaveSlot.cs:154)
+UnityEngine.EventSystems.EventSystem:Update () (at ./Library/PackageCache/com.unity.ugui@1.0.0/Runtime/EventSystem/EventSystem.cs:530)
+
+[SaveLoadMenu] HandleSaveSlotSelected - 存档槽save_2被点击，为空存档：是
+UnityEngine.Debug:Log (object)
+Logger.Log:Info (string,string,UnityEngine.Object) (at Assets/Scripts/Logger/Log.cs:22)
+MyGame.UI.SaveLoad.Controller.SaveLoadMenuController:HandleSaveSlotSelected (string,MyGame.Data.SaveData) (at Assets/Scripts/UI/SaveLoadMenu/Controller/SaveLoadMenuController.cs:308)
+MyGame.UI.SaveLoad.View.SaveLoadMenuView:OnSaveSlotClick (string,MyGame.Data.SaveData) (at Assets/Scripts/UI/SaveLoadMenu/View/SaveLoadMenuView.cs:599)
+MyGame.UI.SaveLoad.View.SaveSlot:HandleSlotButtonClick () (at Assets/Scripts/UI/SaveLoadMenu/View/Components/SaveSlot.cs:154)
+UnityEngine.EventSystems.EventSystem:Update () (at ./Library/PackageCache/com.unity.ugui@1.0.0/Runtime/EventSystem/EventSystem.cs:530)
+

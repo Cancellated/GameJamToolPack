@@ -35,7 +35,7 @@ namespace MyGame.UI.SaveLoad.View
 
         [Header("确认面板")]
         [Tooltip("确认对话框组件")]
-        [SerializeField] private ConfirmDialog confirmDialog;
+        public ConfirmDialog confirmDialog;
         
         // 当前确认操作的存档槽名称
         private string _currentConfirmSlotName;
@@ -72,13 +72,12 @@ namespace MyGame.UI.SaveLoad.View
         /// <summary>
         /// 初始化视图
         /// 重写基类Initialize方法
+        /// 注意：不再在此处直接设置模型和更新视图，改为在DelayedInitialize中处理
         /// </summary>
         public override void Initialize()
         {
             base.Initialize();
-            SetModel(m_controller.Model);
             BindButtonEvents();
-            UpdateView();
         }
         
         /// <summary>
@@ -98,19 +97,9 @@ namespace MyGame.UI.SaveLoad.View
         /// </summary>
         protected override void OnControllerBound()
         {
-            // When controller is bound, set model reference
-            if (m_controller != null && m_controller.Model != null)
-            {
-                Model = m_controller.Model;
-            }
-            
-            // 初始化SaveOptions组件，设置控制器引用
-            if (saveOptions != null)
-            {
-                saveOptions.SetController(m_controller);
-                Log.Info(LOG_MODULE, "SaveOptions组件初始化完成");
-            }
+            Log.Info(LOG_MODULE, "控制器绑定完成，开始初始化视图");
         }
+        
         
         /// <summary>
         /// 控制器解绑后的回调
@@ -142,8 +131,6 @@ namespace MyGame.UI.SaveLoad.View
             {
                 SubscribeToModelEvents();
             }
-            
-            UpdateView();
         }
         
         /// <summary>
@@ -173,10 +160,22 @@ namespace MyGame.UI.SaveLoad.View
         /// </summary>
         protected virtual void CreateSaveSlotUIs()
         {
-            // 参数校验
-            if (_model == null || saveSlotsContainer == null || saveSlotPrefab == null)
+            // 参数校验 - 增加详细的错误日志
+            if (_model == null)
             {
-                Log.Error(LOG_MODULE, "CreateSaveSlotUIs: 缺少必要组件，无法创建存档槽UI");
+                Log.Error(LOG_MODULE, "CreateSaveSlotUIs: 模型为空，无法创建存档槽UI");
+                return;
+            }
+            
+            if (saveSlotsContainer == null)
+            {
+                Log.Error(LOG_MODULE, "CreateSaveSlotUIs: 存档槽容器(saveSlotsContainer)未设置，无法创建存档槽UI");
+                return;
+            }
+            
+            if (saveSlotPrefab == null)
+            {
+                Log.Error(LOG_MODULE, "CreateSaveSlotUIs: 存档槽预制件(saveSlotPrefab)未设置，无法创建存档槽UI");
                 return;
             }
             
@@ -660,11 +659,7 @@ namespace MyGame.UI.SaveLoad.View
         {
             // 取消操作不需要额外处理
         }
-        
-        
-        
 
-        
         /// <summary>
         /// 处理存档槽更新事件
         /// </summary>
@@ -679,6 +674,7 @@ namespace MyGame.UI.SaveLoad.View
         /// </summary>
         public override void Show()
         {
+            UpdateView();
             m_canvasGroup.alpha = 1;
             m_canvasGroup.interactable = true;
             m_canvasGroup.blocksRaycasts = true;

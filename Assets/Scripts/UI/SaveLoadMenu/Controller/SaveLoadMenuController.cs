@@ -62,15 +62,10 @@ namespace MyGame.UI.SaveLoad.Controller
         {
             Initialize();
         }
-        
         /// <summary>
-        /// 初始化逻辑
-        /// 重写基类OnInitialize方法，确保在初始化时正确加载存档数据
-        /// </summary>
-        protected override void OnInitialize()
+        /// 重写基类的初始化逻辑
+        public override void Initialize()
         {
-            base.OnInitialize();
-            
             // 确保配置文件不为空
             if (_config == null)
             {
@@ -81,16 +76,10 @@ namespace MyGame.UI.SaveLoad.Controller
                     Log.Warning(Log_MODULE, "未找到存档菜单配置文件，使用默认配置");
                 }
             }
-            
-            // 确保模型已初始化
-            if (m_model == null)
-            {
-                m_model = CreateAndInitializeModel();
-                SetModel(m_model);
-            }
-            
-            // 提前初始化存档槽数据，确保在视图显示前就有有效的数据
-            InitializeSaveSlots();
+            // 这一步会绑定模型和视图
+            base.Initialize();
+            RegisterEvents();
+            m_view.UpdateView();
         }
         
         /// <summary>
@@ -117,7 +106,6 @@ namespace MyGame.UI.SaveLoad.Controller
             if (m_model != null)
             {
                 // 移除旧模型的事件监听
-                m_model.OnSaveSlotsUpdated -= HandleSaveSlotsUpdated;
                 m_model.OnSelectedSaveSlotChanged -= HandleSelectedSaveSlotChanged;
             }
             
@@ -127,7 +115,6 @@ namespace MyGame.UI.SaveLoad.Controller
             {
                 m_model.Initialize();
                 // 添加新模型的事件监听
-                m_model.OnSaveSlotsUpdated += HandleSaveSlotsUpdated;
                 m_model.OnSelectedSaveSlotChanged += HandleSelectedSaveSlotChanged;
                 
                 // 如果视图已设置，同步模型引用
@@ -155,12 +142,12 @@ namespace MyGame.UI.SaveLoad.Controller
             
             if (m_view != null)
             {
-                m_view.Initialize();
                 m_view.Controller = this;
                 
+                // 如果模型已设置，同步到视图
                 if (m_model != null)
                 {
-                    m_view.SetModel(m_model);
+                    m_view.Model = m_model;
                 }
             }
         }
@@ -179,6 +166,9 @@ namespace MyGame.UI.SaveLoad.Controller
             SaveLoadMenuEvents.OnCreateNewGame += HandleCreateNewGame;
             SaveLoadMenuEvents.OnBackToMainMenu += HandleBackToMainMenu;
             SaveLoadMenuEvents.OnSaveSlotSelected += HandleSaveSlotSelected;
+            
+            // 注册存档完成事件
+            SaveLoadMenuEvents.OnSaveComplete += HandleSaveComplete;
         }
         
         /// <summary>
@@ -193,6 +183,9 @@ namespace MyGame.UI.SaveLoad.Controller
             SaveLoadMenuEvents.OnCreateNewGame -= HandleCreateNewGame;
             SaveLoadMenuEvents.OnBackToMainMenu -= HandleBackToMainMenu;
             SaveLoadMenuEvents.OnSaveSlotSelected -= HandleSaveSlotSelected;
+            
+            // 注销存档完成事件
+            SaveLoadMenuEvents.OnSaveComplete -= HandleSaveComplete;
         }
         
         /// <summary>
@@ -336,7 +329,24 @@ namespace MyGame.UI.SaveLoad.Controller
         {
             // 通过GameEvents触发存档操作
             GameEvents.TriggerSaveGame(slotName);
-            m_view.UpdateView();
+            // 不再立即更新视图，而是等待存档完成事件
+        }
+        
+        /// <summary>
+        /// 处理存档完成事件
+        /// 这是事件驱动刷新机制的核心，用于在保存、加载等操作完成后刷新UI
+        /// </summary>
+        private void HandleSaveComplete(string slotName)
+        {
+            Log.Info(Log_MODULE, $"存档操作完成，槽位: {slotName}，刷新存档数据和视图");
+            // 刷新存档槽数据并更新视图
+            InitializeSaveSlots();
+            
+            // 如果视图存在，确保隐藏确认面板（如果正在显示）
+            if (m_view != null)
+            {
+                m_view.confirmDialog.HideConfirmPanel();
+            }
         }
         
         /// <summary>
@@ -357,6 +367,8 @@ namespace MyGame.UI.SaveLoad.Controller
         {
             // 通过GameEvents触发删除存档操作
             GameEvents.TriggerDeleteSave(slotName);
+            // 现在我们使用事件驱动方式，不再需要手动延迟刷新
+            // 当删除完成后，SaveManager会触发OnSaveComplete事件
         }
         
         /// <summary>
@@ -386,17 +398,6 @@ namespace MyGame.UI.SaveLoad.Controller
             if (m_view != null)
             {
                 m_view.Hide();
-            }
-        }
-        
-        /// <summary>
-        /// 处理存档槽更新事件
-        /// </summary>
-        private void HandleSaveSlotsUpdated()
-        {
-            if (m_view != null)
-            {
-                m_view.UpdateView();
             }
         }
         

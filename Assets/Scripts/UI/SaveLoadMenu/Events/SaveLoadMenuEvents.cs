@@ -46,6 +46,13 @@ namespace MyGame.UI.SaveLoad.Events
         /// </summary>
         public delegate void SaveSlotSelectedDelegate(string slotName, SaveData saveData = null);
         public static event SaveSlotSelectedDelegate OnSaveSlotSelected;
+
+
+        /// <summary>
+        /// 存档完成事件
+        /// </summary>
+        public delegate void SaveCompletedDelegate(string slotName);
+        public static event SaveCompletedDelegate OnSaveComplete;
         
         /// <summary>
         /// 触发存档操作
@@ -102,6 +109,15 @@ namespace MyGame.UI.SaveLoad.Events
         }
         
         /// <summary>
+        /// 触发存档完成事件
+        /// </summary>
+        /// <param name="slotName">存档槽名称</param>
+        public static void TriggerSaveComplete(string slotName)
+        {
+            OnSaveComplete?.Invoke(slotName);
+        }
+        
+        /// <summary>
         /// 清理所有事件订阅
         /// </summary>
         public static void ClearAllEvents()
@@ -112,6 +128,7 @@ namespace MyGame.UI.SaveLoad.Events
             OnCreateNewGame = null;
             OnBackToMainMenu = null;
             OnSaveSlotSelected = null;
+            OnSaveComplete = null;
         }
     }
 }

@@ -114,11 +114,6 @@ namespace MyGame.UI.About.View
         {
             base.OnControllerBound();
             
-            // 初始化控制器
-            if (m_controller != null)
-            {
-                m_controller.Initialize();
-            }
         }
 
         #endregion

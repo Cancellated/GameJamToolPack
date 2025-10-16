@@ -61,7 +61,7 @@ namespace MyGame.UI
         #region 保护方法
         
         /// <summary>
-        /// 初始化逻辑
+        /// 初始化后调用，基类默认实现为空
         /// 子类可以重写此方法来实现特定的初始化逻辑
         /// </summary>
         protected virtual void OnInitialize() { }

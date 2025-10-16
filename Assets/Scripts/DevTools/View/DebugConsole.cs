@@ -81,19 +81,7 @@ namespace MyGame.DevTools
         /// </summary>
         protected override void TryBindController()
         {
-            // 查找并关联控制器
-            m_Controller = FindObjectOfType<DebugConsoleController>();
-            if (m_Controller == null)
-            {
-                Log.Error(LOG_MODULE, "未找到DebugConsoleController组件，已添加新组件", this);
-                m_Controller = gameObject.AddComponent<DebugConsoleController>();
-            }
-
-            // 设置控制器的视图引用
-            m_Controller.SetView(this);
-
-            // 绑定控制器到视图
-            BindController(m_Controller);
+            base.TryBindController();
         }
 
         /// <summary>
@@ -117,7 +105,7 @@ namespace MyGame.DevTools
         /// </summary>
         public override void Initialize()
         {
-
+            base.Initialize();
             Log.Info(LOG_MODULE, "DebugConsole.PanelType 设置为: " + m_panelType);
         }
 

@@ -78,7 +78,7 @@ namespace MyGame.UI.Settings.View
         public override void Initialize()
         {
             Log.Info(LOG_MODULE, "初始化设置面板");
-            TryBindController();
+            base.Initialize();
             BindButtonEvents();
             InitializeAllSettingsComponents();
         }

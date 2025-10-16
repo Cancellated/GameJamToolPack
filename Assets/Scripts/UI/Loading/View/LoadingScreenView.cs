@@ -112,7 +112,12 @@ namespace MyGame.UI.Loading.View
         /// </summary>
         public override void Initialize()
         {
-            // 可以在这里进行额外的初始化逻辑
+            // 确保CanvasGroup的alpha值为0，使面板不可见
+            if (m_canvasGroup != null)
+            {
+                m_canvasGroup.alpha = 0f;
+            }
+            base.Initialize();
         }
         
         /// <summary>
