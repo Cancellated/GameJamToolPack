@@ -1,5 +1,6 @@
 using UnityEngine;
 using MyGame.Managers;
+using Logger;
 
 namespace MyGame.Control
 {
@@ -33,7 +34,7 @@ namespace MyGame.Control
             }
             else
             {
-                Debug.LogError("PlayerController: InputManager instance not found!");
+                Log.Error(LogModules.PLAYER, "未找到InputManager实例!");
                 _inputActions = new GameControl();
                 _inputActions.GamePlay.Enable();
             }

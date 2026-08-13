@@ -23,7 +23,7 @@ namespace MyGame.UI.About.Model
         /// <summary>
         /// 版权信息
         /// </summary>
-        private string m_copyright = "© 2023 Game Jam Team. All rights reserved.";
+        private string m_copyright = "";
 
         #endregion
 

@@ -5,6 +5,7 @@ using Inventory.data;
 using Inventory.controller;
 using MyGame.UI;
 using System.Collections.Generic;
+using Logger;
 
 namespace Inventory.view
 {
@@ -50,6 +51,22 @@ namespace Inventory.view
             // 设置关闭按钮事件
             closeButton.onClick.AddListener(Hide);
             dragIcon.gameObject.SetActive(false);
+        }
+
+        /// <summary>
+        /// 尝试自动绑定控制器
+        /// View侧绑定模式：自身查找，找不到则创建，并注入View引用
+        /// </summary>
+        protected override void TryBindController()
+        {
+            if (!TryGetComponent<InventoryController>(out var controller))
+            {
+                controller = gameObject.AddComponent<InventoryController>();
+            }
+
+            // 将视图注入控制器，完成槽位初始化与首次刷新
+            controller.SetView(this);
+            BindController(controller);
         }
         
         /// <summary>
@@ -100,7 +117,7 @@ namespace Inventory.view
         public override void Show()
         {
             base.Show();
-            Debug.Log("InventoryView: 背包已显示");
+            Log.Info(LogModules.INVENTORY, "背包已显示");
         }
         
         /// <summary>
@@ -109,7 +126,21 @@ namespace Inventory.view
         public override void Hide()
         {
             base.Hide();
-            Debug.Log("InventoryView: 背包已隐藏");
+            Log.Info(LogModules.INVENTORY, "背包已隐藏");
+        }
+
+        /// <summary>
+        /// 清理面板资源
+        /// </summary>
+        public override void Cleanup()
+        {
+            base.Cleanup();
+
+            // 解绑关闭按钮事件，与 Awake 中的绑定成对出现
+            if (closeButton != null)
+            {
+                closeButton.onClick.RemoveListener(Hide);
+            }
         }
         
         /// <summary>

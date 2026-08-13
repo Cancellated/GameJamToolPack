@@ -31,6 +31,7 @@ namespace MyGame.UI.About.Controller
             }
             
             base.Initialize();
+            Log.Info(LOG_MODULE, "关于面板控制器初始化完成");
         }
 
         /// <summary>

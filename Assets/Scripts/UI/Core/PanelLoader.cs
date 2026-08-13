@@ -310,9 +310,10 @@ namespace MyGame.UI.Core
                         }
                         else
                         {
-                            Log.Error(module, $"面板 {panelType} 注册到UIManager失败");
+                            // 面板已在场景中注册，跳过重复加载
+                            Log.Info(module, $"面板 {panelType} 已存在，跳过重复加载");
                             Destroy(panelObj);
-                            return false;
+                            return true;
                         }
                     }
                     else

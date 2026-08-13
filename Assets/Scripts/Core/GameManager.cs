@@ -109,10 +109,10 @@ namespace MyGame.Managers
             var validTransitions = new Dictionary<GameState, GameState[]>
             {
                 [GameState.Init] = new[] { GameState.Menu },
-                [GameState.Menu] = new[] { GameState.Playing },
-                [GameState.Playing] = new[] { GameState.Paused, GameState.GameOver },
-                [GameState.Paused] = new[] { GameState.Playing, GameState.GameOver, GameState.Menu },
-                [GameState.GameOver] = new[] { GameState.Menu }
+                [GameState.Menu] = new[] { GameState.Playing, GameState.Menu},
+                [GameState.Playing] = new[] { GameState.Paused, GameState.GameOver,GameState.Playing },
+                [GameState.Paused] = new[] { GameState.Playing, GameState.GameOver, GameState.Menu, GameState.Paused },
+                [GameState.GameOver] = new[] { GameState.Menu, GameState.GameOver }
             };
 
             // 检查当前状态是否有合法的转换到下一个状态

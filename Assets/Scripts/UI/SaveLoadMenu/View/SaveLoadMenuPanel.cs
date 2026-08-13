@@ -54,39 +54,42 @@ namespace MyGame.UI.SaveLoad.View
         
         /// <summary>
         /// 更新选中存档信息显示
+        /// 通过 Controller 查询方法获取数据，不直接访问Model
         /// </summary>
         private void UpdateSelectedSlotInfo()
         {
-            if (_selectedSlotInfoText == null || _model == null)
+            if (_selectedSlotInfoText == null || m_controller == null)
                 return;
-            
-            if (string.IsNullOrEmpty(_model.SelectedSaveSlotName))
+
+            string selectedSlotName = m_controller.GetSelectedSaveSlotName();
+            if (string.IsNullOrEmpty(selectedSlotName))
             {
                 _selectedSlotInfoText.text = "请选择一个存档";
                 return;
             }
-            
+
             // 查找选中的存档信息
             SaveSlotInfo selectedSlotInfo = null;
-            if (_model.SaveSlots != null)
+            var saveSlots = m_controller.GetSaveSlots();
+            if (saveSlots != null)
             {
-                foreach (var slotInfo in _model.SaveSlots)
+                foreach (var slotInfo in saveSlots)
                 {
-                    if (slotInfo.SlotName == _model.SelectedSaveSlotName)
+                    if (slotInfo.SlotName == selectedSlotName)
                     {
                         selectedSlotInfo = slotInfo;
                         break;
                     }
                 }
             }
-            
+
             // 显示选中的存档信息
             if (selectedSlotInfo != null && selectedSlotInfo.SaveData != null)
             {
                 string info = $"选中存档：{selectedSlotInfo.SlotName}\n";
                 info += $"存档时间：{selectedSlotInfo.SaveData.saveTime}\n";
                 info += $"游戏版本：{selectedSlotInfo.SaveData.version}\n";
-                
+
                 // 添加游戏进度信息
                 if (selectedSlotInfo.SaveData.gameProgress != null)
                 {
@@ -94,12 +97,12 @@ namespace MyGame.UI.SaveLoad.View
                     info += $"已完成关卡：{selectedSlotInfo.SaveData.gameProgress.completedLevels.Count}\n";
                     info += $"活跃任务：{selectedSlotInfo.SaveData.gameProgress.activeQuests.Count}\n";
                 }
-                
+
                 _selectedSlotInfoText.text = info;
             }
             else
             {
-                _selectedSlotInfoText.text = $"选中存档：{_model.SelectedSaveSlotName}\n(空存档槽)";
+                _selectedSlotInfoText.text = $"选中存档：{selectedSlotName}\n(空存档槽)";
             }
         }
         

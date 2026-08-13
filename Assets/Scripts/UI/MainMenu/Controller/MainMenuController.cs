@@ -3,26 +3,20 @@ using MyGame.Managers;
 using MyGame.UI.MainMenu.Model;
 using MyGame.UI.MainMenu.View;
 using UnityEngine;
+using Logger;
 
 namespace MyGame.UI.MainMenu.Controller
 {
     /// <summary>
     /// 主菜单的控制器，连接模型和视图，处理业务逻辑，同时负责MVC组件的初始化和协调
     /// </summary>
-    public class MainMenuController : MonoBehaviour
+    public class MainMenuController : BaseController<MainMenuView, MainMenuModel>
     {
-        #region 字段与属性
+        #region 字段
 
         [Header("菜单配置")]
         [Tooltip("默认启动的游戏场景名称")]
         [SerializeField] private string m_defaultGameScene = "GameLevel1";
-        
-        [Header("MVC组件")]
-        [Tooltip("主菜单模型")]
-        [SerializeField] private MainMenuModel m_model;
-        
-        [Tooltip("主菜单视图")]
-        [SerializeField] private MainMenuView m_view;
 
         #endregion
 
@@ -33,41 +27,45 @@ namespace MyGame.UI.MainMenu.Controller
         /// </summary>
         private void Awake()
         {
-            // 初始化MVC组件
+            // 初始化MVC组件（创建Model、设置View引用）
             InitializeMVCComponents();
-            
-            // 注册事件监听
-            RegisterEvents();
-        }
-        
-        /// <summary>
-        /// 当对象启用时
-        /// </summary>
-        private void OnEnable()
-        {
-            // 确保MVC组件正确初始化
-            if (m_model == null || m_view == null)
-            {
-                InitializeMVCComponents();
-            }
+
+            // 初始化控制器生命周期
+            Initialize();
         }
 
         /// <summary>
-        /// 当对象被销毁时
+        /// 当对象启用时，注册事件监听
+        /// </summary>
+        private void OnEnable()
+        {
+            RegisterEvents();
+            BindModelEvents();
+        }
+
+        /// <summary>
+        /// 当对象禁用时，注销事件监听
+        /// </summary>
+        private void OnDisable()
+        {
+            UnregisterEvents();
+            UnbindModelEvents();
+        }
+
+        /// <summary>
+        /// 当对象被销毁时，清理资源
         /// </summary>
         private void OnDestroy()
         {
             // 注销事件监听
             UnregisterEvents();
-            
+            UnbindModelEvents();
+
             // 清理模型资源
             m_model?.Cleanup();
-            
+
             // 解绑视图
-            if (m_view != null)
-            {
-                m_view.UnbindController();
-            }
+            m_view?.UnbindController();
         }
 
         #endregion
@@ -78,113 +76,73 @@ namespace MyGame.UI.MainMenu.Controller
         /// 初始化MVC组件
         /// 如果组件不存在，则自动创建
         /// </summary>
-        protected virtual void InitializeMVCComponents()
+        private void InitializeMVCComponents()
         {
-            // 初始化模型
-            m_model ??= new MainMenuModel();
-            
-            if (!m_model.IsInitialized)
-            {
-                m_model.Initialize();
-            }
-            
+            // 创建并初始化Model
+            CreateAndInitializeModel();
+
             // 设置默认游戏场景
-            if (!string.IsNullOrEmpty(m_defaultGameScene))
+            if (m_model != null && !string.IsNullOrEmpty(m_defaultGameScene))
             {
                 m_model.DefaultGameScene = m_defaultGameScene;
             }
-            
-            // 初始化视图
+
+            // 查找或创建View
             if (m_view == null)
             {
-                m_view = gameObject.GetComponentInChildren<MainMenuView>(true);
+                m_view = GetComponentInChildren<MainMenuView>(true);
                 if (m_view == null)
                 {
-                    Debug.LogWarning("MainMenuController: MainMenuView not found, attempting to create.");
-                    
+                    Log.Warning(LogModules.MAINMENU, "未找到MainMenuView组件，尝试创建");
+
                     // 创建视图对象
                     GameObject viewObject = new("MainMenuView");
                     viewObject.transform.SetParent(transform, false);
                     m_view = viewObject.AddComponent<MainMenuView>();
                 }
             }
-            
-            // 建立MVC之间的连接
-            SetModel(m_model);
-            SetView(m_view);
+        }
+
+        #endregion
+
+        #region Model事件绑定
+
+        /// <summary>
+        /// 订阅Model的属性变更事件
+        /// </summary>
+        private void BindModelEvents()
+        {
+            if (m_model != null)
+            {
+                m_model.OnPropertyChanged += HandleModelPropertyChanged;
+            }
+        }
+
+        /// <summary>
+        /// 取消订阅Model的属性变更事件
+        /// </summary>
+        private void UnbindModelEvents()
+        {
+            if (m_model != null)
+            {
+                m_model.OnPropertyChanged -= HandleModelPropertyChanged;
+            }
+        }
+
+        /// <summary>
+        /// Model属性变更回调
+        /// 主菜单暂无View更新需求，但订阅以遵循ObservableModel规范
+        /// </summary>
+        /// <param name="propertyName">变更的属性名</param>
+        private void HandleModelPropertyChanged(string propertyName)
+        {
+            // 主菜单的Model属性变更（如 IsSettingsVisible）由GameEvents驱动，
+            // 暂不需要额外的View更新。保留订阅以满足ObservableModel使用规范。
         }
 
         #endregion
 
         #region 公共方法
-
-        /// <summary>
-        /// 设置视图引用
-        /// </summary>
-        /// <param name="view">主菜单视图</param>
-        public void SetView(MainMenuView view)
-        {
-            if (m_view != null && m_view != view)
-            {
-                m_view.UnbindController();
-            }
-            
-            m_view = view;
-            
-            if (m_view != null)
-            {
-                m_view.BindController(this);
-            }
-        }
-
-        /// <summary>
-        /// 设置模型引用
-        /// </summary>
-        /// <param name="model">主菜单模型</param>
-        public void SetModel(MainMenuModel model)
-        {
-            if (m_model != null && m_model != model)
-            {
-                m_model.Cleanup();
-            }
-            
-            m_model = model;
-            
-            if (m_model != null)
-            {
-                if (!m_model.IsInitialized)
-                {
-                    m_model.Initialize();
-                }
-                
-                if (!string.IsNullOrEmpty(m_defaultGameScene))
-                {
-                    m_model.DefaultGameScene = m_defaultGameScene;
-                }
-            }
-        }
-
-        /// <summary>
-        /// 获取主菜单模型
-        /// </summary>
-        /// <returns>主菜单模型实例</returns>
-        public MainMenuModel GetModel()
-        {
-            return m_model;
-        }
-
-        /// <summary>
-        /// 获取主菜单视图
-        /// </summary>
-        /// <returns>主菜单视图实例</returns>
-        public MainMenuView GetView()
-        {
-            return m_view;
-        }
-
-        #endregion
-
-        #region 事件处理
 
         /// <summary>
         /// 开始游戏
@@ -230,6 +188,10 @@ namespace MyGame.UI.MainMenu.Controller
             Application.Quit();
 #endif
         }
+
+        #endregion
+
+        #region 事件处理
 
         /// <summary>
         /// 游戏开始事件响应

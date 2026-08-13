@@ -20,7 +20,7 @@ namespace MyGame.Managers
     /// </summary>
     public class UIManager : Singleton<UIManager>
     {
-        public const string module = LogModules.UIMANAGER;
+        private const string LOG_MODULE = LogModules.UIMANAGER;
         #region UI引用
 
         [System.Serializable]
@@ -92,7 +92,7 @@ namespace MyGame.Managers
         /// </summary>
         private void InitializePanelMap()
         {
-            Log.Info(module, "开始初始化面板映射");
+            Log.Info(LOG_MODULE, "开始初始化面板映射");
             
             // 清空现有映射和面板列表
             PanelMap.Clear();
@@ -103,7 +103,7 @@ namespace MyGame.Managers
             {
                 if (wrapper == null)
                 {
-                    Log.Warning(module, "包装器为空");
+                    Log.Warning(LOG_MODULE, "包装器为空");
                     continue;
                 }
 
@@ -118,7 +118,7 @@ namespace MyGame.Managers
             }
             
             // 输出最终映射内容
-            Log.Info(module, "面板映射初始化完成，共包含 " + PanelMap.Count + " 个面板类型");
+            Log.Info(LOG_MODULE, "面板映射初始化完成，共包含 " + PanelMap.Count + " 个面板类型");
         }
         
         private void OnDestroy()
@@ -170,7 +170,7 @@ namespace MyGame.Managers
             }
             
             // 包装器的panel字段为空
-            Log.Warning(module, "包装器的panel字段为空");
+            Log.Warning(LOG_MODULE, "包装器的panel字段为空");
             return null;
         }
         
@@ -190,7 +190,7 @@ namespace MyGame.Managers
             }
             else
             {
-                Log.Info(module, "面板类型已存在于映射中: " + panel.PanelType + " (" + panel.GetType().Name + ")");
+                Log.Info(LOG_MODULE, "面板类型已存在于映射中: " + panel.PanelType + " (" + panel.GetType().Name + ")");
             }
         }
 
@@ -208,19 +208,19 @@ namespace MyGame.Managers
         {
             if (panel == null)
             {
-                Log.Error(module, "尝试注册空面板");
+                Log.Error(LOG_MODULE, "尝试注册空面板");
                 return false;
             }
 
             if (!PanelMap.ContainsKey(panel.PanelType))
             {
                 AddPanelToMap(panel);
-                Log.Info(module, "成功动态注册面板: " + panel.PanelType + " (" + panel.GetType().Name + ")");
+                Log.Info(LOG_MODULE, "成功动态注册面板: " + panel.PanelType + " (" + panel.GetType().Name + ")");
                 return true;
             }
             else
             {
-                Log.Info(module, "面板类型已存在于映射中，跳过注册: " + panel.PanelType);
+                Log.Info(LOG_MODULE, "面板类型已存在于映射中，跳过注册: " + panel.PanelType);
                 return false;
             }
         }
@@ -237,12 +237,12 @@ namespace MyGame.Managers
                 PanelMap.Remove(panelType);
                 uiPanels.Remove(panel);
                 panel.Cleanup();
-                Log.Info(module, "成功注销面板: " + panelType);
+                Log.Info(LOG_MODULE, "成功注销面板: " + panelType);
                 return true;
             }
             else
             {
-                Log.Warning(module, "未找到要注销的面板类型: " + panelType);
+                Log.Warning(LOG_MODULE, "未找到要注销的面板类型: " + panelType);
                 return false;
             }
         }
@@ -278,7 +278,7 @@ namespace MyGame.Managers
                 if (InputManager.Instance != null)
                 {
                     // 对于需要完全UI控制的界面，切换到UI模式
-                    if (state != UIType.Console && state != UIType.Loading)
+                    if (state != UIType.Console && state != UIType.Loading && state != UIType.HUD)
                     {
                         InputManager.Instance.SwitchToUIMode();
                     }
@@ -345,7 +345,7 @@ namespace MyGame.Managers
             else if (currentState == state) currentState = UIType.None;
 
             // 根据状态显示/隐藏对应UI
-            Log.Info(module, "尝试显示/隐藏UI类型: " + state + ", show: " + show);
+            Log.Info(LOG_MODULE, "尝试显示/隐藏UI类型: " + state + ", show: " + show);
             
             if (PanelMap.TryGetValue(state, out var panel))
             {                
@@ -361,12 +361,12 @@ namespace MyGame.Managers
             else if (show)
             {
                 // 如果面板不存在且请求显示，则尝试自动加载
-                Log.Warning(module, "未找到面板类型: " + state + ", 正在尝试自动加载");
+                Log.Warning(LOG_MODULE, "未找到面板类型: " + state + ", 正在尝试自动加载");
                 StartCoroutine(LoadPanelAutomatically(state));
             }
             else
             {
-                Log.Error(module, "未找到对应UI类型的面板: " + state);
+                Log.Error(LOG_MODULE, "未找到对应UI类型的面板: " + state);
             }
         }
         
@@ -377,7 +377,7 @@ namespace MyGame.Managers
         /// <param name="panelType">需要加载的面板类型</param>
         private IEnumerator LoadPanelAutomatically(UIType panelType)
         {
-            Log.Info(module, "开始自动加载面板: " + panelType);
+            Log.Info(LOG_MODULE, "开始自动加载面板: " + panelType);
             
             // 使用PanelLoader异步加载面板
             Task<bool> loadTask = PanelLoader.Instance.LoadPanelAsync(panelType);
@@ -391,12 +391,12 @@ namespace MyGame.Managers
             // 如果加载成功，则显示面板
             if (loadTask.Result && PanelMap.TryGetValue(panelType, out var panel))
             {
-                Log.Info(module, "面板 " + panelType + " 自动加载成功并显示");
+                Log.Info(LOG_MODULE, "面板 " + panelType + " 自动加载成功并显示");
                 panel.Show();
             }
             else
             {
-                Log.Error(module, "面板 " + panelType + " 自动加载失败");
+                Log.Error(LOG_MODULE, "面板 " + panelType + " 自动加载失败");
             }
         }
         #endregion
@@ -414,7 +414,7 @@ namespace MyGame.Managers
         /// <param name="sceneName">要加载的场景名称</param>
         private void ShowLoading(string sceneName)
         {
-            Log.Info(module, "场景加载开始，显示加载界面");
+            Log.Info(LOG_MODULE, "场景加载开始，显示加载界面");
             // 立即显示加载界面，但延迟实际的场景加载
             SetUIState(UIType.Loading, true);
             // 启动协程等待加载界面完全显示后再继续场景加载
@@ -428,7 +428,7 @@ namespace MyGame.Managers
         /// <param name="sceneName">要加载的场景名称</param>
         private IEnumerator WaitForLoadingScreenReady(string sceneName)
         {
-            Log.Info(module, "等待加载界面完全显示");
+            Log.Info(LOG_MODULE, "等待加载界面完全显示");
             
             float startTime = Time.time;
             float maxWaitTime = 2f; // 最大等待时间2秒
@@ -446,7 +446,7 @@ namespace MyGame.Managers
             }
             
             // 触发实际的场景加载事件
-            Log.Info(module, "加载界面已准备就绪，通知实际的场景加载: " + sceneName);
+            Log.Info(LOG_MODULE, "加载界面已准备就绪，通知实际的场景加载: " + sceneName);
             GameEvents.TriggerLoadingScreenReady(sceneName);
         }
 
@@ -456,7 +456,7 @@ namespace MyGame.Managers
         /// <param name="sceneName">已加载完成的场景名称</param>
         private void HideLoading(string sceneName)
         {
-            Log.Info(module, "场景加载完成，开始隐藏加载界面");
+            Log.Info(LOG_MODULE, "场景加载完成，开始隐藏加载界面");
             StartCoroutine(WaitAndHideLoading());
         }
         
@@ -467,7 +467,7 @@ namespace MyGame.Managers
         /// </summary>
         private IEnumerator WaitAndHideLoading()
         {
-            Log.Info(module, "等待加载界面初始化完成后再隐藏");
+            Log.Info(LOG_MODULE, "等待加载界面初始化完成后再隐藏");
             
             // 记录开始等待的时间
             float startTime = Time.time;
@@ -486,19 +486,19 @@ namespace MyGame.Managers
             if (shownTime < minShowTime)
             {
                 float waitTime = minShowTime - shownTime;
-                Log.Info(module, $"加载界面显示时间不足，额外等待 {waitTime} 秒");
+                Log.Info(LOG_MODULE, $"加载界面显示时间不足，额外等待 {waitTime} 秒");
                 yield return new WaitForSeconds(waitTime);
             }
             
             // 隐藏加载界面
             if (PanelMap.ContainsKey(UIType.Loading))
             {
-                Log.Info(module, "加载界面初始化完成并已显示足够时间，执行隐藏操作");
+                Log.Info(LOG_MODULE, "加载界面初始化完成并已显示足够时间，执行隐藏操作");
                 SetUIState(UIType.Loading, false);
             }
             else
             {
-                Log.Warning(module, "加载界面板未在规定时间内初始化完成，跳过隐藏操作");
+                Log.Warning(LOG_MODULE, "加载界面板未在规定时间内初始化完成，跳过隐藏操作");
             }
         }
         

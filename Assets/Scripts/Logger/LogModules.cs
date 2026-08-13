@@ -30,6 +30,7 @@ namespace Logger
         // 游戏数据模块
         public const string GAMEDATA = "GameData";
         public const string SAVE = "Save";
+        public const string SAVELOAD = "SaveLoad";
 
         // 调试模块
         public const string DEVTOOLS = "DevTools";

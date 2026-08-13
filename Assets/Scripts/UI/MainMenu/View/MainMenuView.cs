@@ -83,6 +83,7 @@ namespace MyGame.UI.MainMenu.View
                 m_canvasGroup.interactable = true;
                 m_canvasGroup.blocksRaycasts = true;
             }
+            IsVisible = true;
             Log.Info(LOG_MODULE, "显示主菜单面板");
         }
 
@@ -98,6 +99,7 @@ namespace MyGame.UI.MainMenu.View
                 m_canvasGroup.interactable = false;
                 m_canvasGroup.blocksRaycasts = false;
             }
+            IsVisible = false;
         }
 
         /// <summary>
