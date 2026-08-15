@@ -1,5 +1,6 @@
 using UnityEngine;
 using Logger;
+using MyGame.UI.Core;
 using MyGame.UI.PauseMenu.Controller;
 
 namespace MyGame.UI.PauseMenu.View
@@ -33,8 +34,10 @@ namespace MyGame.UI.PauseMenu.View
             if (!gameObject.TryGetComponent<PauseMenuController>(out var controller))
             {
                 controller = gameObject.AddComponent<PauseMenuController>();
-                controller.Initialize();
             }
+
+            // 初始化控制器（幂等，基类 IsInitialized 防重入）
+            controller.Initialize();
             
             // 设置控制器的视图引用
             controller.SetView(this);
@@ -80,21 +83,59 @@ namespace MyGame.UI.PauseMenu.View
         }
 
         /// <summary>
-        /// 显示暂停菜单
+        /// 显示暂停菜单（淡入）。
+        /// 立即置 IsVisible 并中断淡出协程：防止"淡出后释放"回调在重新显示期间误释放面板。
         /// </summary>
         public override void Show()
         {
-            Log.Info(LOG_MODULE, "显示暂停菜单");
-            base.Show();
+            if (!IsVisible)
+            {
+                Log.Info(LOG_MODULE, "显示暂停菜单（淡入）");
+
+                // 显示前确保物体激活（隐藏流程会 SetActive(false)，见 Hide）
+                gameObject.SetActive(true);
+
+                // 立即置可见：淡出回调检测到 IsVisible 为 true 会放弃释放
+                IsVisible = true;
+
+                // 中断可能进行中的淡出协程，避免两个协程并发写入 alpha
+                StopAllCoroutines();
+                StartCoroutine(FadeIn());
+            }
         }
 
         /// <summary>
-        /// 隐藏暂停菜单
+        /// 隐藏暂停菜单（淡出后释放面板实例与 Addressable 资源）。
+        /// 懒加载面板：释放后下次 SetUIState(PauseMenu, true) 会自动重新加载并显示。
         /// </summary>
         public override void Hide()
         {
-            Log.Info(LOG_MODULE, "隐藏暂停菜单");
-            base.Hide();
+            if (IsVisible)
+            {
+                Log.Info(LOG_MODULE, "隐藏暂停菜单（淡出）");
+
+                // 立即重置可见状态，保证淡出期间 Show() 可正常重新显示面板
+                IsVisible = false;
+
+                // 中断可能进行中的淡入协程，避免两个协程并发写入 alpha
+                StopAllCoroutines();
+                StartCoroutine(FadeOut(() =>
+                {
+                    // 防御：淡出期间面板被重新显示（Show）时不再关闭与释放
+                    if (IsVisible)
+                    {
+                        return;
+                    }
+
+                    gameObject.SetActive(false);
+
+                    // 懒加载释放闭环：销毁实例并释放 Addressable 资源
+                    if (PanelLoader.Instance != null)
+                    {
+                        PanelLoader.Instance.UnloadPanel(UIType.PauseMenu);
+                    }
+                }));
+            }
         }
     }
 }

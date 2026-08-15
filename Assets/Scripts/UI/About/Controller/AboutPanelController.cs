@@ -22,16 +22,14 @@ namespace MyGame.UI.About.Controller
         /// </summary>
         public override void Initialize()
         {
-            // 创建并初始化模型
-            if (m_model == null)
+            if (!IsInitialized)
             {
-                m_model = new AboutModel();
-                m_model.Initialize();
-                SetModel(m_model);
+                // 创建并初始化模型（统一走基类 CreateAndInitializeModel）
+                CreateAndInitializeModel();
+
+                base.Initialize();
+                Log.Info(LOG_MODULE, "关于面板控制器初始化完成");
             }
-            
-            base.Initialize();
-            Log.Info(LOG_MODULE, "关于面板控制器初始化完成");
         }
 
         /// <summary>

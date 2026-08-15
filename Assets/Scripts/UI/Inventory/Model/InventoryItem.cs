@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Inventory.data
+namespace MyGame.UI.Inventory.Data
 {
     /// <summary>
     /// 背包中的单个物品项

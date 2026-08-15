@@ -61,38 +61,25 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\GameData\SaveSystem\ISaveSystem.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventHandler.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\Model\InventoryItem.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeA.cs" />
     <Compile Include="Assets\Scripts\UI\SaveLoadMenu\Model\SaveLoadMenuConfig.cs" />
     <Compile Include="Assets\Scripts\UI\About\Controller\AboutPanelController.cs" />
     <Compile Include="Assets\Scripts\Logger\LogModules.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\EnvMapAnimator.cs" />
     <Compile Include="Assets\Scripts\UI\Components\ToggleSwitch\ToggleSwitch.cs" />
     <Compile Include="Assets\Scripts\GameData\DataModels\GameSettings.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_A.cs" />
     <Compile Include="Assets\Scripts\UI\SaveLoadMenu\Model\SaveLoadMenuConstants.cs" />
     <Compile Include="Assets\Scripts\UI\Settings\Model\SettingsModel.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01_UGUI.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\SimpleScript.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark04.cs" />
+    <Compile Include="Assets\Scripts\UI\Core\SceneLoadingController.cs" />
     <Compile Include="Assets\Scripts\UI\Loading\Model\LoadingScreenModel.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerController.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\ChatController.cs" />
     <Compile Include="Assets\Scripts\UI\PauseMenu\Model\PauseMenuModel.cs" />
     <Compile Include="Assets\Scripts\UI\Control\UIController.cs" />
     <Compile Include="Assets\Scripts\UI\PauseMenu\Controller\PauseMenuController.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_DigitValidator.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_FrameRateCounter.cs" />
-    <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
     <Compile Include="Assets\Scripts\UI\About\View\AboutPanelView.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\Model\ItemDatabase.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshSpawner.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\View\InventorySlot.cs" />
     <Compile Include="Assets\Scripts\Core\Singleton\Singleton.cs" />
     <Compile Include="Assets\Scripts\UI\Settings\View\Components\BaseSettingsComponent.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark02.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\Model\HUDModel.cs" />
     <Compile Include="Assets\Scripts\DevTools\Controller\DebugConsoleController.cs" />
     <Compile Include="Assets\Scripts\Core\InputManager.cs" />
@@ -104,10 +91,10 @@
     <Compile Include="Assets\Scripts\UI\Core\PanelLoader.cs" />
     <Compile Include="Assets\Scripts\UI\Core\UIType.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\Controller\InventoryController.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\CameraController.cs" />
     <Compile Include="Assets\Scripts\UI\MainMenu\View\MainMenuView.cs" />
+    <Compile Include="Assets\Scripts\UI\ResultPanel\Controller\ResultPanelController.cs" />
+    <Compile Include="Assets\Scripts\UI\Core\Config\UIConfig.cs" />
     <Compile Include="Assets\Scripts\Core\Events\GameEvents.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark03.cs" />
     <Compile Include="Assets\Scripts\GameData\SaveSystem\JsonSaveSystem.cs" />
     <Compile Include="Assets\Scripts\UI\Core\BaseMVC\BaseModel.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\Controller\HUDController.cs" />
@@ -117,60 +104,40 @@
     <Compile Include="Assets\Scripts\Core\Utils\Utils.cs" />
     <Compile Include="Assets\Scripts\GameData\DataModels\GameProgress.cs" />
     <Compile Include="Assets\Scripts\UI\Core\BaseMVC\BaseController.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_ExampleScript_01.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMPro_InstructionOverlay.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeB.cs" />
     <Compile Include="Assets\Scripts\UI\Loading\Controller\LoadingScreenController.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\DropdownSample.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexColorCycler.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\View\InventoryView.cs" />
     <Compile Include="Assets\Scripts\UI\Loading\View\LoadingScreenView.cs" />
     <Compile Include="Assets\Scripts\Core\AudioListenerManager.cs" />
-    <Compile Include="Assets\Scripts\UI\Core\Config\PanelAddressConfig.cs" />
     <Compile Include="Assets\Scripts\DevTools\Model\DebugCommands.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\ObjectSpin.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_PhoneNumberValidator.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexJitter.cs" />
+    <Compile Include="Assets\Scripts\UI\ResultPanel\View\ResultPanelView.cs" />
     <Compile Include="Assets\Scripts\DevTools\View\DebugConsole.cs" />
     <Compile Include="Assets\Scripts\Core\GameManager.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextConsoleSimulator.cs" />
     <Compile Include="Assets\Scripts\UI\SaveLoadMenu\Model\SaveLoadMenuModel.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TeleType.cs" />
     <Compile Include="Assets\Scripts\UI\About\Model\AboutModel.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventCheck.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_UiFrameRateCounter.cs" />
     <Compile Include="Assets\Settings\Input System\GameControl.cs" />
     <Compile Include="Assets\Scripts\UI\SaveLoadMenu\Controller\SaveLoadMenuController.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\View\HUDView.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\Model\ItemData.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexZoom.cs" />
     <Compile Include="Assets\Scripts\UI\Settings\View\SettingsPanelView.cs" />
     <Compile Include="Assets\Scripts\UI\Components\SettingSlider\SettingSliderComponent.cs" />
     <Compile Include="Assets\Scripts\Core\Scene\SceneSwitcher.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_B.cs" />
     <Compile Include="Assets\Scripts\UI\Core\UIManager.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\SkewTextExample.cs" />
     <Compile Include="Assets\Scripts\GameData\DataModels\SaveData.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\WarpTextExample.cs" />
     <Compile Include="Assets\Scripts\UI\SaveLoadMenu\Events\SaveLoadMenuEvents.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshProFloatingText.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\ShaderPropAnimator.cs" />
+    <Compile Include="Assets\Scripts\UI\ResultPanel\Model\ResultPanelModel.cs" />
     <Compile Include="Assets\Scripts\DevTools\Model\DebugCommandModel.cs" />
     <Compile Include="Assets\Scripts\UI\Settings\View\Components\GraphicsSettingsComponent.cs" />
     <Compile Include="Assets\Scripts\UI\SaveLoadMenu\View\SaveLoadMenuPanel.cs" />
     <Compile Include="Assets\Scripts\UI\Core\BaseMVC\BaseView.cs" />
     <Compile Include="Assets\Scripts\UI\MainMenu\Model\MainMenuModel.cs" />
     <Compile Include="Assets\Scripts\UI\Settings\Controller\SettingsPanelController.cs" />
-    <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextInfoDebugTool.cs" />
     <Compile Include="Assets\Scripts\UI\Settings\View\Components\ControlsSettingsComponent.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />
-    <None Include="Assets\Art Asset\TextAssets\3500常用字.txt" />
-    <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Oswald-Bold - OFL.txt" />
-    <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Anton OFL.txt" />
+    <None Include="Assets\Art Assets\TextAssets\3500常用字.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro_Mobile.cginc" />
     <None Include="Assets\Scripts\UI\Settings\暂时搁置设置模块.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF SSD.shader" />
@@ -190,7 +157,6 @@
     <None Include="Assets\TextMesh Pro\Fonts\LiberationSans - OFL.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Sprite.shader" />
-    <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Bangers - OFL.txt" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
@@ -525,16 +491,20 @@
       <HintPath>D:\unity\2022.3.58f1c1\Editor\Data\Managed\UnityEngine\UnityEditor.UnityConnectModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="dnlib">
-      <HintPath>Library\PackageCache\com.code-philosophy.hybridclr@d505624c78\Plugins\dnlib.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Unity.VisualScripting.Antlr3.Runtime">
       <HintPath>Library\PackageCache\com.unity.visualscripting@1.9.4\Runtime\VisualScripting.Flow\Dependencies\NCalc\Unity.VisualScripting.Antlr3.Runtime.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="LZ4">
-      <HintPath>Library\PackageCache\com.code-philosophy.hybridclr@d505624c78\Plugins\LZ4.dll</HintPath>
+    <Reference Include="Unity.Android.Types">
+      <HintPath>D:\unity\2022.3.58f1c1\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.Types.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Android.Gradle">
+      <HintPath>D:\unity\2022.3.58f1c1\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.Gradle.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Android.GradleProject">
+      <HintPath>D:\unity\2022.3.58f1c1\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.GradleProject.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="netstandard">
@@ -1031,10 +1001,6 @@
       <Project>{A9C4B3D3-B16E-4DED-8B5C-BFA0FB5E026A}</Project>
       <Name>Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary</Name>
     </ProjectReference>
-    <ProjectReference Include="HybridCLR.Runtime.csproj">
-      <Project>{530A4168-C42B-D62B-6970-4D04E0F287BE}</Project>
-      <Name>HybridCLR.Runtime</Name>
-    </ProjectReference>
     <ProjectReference Include="Unity.RenderPipelines.Core.Runtime.csproj">
       <Project>{2892DA1A-3586-00F0-AAB8-B11D203495FF}</Project>
       <Name>Unity.RenderPipelines.Core.Runtime</Name>
@@ -1059,10 +1025,6 @@
       <Project>{9E1B3283-AD6A-6182-C13B-F0DB3DFF2EDF}</Project>
       <Name>Unity.ResourceManager</Name>
     </ProjectReference>
-    <ProjectReference Include="HybridCLR.Editor.csproj">
-      <Project>{2B87CEDA-EE7D-0D2C-3ADE-07873488603C}</Project>
-      <Name>HybridCLR.Editor</Name>
-    </ProjectReference>
     <ProjectReference Include="Unity.Timeline.Editor.csproj">
       <Project>{C6091AF5-F65C-7A38-8EC2-8C4AE1E888E2}</Project>
       <Name>Unity.Timeline.Editor</Name>
@@ -1075,13 +1037,13 @@
       <Project>{A2927405-D084-D048-4600-B959A98B7D83}</Project>
       <Name>Unity.VisualScripting.Shared.Editor</Name>
     </ProjectReference>
-    <ProjectReference Include="Unity.VisualStudio.Editor.csproj">
-      <Project>{416B8F0F-5EB5-D645-CB98-F5754ED72231}</Project>
-      <Name>Unity.VisualStudio.Editor</Name>
-    </ProjectReference>
     <ProjectReference Include="Unity.ShaderGraph.Editor.csproj">
       <Project>{4F539301-18F3-2504-38AF-C5142B201830}</Project>
       <Name>Unity.ShaderGraph.Editor</Name>
+    </ProjectReference>
+    <ProjectReference Include="Unity.VisualStudio.Editor.csproj">
+      <Project>{416B8F0F-5EB5-D645-CB98-F5754ED72231}</Project>
+      <Name>Unity.VisualStudio.Editor</Name>
     </ProjectReference>
     <ProjectReference Include="UnityEditor.UI.csproj">
       <Project>{997C8BC0-932D-7004-561A-66601BF09F9C}</Project>

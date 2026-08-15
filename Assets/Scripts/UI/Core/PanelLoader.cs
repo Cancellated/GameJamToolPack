@@ -7,9 +7,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 using Logger;
 using MyGame.Managers;
 using MyGame.UI;
-using MyGame.Events;
-
-using MyGame.UI.Core.Config;
+using MyGame.UI.Config;
 using UnityEngine.UI;
 
 namespace MyGame.UI.Core
@@ -32,19 +30,70 @@ namespace MyGame.UI.Core
         
         // UI面板的父级容器
         private Transform _canvasTransform;
-        
-        [Header("配置文件")]
-        [Tooltip("面板地址配置文件，定义UI面板类型与Addressable资源地址的映射关系")]
-        [SerializeField]
-        private PanelAddressConfig _panelAddressConfig;
-        
+
         /// <summary>
-        /// 面板地址配置文件
+        /// UIConfig 资产的 Addressable 地址（与 Config 分组中 UIConfig.asset 的地址一致）
         /// </summary>
-        public PanelAddressConfig Config
+        private const string UICONFIG_ADDRESS = "Config/UIConfig";
+
+        [Header("配置文件")]
+        [Tooltip("面板配置资产（可选）：未拖入时通过 Addressable 按地址异步加载")]
+        [SerializeField]
+        private UIConfig _panelConfig;
+
+        /// <summary>
+        /// 配置异步加载任务（幂等缓存，防止重复触发 Addressable 加载）
+        /// </summary>
+        private Task<UIConfig> _configLoadTask;
+
+        /// <summary>
+        /// 面板配置资产访问入口（全项目唯一持有者）。
+        /// 已就绪时返回缓存实例；未就绪返回 null，请先调用 EnsureConfigLoadedAsync 等待加载完成。
+        /// UIManager 等其他模块均通过本入口读取，避免双份配置源
+        /// </summary>
+        public UIConfig Config
         {
-            get { return _panelAddressConfig; }
-            set { _panelAddressConfig = value; }
+            get { return _panelConfig; }
+            set { _panelConfig = value; }
+        }
+
+        /// <summary>
+        /// 确保面板配置资产已就绪（幂等）：
+        /// Inspector 已拖入直接返回；否则通过 Addressable 按 UICONFIG_ADDRESS 异步加载并缓存。
+        /// 加载完成后自动初始化面板地址映射
+        /// </summary>
+        public Task<UIConfig> EnsureConfigLoadedAsync()
+        {
+            if (_panelConfig != null)
+            {
+                return Task.FromResult(_panelConfig);
+            }
+            if (_configLoadTask == null)
+            {
+                _configLoadTask = LoadConfigAsync();
+            }
+            return _configLoadTask;
+        }
+
+        /// <summary>
+        /// 通过 Addressable 异步加载 UIConfig 资产并缓存（仅触发一次）
+        /// </summary>
+        private async Task<UIConfig> LoadConfigAsync()
+        {
+            AsyncOperationHandle<UIConfig> handle = Addressables.LoadAssetAsync<UIConfig>(UICONFIG_ADDRESS);
+            _panelConfig = await handle.Task;
+
+            if (_panelConfig != null)
+            {
+                // 面板地址映射依赖配置内容，配置就绪后再初始化
+                InitializePanelAddressMap();
+                Log.Info(module, $"已通过 Addressable 加载面板配置资产: {UICONFIG_ADDRESS}");
+            }
+            else
+            {
+                Log.Error(module, $"通过 Addressable 加载面板配置失败: {UICONFIG_ADDRESS}，请检查 Config 分组配置");
+            }
+            return _panelConfig;
         }
         
         /// <summary>
@@ -147,61 +196,35 @@ namespace MyGame.UI.Core
             // 在初始化时使用全局Canvas
             UpdateCanvasReference(true, "GlobalUI");
             
-            // 初始化面板地址映射
-            InitializePanelAddressMap();
+            // 面板地址映射依赖 UIConfig 配置内容，
+            // 而配置由 Addressable 异步加载，故在 LoadConfigAsync 完成后初始化（见 EnsureConfigLoadedAsync）
         }
         
         /// <summary>
         /// 初始化面板类型与Addressable地址的映射
-        /// 从配置文件加载面板地址映射信息
+        /// 从 UIConfig 面板配置资产收集 addressableAddress 字段（面板资源的唯一来源）
         /// </summary>
         private void InitializePanelAddressMap()
         {
             // 清空现有的映射
             _panelAddressMap.Clear();
-            
-            // 如果配置文件存在，则加载映射信息
-            if (_panelAddressConfig != null)
+
+            // 从面板配置资产收集 Addressable 地址
+            if (Config != null)
             {
-                Dictionary<UIType, string> configMap = _panelAddressConfig.GetAddressMap();
-                foreach (var kvp in configMap)
+                foreach (var entry in Config.Entries)
                 {
-                    _panelAddressMap[kvp.Key] = kvp.Value;
-                    Log.Info(module, $"从配置文件加载面板地址映射: {kvp.Key} -> {kvp.Value}");
+                    if (entry == null || entry.panelType == UIType.None || string.IsNullOrEmpty(entry.addressableAddress))
+                    {
+                        continue;
+                    }
+                    _panelAddressMap[entry.panelType] = entry.addressableAddress;
+                    Log.Info(module, $"从面板配置加载地址映射: {entry.panelType} -> {entry.addressableAddress}");
                 }
             }
             else
             {
-                Log.Warning(module, "PanelAddressConfig未设置");
-            }
-        }
-        
-        /// <summary>
-        /// 重新加载面板地址映射
-        /// 可用于运行时更新配置
-        /// </summary>
-        public void ReloadPanelAddressMap()
-        {
-            InitializePanelAddressMap();
-            Log.Info(module, "已重新加载面板地址映射");
-        }
-        
-        /// <summary>
-        /// 注册面板类型与Addressable地址的映射关系
-        /// </summary>
-        /// <param name="panelType">面板类型</param>
-        /// <param name="addressableAddress">Addressable资源地址</param>
-        public void RegisterPanelAddress(UIType panelType, string addressableAddress)
-        {
-            if (!_panelAddressMap.ContainsKey(panelType))
-            {
-                _panelAddressMap.Add(panelType, addressableAddress);
-                Log.Info(module, $"注册面板地址映射: {panelType} -> {addressableAddress}");
-            }
-            else
-            {
-                Log.Warning(module, $"面板类型 {panelType} 的地址映射已存在，将被覆盖");
-                _panelAddressMap[panelType] = addressableAddress;
+                Log.Warning(module, "UIConfig 未设置，面板地址映射为空");
             }
         }
         
@@ -258,10 +281,10 @@ namespace MyGame.UI.Core
                 // 首先尝试从内存中的映射表获取
                 if (!_panelAddressMap.TryGetValue(panelType, out address))
                 {
-                    // 如果内存映射表中没有，且配置文件存在，尝试直接从配置文件获取
-                    if (_panelAddressConfig != null)
+                    // 内存映射表中没有时，直接从面板配置资产获取地址
+                    if (Config != null)
                     {
-                        address = _panelAddressConfig.GetAddressForPanel(panelType);
+                        address = Config.GetAddressableAddress(panelType);
                     }
                     
                     if (string.IsNullOrEmpty(address))
@@ -383,14 +406,5 @@ namespace MyGame.UI.Core
             }
         }
         
-        /// <summary>
-        /// 检查指定类型的面板是否已加载
-        /// </summary>
-        /// <param name="panelType">面板类型</param>
-        /// <returns>是否已加载</returns>
-        public bool IsPanelLoaded(UIType panelType)
-        {
-            return _loadedPanels.ContainsKey(panelType);
-        }
     }
 }

@@ -1,5 +1,5 @@
-using Inventory.controller;
-using Inventory.data;
+using MyGame.UI.Inventory.Controller;
+using MyGame.UI.Inventory.Data;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,7 +7,7 @@ using UnityEngine.UI;
 /// <summary>
 /// 表示背包系统中的单个物品槽位，负责显示物品图标和数量，并处理交互逻辑
 /// </summary>
-namespace Inventory.view
+namespace MyGame.UI.Inventory.View
 {
     public class InventorySlot : MonoBehaviour
     {

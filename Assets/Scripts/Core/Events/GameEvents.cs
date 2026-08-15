@@ -61,6 +61,18 @@ namespace MyGame.Events
         }
 
         /// <summary>
+        /// 游戏重新开始事件（结算面板的重新开始按钮触发）。
+        /// 订阅方负责复位本局状态（分数/时间流速/玩家/敌人生成器等）
+        /// </summary>
+        public static event Action OnGameRestart;
+        
+        public static void TriggerGameRestart()
+        {
+            Log.Info(module, "触发游戏重新开始事件");
+            OnGameRestart?.Invoke();
+        }
+
+        /// <summary>
         /// 游戏状态变更事件。
         /// </summary>
         public static event Action<GameState, GameState> OnGameStateChanged;

@@ -8,7 +8,12 @@ using Logger;
 namespace MyGame.UI.MainMenu.Controller
 {
     /// <summary>
-    /// 主菜单的控制器，连接模型和视图，处理业务逻辑，同时负责MVC组件的初始化和协调
+    /// 主菜单的控制器，连接模型和视图，处理业务逻辑。
+    ///
+    /// 【初始化契约】（与 HUD/PauseMenu/ResultPanel 等标准 Controller 对齐）
+    ///   - 由 View 侧 TryBindController 调用 Initialize() + SetView()；
+    ///   - Model 在 Initialize() 中创建；
+    ///   - 全局事件订阅在 OnInitialize() 中注册、Cleanup() 中注销。
     /// </summary>
     public class MainMenuController : BaseController<MainMenuView, MainMenuModel>
     {
@@ -16,53 +21,53 @@ namespace MyGame.UI.MainMenu.Controller
 
         [Header("菜单配置")]
         [Tooltip("默认启动的游戏场景名称")]
-        [SerializeField] private string m_defaultGameScene = "GameLevel1";
+        [SerializeField] private string m_defaultGameScene = "Level Select";
 
         #endregion
 
         #region 生命周期
 
         /// <summary>
-        /// 初始化控制器和MVC组件
+        /// 初始化控制器（由 MainMenuView.TryBindController 调用）。
+        /// 创建 Model、应用默认场景配置，再触发基类 OnInitialize。
         /// </summary>
-        private void Awake()
+        public override void Initialize()
         {
-            // 初始化MVC组件（创建Model、设置View引用）
-            InitializeMVCComponents();
+            if (!IsInitialized)
+            {
+                Log.Info(LogModules.MAINMENU, "初始化主菜单控制器");
 
-            // 初始化控制器生命周期
-            Initialize();
+                // 创建并初始化模型
+                CreateAndInitializeModel();
+
+                // 应用默认游戏场景配置
+                if (m_model != null && !string.IsNullOrEmpty(m_defaultGameScene))
+                {
+                    m_model.DefaultGameScene = m_defaultGameScene;
+                }
+
+                // 调用基类初始化（触发 OnInitialize）
+                base.Initialize();
+            }
         }
 
         /// <summary>
-        /// 当对象启用时，注册事件监听
+        /// 初始化逻辑：注册全局事件并订阅 Model 变更
         /// </summary>
-        private void OnEnable()
+        protected override void OnInitialize()
         {
+            base.OnInitialize();
             RegisterEvents();
             BindModelEvents();
         }
 
         /// <summary>
-        /// 当对象禁用时，注销事件监听
-        /// </summary>
-        private void OnDisable()
-        {
-            UnregisterEvents();
-            UnbindModelEvents();
-        }
-
-        /// <summary>
-        /// 当对象被销毁时，清理资源
+        /// 当对象被销毁时（MainMenu 面板随 MainMenu 场景卸载），清理资源
         /// </summary>
         private void OnDestroy()
         {
-            // 注销事件监听
-            UnregisterEvents();
-            UnbindModelEvents();
-
-            // 清理模型资源
-            m_model?.Cleanup();
+            // 清理控制器（注销事件、清理模型）
+            Cleanup();
 
             // 解绑视图
             m_view?.UnbindController();
@@ -70,36 +75,32 @@ namespace MyGame.UI.MainMenu.Controller
 
         #endregion
 
-        #region MVC组件初始化
+        #region 清理
 
         /// <summary>
-        /// 初始化MVC组件
-        /// 如果组件不存在，则自动创建
+        /// 清理控制器资源（注销事件、清理模型）
         /// </summary>
-        private void InitializeMVCComponents()
+        public override void Cleanup()
         {
-            // 创建并初始化Model
-            CreateAndInitializeModel();
-
-            // 设置默认游戏场景
-            if (m_model != null && !string.IsNullOrEmpty(m_defaultGameScene))
+            if (IsInitialized)
             {
-                m_model.DefaultGameScene = m_defaultGameScene;
-            }
+                Log.Info(LogModules.MAINMENU, "清理主菜单控制器");
 
-            // 查找或创建View
-            if (m_view == null)
-            {
-                m_view = GetComponentInChildren<MainMenuView>(true);
-                if (m_view == null)
+                // 注销全局事件
+                UnregisterEvents();
+
+                // 取消订阅 Model 事件
+                UnbindModelEvents();
+
+                // 清理模型资源
+                if (m_model != null)
                 {
-                    Log.Warning(LogModules.MAINMENU, "未找到MainMenuView组件，尝试创建");
-
-                    // 创建视图对象
-                    GameObject viewObject = new("MainMenuView");
-                    viewObject.transform.SetParent(transform, false);
-                    m_view = viewObject.AddComponent<MainMenuView>();
+                    m_model.Cleanup();
+                    m_model = null;
                 }
+
+                // 调用基类清理
+                base.Cleanup();
             }
         }
 

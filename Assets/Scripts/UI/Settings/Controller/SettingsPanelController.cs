@@ -26,81 +26,68 @@ namespace MyGame.UI.Settings.Controller
         #region 生命周期方法
 
         /// <summary>
-        /// 控制器的Awake方法
-        /// 初始化组件和绑定事件
+        /// 初始化控制器（由 SettingsPanelView.TryBindController 调用）。
+        /// 创建 Model、注入 Inspector 配置的视图引用（View 侧注入优先）。
         /// </summary>
-        protected virtual void Awake()
+        public override void Initialize()
         {
-            Log.Info(LOG_MODULE, "设置面板控制器初始化");
-            base.CreateAndInitializeModel();
-            // 设置视图引用
-            if (m_settingsPanelView != null)
+            if (!IsInitialized)
             {
-                SetView(m_settingsPanelView);
+                Log.Info(LOG_MODULE, "初始化设置面板控制器");
+
+                // 创建并初始化模型
+                CreateAndInitializeModel();
+
+                // 视图注入兜底：View 侧 TryBindController 未注入时使用 Inspector 引用
+                if (m_view == null && m_settingsPanelView != null)
+                {
+                    SetView(m_settingsPanelView);
+                }
+
+                // 调用基类初始化（触发 OnInitialize）
+                base.Initialize();
             }
         }
 
         /// <summary>
-        /// 当控制器被启用时调用
+        /// 初始化逻辑：订阅 Model 变更事件
         /// </summary>
-        protected virtual void OnEnable()
+        protected override void OnInitialize()
         {
-            Log.DebugLog(LOG_MODULE, "设置面板控制器启用");
-            SetModels();
-        }
-        
-        /// <summary>
-        /// 模型设置后的回调
-        /// 在模型设置完成后执行绑定事件和初始化面板的操作
-        /// </summary>
-        protected void SetModels()
-        {
-            Log.DebugLog(LOG_MODULE, "设置面板控制器: 模型已设置");
+            base.OnInitialize();
             BindModelEvents();
         }
 
         /// <summary>
-        /// 当游戏对象禁用时调用
+        /// 清理控制器资源（解绑 Model 事件、清理模型）
         /// </summary>
-        private void OnDisable()
+        public override void Cleanup()
         {
-            UnbindModelEvents();
-        }
-
-        /// <summary>
-        /// 解绑设置模型事件
-        /// </summary>
-        private void UnbindModelEvents()
-        {
-            if (m_model != null)
+            if (IsInitialized)
             {
-                m_model.OnPropertyChanged -= HandleModelPropertyChanged;
+                Log.Info(LOG_MODULE, "清理设置面板控制器");
+
+                // 取消订阅 Model 事件
+                UnbindModelEvents();
+
+                // 清理模型资源
+                if (m_model != null)
+                {
+                    m_model.Cleanup();
+                    m_model = null;
+                }
+
+                // 调用基类清理
+                base.Cleanup();
             }
         }
 
         #endregion
 
-        #region 初始化和事件绑定
+        #region Model事件绑定
 
         /// <summary>
-        /// 初始化设置面板
-        /// </summary>
-        private void InitializePanel()
-        {
-            Log.Info(LOG_MODULE, "初始化设置面板视图层");
-            if (m_settingsPanelView != null)
-            {
-                m_settingsPanelView.Initialize();
-                UpdateViewWithCurrentSettings();
-            }
-            else
-            {
-                Log.Error(LOG_MODULE, "设置面板视图为空，无法初始化");
-            }
-        }
-
-        /// <summary>
-        /// 绑定设置模型事件
+        /// 订阅 Model 属性变更事件
         /// </summary>
         private void BindModelEvents()
         {
@@ -112,6 +99,17 @@ namespace MyGame.UI.Settings.Controller
             else
             {
                 Log.Error(LOG_MODULE, "设置模型为空，无法绑定事件");
+            }
+        }
+
+        /// <summary>
+        /// 取消订阅 Model 属性变更事件
+        /// </summary>
+        private void UnbindModelEvents()
+        {
+            if (m_model != null)
+            {
+                m_model.OnPropertyChanged -= HandleModelPropertyChanged;
             }
         }
 
@@ -324,9 +322,11 @@ namespace MyGame.UI.Settings.Controller
         /// </summary>
         private void UpdateViewWithCurrentSettings()
         {
-            if (m_settingsPanelView != null)
+            // 优先使用标准注入的 m_view，Inspector 引用作兜底
+            SettingsPanelView view = m_view ?? m_settingsPanelView;
+            if (view != null)
             {
-                m_settingsPanelView.UpdateAllSettingsComponents();
+                view.UpdateAllSettingsComponents();
             }
             else
             {

@@ -1,7 +1,7 @@
 using UnityEngine;
-using Inventory.data;
+using MyGame.UI.Inventory.Data;
 
-namespace Inventory.data
+namespace MyGame.UI.Inventory.Data
 {
 /// <summary>
 /// 物品数据库，负责存储所有可使用的物品数据

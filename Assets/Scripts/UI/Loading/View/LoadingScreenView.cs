@@ -1,3 +1,4 @@
+using System;
 using Logger;
 using UnityEngine;
 
@@ -9,24 +10,16 @@ namespace MyGame.UI.Loading.View
     /// <summary>
     /// 加载界面组件
     /// MVC架构中的View层，负责显示加载界面的UI元素和动画效果
-    /// 使用Animator组件控制由bool参数触发的动画
+    /// 显隐动画由代码控制（CanvasGroup 淡入淡出协程，unscaledTime 驱动），
+    /// 不依赖 Animator 状态机，避免状态机重启/默认状态重播导致的播放不稳定
     /// </summary>
     public class LoadingScreenView : BaseView<LoadingScreenController>
     {
         private const string LOG_MODULE = LogModules.LOADING;
-        
-        // 动画参数名称常量
-        private const string ANIM_PARAM_SHOW_LOADING = "ShowLoading";
-        private const string ANIM_PARAM_HIDE_LOADING = "HideLoading";
 
         [Header("层级设置")]
         [Tooltip("加载界面Canvas的Sorting Order。值越高，显示层级越高，不易被其他UI遮挡。")]
         public int canvasSortingOrder = 1000;
-        
-        [Header("动画设置")]
-        [Tooltip("控制加载界面显隐动画的Animator组件")]
-        [SerializeField] private Animator m_animator;
-        
 
         /// <summary>
         /// 初始化加载界面
@@ -36,26 +29,18 @@ namespace MyGame.UI.Loading.View
             // 设置面板类型为Loading
             m_panelType = UIType.Loading;
             
-            // 调用基类的Awake方法，完成基础初始化
+            // 调用基类的Awake方法，完成基础初始化（获取/创建 CanvasGroup）
             base.Awake();
             
             // 确保使用全局Canvas
             EnsureGlobalCanvasParent();
-            
-            // 自动获取Animator组件
-            if (m_animator == null)
-            {
-                m_animator = GetComponent<Animator>();
-                if (m_animator == null)
-                {
-                    m_animator = gameObject.AddComponent<Animator>();
-                    Log.Info(LOG_MODULE, "已自动添加Animator组件", this);
-                }
-            }
         }
         
         /// <summary>
-        /// 确保加载界面使用全局Canvas作为父级并设置正确的排序层级
+        /// 确保加载界面使用全局Canvas作为父级并设置正确的排序层级。
+        /// 若全局UI容器下已存在其他加载界面实例，则销毁当前（新）实例，
+        /// 保证全局唯一——场景中放置的 Loading 会被移入 GlobalUI（DontDestroyOnLoad），
+        /// 不随场景卸载，若不在此去重，每次场景切换都会堆积一份且永不销毁
         /// </summary>
         private void EnsureGlobalCanvasParent()
         {
@@ -64,6 +49,19 @@ namespace MyGame.UI.Loading.View
             Canvas globalCanvas = globalCanvasObj != null ? globalCanvasObj.GetComponent<Canvas>() : null;
             if (globalCanvas != null)
             {
+                // 全局唯一性：GlobalUI 下已存在其他加载界面实例时销毁当前实例
+                foreach (var other in FindObjectsByType<LoadingScreenView>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                {
+                    if (other != this && other.transform.IsChildOf(globalCanvas.transform))
+                    {
+                        Log.Info(LOG_MODULE, "全局UI下已存在加载界面实例，销毁重复实例", this);
+                        // 先禁用再销毁：避免 Destroy 延迟执行期间被场景扫描误注册为面板
+                        gameObject.SetActive(false);
+                        Destroy(gameObject);
+                        return;
+                    }
+                }
+
                 // 如果当前对象不在全局Canvas下，则将其移动到全局Canvas下
                 if (transform.parent != globalCanvas.transform)
                 {
@@ -88,20 +86,26 @@ namespace MyGame.UI.Loading.View
         }
         
         /// <summary>
-        /// 尝试自动绑定控制器
-        /// 创建并绑定LoadingScreenController实例
+        /// 尝试自动绑定控制器（标准模式：同物体查找，初始化并注入视图）。
+        /// 注意：Loading prefab 上已预挂 LoadingScreenController，必须先 TryGetComponent，
+        /// 否则会叠加第二个 Controller 组件造成重复挂载。
         /// </summary>
         protected override void TryBindController()
         {
-            // 正确的方法：在GameObject上添加控制器组件
-            LoadingScreenController controller = gameObject.AddComponent<LoadingScreenController>();
-            
-            // 初始化控制器
+            if (TryGetComponent<LoadingScreenController>(out var controller))
+            {
+                // 找到预挂的控制器：初始化、注入视图并绑定
+                controller.Initialize();
+                controller.SetView(this);
+                BindController(controller);
+                return;
+            }
+
+            // 未预挂时创建（仅作为防御路径，prefab 上应始终预挂）
+            controller = gameObject.AddComponent<LoadingScreenController>();
             controller.Initialize();
-            
-            // 设置控制器的视图引用
             controller.SetView(this);
-            
+
             // 绑定控制器到视图
             BindController(controller);
         }
@@ -126,75 +130,66 @@ namespace MyGame.UI.Loading.View
         
         /// <summary>
         /// 显示加载界面
-        /// 重写IUIPanel接口的Show方法，通过设置bool参数触发进入动画
+        /// 重写IUIPanel接口的Show方法：激活物体后播放 CanvasGroup 淡入动画。
+        /// 面板常驻 GlobalUI 且隐藏时物体被 SetActive(false) 关闭，
+        /// 因此显示前必须先重新激活物体，否则动画不会播放
         /// </summary>
         public override void Show()
         {
             if (!IsVisible)
-            {  
-                // 确保CanvasGroup的alpha值为1，使面板可见
-                if (m_canvasGroup != null)
-                {
-                    m_canvasGroup.alpha = 1f;
-                }  
-                // 通过设置bool参数触发进入动画
-                if (m_animator != null)
-                {
-                    m_animator.SetBool(ANIM_PARAM_SHOW_LOADING, true);
-                    m_animator.SetBool(ANIM_PARAM_HIDE_LOADING, false);
-                }
-                
+            {
+                // 常驻面板：显示前确保物体激活（隐藏流程会 SetActive(false)，见 Hide）
+                gameObject.SetActive(true);
+
+                // 中断可能进行中的淡出协程，避免两个协程并发写入 alpha
+                StopAllCoroutines();
+                StartCoroutine(FadeIn());
+
                 IsVisible = true;
-                
-                Log.Info(LOG_MODULE, "加载界面显示，触发ShowLoading动画");
+                Log.Info(LOG_MODULE, "加载界面显示（淡入）");
             }
         }
         
         /// <summary>
         /// 隐藏加载界面
-        /// 重写IUIPanel接口的Hide方法，通过设置bool参数触发退出动画
+        /// 重写IUIPanel接口的Hide方法：播放 CanvasGroup 淡出动画，
+        /// 动画播完后关闭物体并通知控制器——常驻的隐藏面板不占渲染开销（见重构文档 3.3）
         /// </summary>
         public override void Hide()
         {
             if (IsVisible)
             {
-                Log.Info(LOG_MODULE, "隐藏加载界面，触发HideLoading动画");
-                
-                // 通过设置bool参数触发退出动画
-                if (m_animator != null)
+                Log.Info(LOG_MODULE, "隐藏加载界面（淡出）");
+
+                // 立即重置可见状态，保证淡出期间 Show() 可正常重新显示面板
+                IsVisible = false;
+
+                // 中断可能进行中的淡入协程，避免两个协程并发写入 alpha
+                StopAllCoroutines();
+                StartCoroutine(FadeOut(() =>
                 {
-                    m_animator.SetBool(ANIM_PARAM_HIDE_LOADING, true);
-                    m_animator.SetBool(ANIM_PARAM_SHOW_LOADING, false);
-                }
-                else
-                {
-                    // 如果没有动画组件，直接隐藏
+                    // 防御：淡出期间面板被重新显示（Show）时不再关闭物体
+                    if (IsVisible)
+                    {
+                        return;
+                    }
                     OnHideAnimationComplete();
-                }
+                }));
             }
         }
         
         /// <summary>
         /// 隐藏动画完成后的回调处理
-        /// 此方法应由动画状态机在动画结束时调用
+        /// 由 Hide 的淡出协程在动画完成后调用（不再依赖动画状态机事件）
         /// </summary>
         public void OnHideAnimationComplete()
         {
-            IsVisible = false; 
-            // 重置动画状态
-            if (m_animator != null)
-            {
-                m_animator.SetBool(ANIM_PARAM_HIDE_LOADING, false);
-            }
-            
+            IsVisible = false;
+
             // 通知控制器加载界面已隐藏
-            if (m_controller != null)
+            if (m_controller != null && m_controller is LoadingScreenController loadingController)
             {
-                var loadingController = m_controller as LoadingScreenController;
-                if (loadingController != null)
-                {
-                    loadingController.OnHideAnimationComplete();
-                }
+                loadingController.OnHideAnimationComplete();
             }
         }
     

@@ -34,7 +34,7 @@ namespace MyGame.Managers
             _inputActions.GamePlay.Enable();
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
             // 清理资源
             if (_inputActions != null)
@@ -42,6 +42,9 @@ namespace MyGame.Managers
                 _inputActions.Disable();
                 _inputActions.Dispose();
             }
+
+            // 通知基类置位销毁标志，禁止后续 Instance 懒创建
+            base.OnDestroy();
         }
         #endregion
 

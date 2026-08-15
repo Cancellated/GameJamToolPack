@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Inventory.data;
+using MyGame.UI.Inventory.Data;
 using MyGame.UI;
 
-namespace Inventory
+namespace MyGame.UI.Inventory.Model
 {
     /// <summary>
     /// 可序列化的背包数据模型，负责管理物品的添加、移除和位置交换

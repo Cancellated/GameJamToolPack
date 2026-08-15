@@ -44,13 +44,16 @@ namespace MyGame.Managers
         /// <summary>
         /// 销毁时注销事件监听，防止内存泄漏。
         /// </summary>
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
             // 注销事件监听，防止内存泄漏
             GameEvents.OnGameStart -= StartGame;
             GameEvents.OnGamePause -= PauseGame;
             GameEvents.OnGameResume -= ResumeGame;
             GameEvents.OnGameOver -= GameOver;
+
+            // 通知基类置位销毁标志，禁止后续 Instance 懒创建
+            base.OnDestroy();
         }
 
         /// <summary>

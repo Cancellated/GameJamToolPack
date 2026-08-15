@@ -117,7 +117,7 @@ namespace MyGame.UI
     /// <typeparam name="TModel">模型类型（必须有无参构造函数）</typeparam>
     public abstract class BaseController<TView, TModel> : BaseController 
         where TView : class
-        where TModel : class, new()
+        where TModel : BaseModel, new()
     {
         #region 字段和属性
         
@@ -142,19 +142,16 @@ namespace MyGame.UI
         /// 
         /// 【使用规范】
         /// - 子类应在 Awake 中调用此方法（在 SetView 之前或之后均可，但建议在 SetView 之前）
-        /// - 内部使用 new() 创建实例，通过反射调用 Initialize()（如果存在）
+        /// - 内部使用 new() 创建实例并直接调用 Initialize()（TModel 约束为 BaseModel，类型安全）
         /// - 创建后会通过 SetModel() 设置 m_model 引用
         /// - 返回的实例已设置到 m_model，子类可直接使用
         /// </summary>
         /// <returns>创建并初始化后的模型实例</returns>
         protected TModel CreateAndInitializeModel()
         {
-            // 创建模型实例
+            // 创建模型实例并初始化（直接调用，避免反射的静默失败风险）
             TModel model = new();
-            
-            // 使用反射检查并调用Initialize方法
-            var initializeMethod = typeof(TModel).GetMethod("Initialize", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic, null, System.Type.EmptyTypes, null);
-            initializeMethod?.Invoke(model, null);
+            model.Initialize();
             
             // 设置模型引用
             SetModel(model);

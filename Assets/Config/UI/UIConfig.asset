@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a38769360a6a112469adacacc7f54ac1, type: 3}
+  m_Name: UIConfig
+  m_EditorClassIdentifier: 
+  _entries:
+  - panelType: 1
+    addressableAddress: Assets/Art Assets/UI/MainMenu/MainMenu.prefab
+    lazyLoad: 1
+    inputMode: 1
+    hideOnShow: 0500000006000000
+  - panelType: 7
+    addressableAddress: Assets/Art Assets/UI/Debug/DebugConsole.prefab
+    lazyLoad: 0
+    inputMode: 1
+    hideOnShow: 
+  - panelType: 5
+    addressableAddress: Assets/Art Assets/UI/HUD/HUD.prefab
+    lazyLoad: 0
+    inputMode: 2
+    hideOnShow: 01000000020000000400000006000000
+  - panelType: 3
+    addressableAddress: Assets/Art Assets/UI/PauseMenu/PauseMenu.prefab
+    lazyLoad: 1
+    inputMode: 2
+    hideOnShow: 0100000006000000
+  - panelType: 6
+    addressableAddress: Assets/Art Assets/UI/Loading/LoadingScreen.prefab
+    lazyLoad: 0
+    inputMode: 2
+    hideOnShow: 
+  - panelType: 4
+    addressableAddress: Assets/Art Assets/UI/ResultPanel/ResultPanel.prefab
+    lazyLoad: 1
+    inputMode: 1
+    hideOnShow: 03000000
+  - panelType: 9
+    addressableAddress: Assets/Art Assets/UI/Settings/SettingsPage.prefab
+    lazyLoad: 1
+    inputMode: 1
+    hideOnShow: 

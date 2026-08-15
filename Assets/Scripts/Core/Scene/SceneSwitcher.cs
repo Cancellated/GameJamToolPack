@@ -1,5 +1,9 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.SceneManagement;
 using MyGame.Events;
 using Logger;
@@ -7,12 +11,34 @@ using Logger;
 namespace MyGame.Managers
 {
     /// <summary>
-    /// 场景切换管理器，负责处理场景加载和卸载
-    /// 实现了基于事件的统一场景切换系统
+    /// 场景切换管理器，负责处理场景加载和卸载。
+    /// 基于事件的统一场景切换系统；场景通过 Addressables 加载。
+    ///
+    /// 【场景地址约定】
+    ///   - "Level Select" 等可热更场景：Addressable 地址（Scenes 组，如 "Scenes/Level Select"）；
+    ///   - "MainMenu" 启动场景：保留在 Build Settings 中作为入口，
+    ///     运行时作为内置场景以场景路径（Assets/Scenes/MainMenu.unity）为 key 加载。
+    ///   映射表见 s_sceneAddressMap，新增场景时在此登记。
     /// </summary>
     public class SceneSwitcher : Singleton<SceneSwitcher>
     {
         private const string module = LogModules.SCENE;
+
+        /// <summary>
+        /// 场景名 → Addressable 加载 key 映射。
+        /// 内置场景（Build Settings 中）用场景路径作 key；纯 Addressable 场景用组内地址。
+        /// </summary>
+        private static readonly Dictionary<string, string> s_sceneAddressMap = new()
+        {
+            { "MainMenu", "Assets/Scenes/MainMenu.unity" },
+            { "Level Select", "Scenes/Level Select" },
+        };
+
+        /// <summary>最近一次 Single 模式加载的场景句柄（旧场景卸载后释放）</summary>
+        private AsyncOperationHandle<SceneInstance> _activeSceneHandle;
+
+        /// <summary>Additive 模式加载的场景句柄（随下次 Single 加载一起释放）</summary>
+        private readonly List<AsyncOperationHandle<SceneInstance>> _additiveSceneHandles = new();
 
         #region 生命周期
         private void OnEnable()
@@ -37,7 +63,7 @@ namespace MyGame.Managers
         /// 请求加载场景（静态方法，外部系统可以直接调用）
         /// 这是统一的场景加载入口，通过事件机制实现
         /// </summary>
-        /// <param name="sceneName">要加载的场景名称</param>
+        /// <param name="sceneName">要加载的场景名称（须在 s_sceneAddressMap 中登记）</param>
         public static void RequestLoadScene(string sceneName)
         {
             Log.Info(module, $"发起场景加载请求: {sceneName}");
@@ -71,10 +97,10 @@ namespace MyGame.Managers
 
         #region 场景加载方法
         /// <summary>
-        /// 异步加载场景
+        /// 异步加载场景（Addressables）
         /// </summary>
-        /// <param name="sceneName">场景名称</param>
-        /// <param name="unloadCurrent">是否卸载当前场景</param>
+        /// <param name="sceneName">场景名称（须在 s_sceneAddressMap 中登记）</param>
+        /// <param name="unloadCurrent">是否卸载当前场景（Single/Additive 模式）</param>
         public void LoadSceneAsync(string sceneName, bool unloadCurrent = true)
         {
             StartCoroutine(LoadSceneAsyncCoroutine(sceneName, unloadCurrent));
@@ -82,61 +108,65 @@ namespace MyGame.Managers
 
         private IEnumerator LoadSceneAsyncCoroutine(string sceneName, bool unloadCurrent)
         {
-            Log.Info(module, $"开始异步加载场景: {sceneName}");
+            if (!s_sceneAddressMap.TryGetValue(sceneName, out string address))
+            {
+                Log.Error(module, $"场景地址映射中未找到场景: {sceneName}，请在 SceneSwitcher.s_sceneAddressMap 中登记");
+                yield break;
+            }
 
-            // 根据unloadCurrent参数决定加载模式
+            Log.Info(module, $"开始异步加载场景: {sceneName} (address: {address})");
+
             LoadSceneMode loadMode = unloadCurrent ? LoadSceneMode.Single : LoadSceneMode.Additive;
 
-            if (unloadCurrent)
-            {
-                // 如果是Single模式，不需要单独卸载当前场景，Unity会自动处理
-            }
-            else
-            {
-                // 记录当前活动场景名称，用于Additive模式下的日志记录
-                var currentScene = SceneManager.GetActiveScene();
-                Log.Info(module, $"将使用Additive模式加载，当前场景 '{currentScene.name}' 会被保留");
-            }
-
-            // 异步加载新场景
-            var asyncLoad = SceneManager.LoadSceneAsync(sceneName, loadMode);
-            while (!asyncLoad.isDone)
+            // Addressables 异步加载场景
+            AsyncOperationHandle<SceneInstance> handle = Addressables.LoadSceneAsync(address, loadMode);
+            while (!handle.IsDone)
             {
                 yield return null;
             }
 
-            // 如果是Additive模式，需要手动设置新场景为活动场景
-            if (!unloadCurrent)
+            if (handle.Status != AsyncOperationStatus.Succeeded)
             {
-                var newScene = SceneManager.GetSceneByName(sceneName);
-                SceneManager.SetActiveScene(newScene);
+                Log.Error(module, $"场景加载失败: {sceneName}，状态: {handle.Status}");
+                Addressables.Release(handle);
+                yield break;
+            }
+
+            // Single 模式：旧场景已被卸载，释放旧句柄与 Additive 句柄
+            if (unloadCurrent)
+            {
+                if (_activeSceneHandle.IsValid())
+                {
+                    Addressables.Release(_activeSceneHandle);
+                }
+                foreach (var additiveHandle in _additiveSceneHandles)
+                {
+                    if (additiveHandle.IsValid())
+                    {
+                        Addressables.Release(additiveHandle);
+                    }
+                }
+                _additiveSceneHandles.Clear();
+
+                _activeSceneHandle = handle;
+            }
+            else
+            {
+                // Additive 模式：手动设置新场景为活动场景
+                _additiveSceneHandles.Add(handle);
+                if (handle.Result.Scene.IsValid())
+                {
+                    SceneManager.SetActiveScene(handle.Result.Scene);
+                }
+                else
+                {
+                    Log.Warning(module, $"Additive 加载的场景 {sceneName} 无效，无法设为活动场景");
+                }
             }
 
             // 触发场景加载完成事件
             GameEvents.TriggerSceneLoadComplete(sceneName);
             Log.Info(module, $"场景加载完成: {sceneName}");
-        }
-
-        /// <summary>
-        /// 直接加载场景（同步）
-        /// </summary>
-        /// <param name="sceneName">场景名称</param>
-        public void LoadScene(string sceneName)
-        {
-            Log.Info(module, $"开始同步加载场景: {sceneName}");
-            SceneManager.LoadScene(sceneName);
-            // 注意：同步加载后可能无法立即触发完成事件，因为场景加载是阻塞的
-            // 如果需要确保完成事件被触发，请使用异步加载方法
-        }
-
-        /// <summary>
-        /// 请求卸载场景
-        /// </summary>
-        /// <param name="sceneName">要卸载的场景名称</param>
-        public static void RequestUnloadScene(string sceneName)
-        {
-            Log.Info(module, $"发起场景卸载请求: {sceneName}");
-            GameEvents.TriggerSceneUnload(sceneName);
         }
         #endregion
     }

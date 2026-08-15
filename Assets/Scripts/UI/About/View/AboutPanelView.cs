@@ -24,16 +24,31 @@ namespace MyGame.UI.About.View
         #region 生命周期
 
         /// <summary>
-        /// 初始化面板
+        /// 初始化面板（仅设置面板类型与基础绑定）
         /// </summary>
         protected override void Awake()
         {
             // 设置面板类型
             m_panelType = UIType.AboutPanel;
             base.Awake();
+        }
 
-            // 绑定按钮事件
+        /// <summary>
+        /// 初始化面板：绑定按钮事件（遵循基类规范：在 Initialize 中绑定，与 Cleanup 中的解绑成对）
+        /// </summary>
+        public override void Initialize()
+        {
+            base.Initialize();
             BindButtonEvents();
+        }
+
+        /// <summary>
+        /// 清理面板资源：解绑按钮事件
+        /// </summary>
+        public override void Cleanup()
+        {
+            UnbindButtonEvents();
+            base.Cleanup();
         }
 
         #endregion
@@ -73,6 +88,17 @@ namespace MyGame.UI.About.View
         }
 
         /// <summary>
+        /// 解绑按钮事件（与 BindButtonEvents 成对出现）
+        /// </summary>
+        private void UnbindButtonEvents()
+        {
+            if (m_closeButton != null)
+            {
+                m_closeButton.onClick.RemoveListener(OnCloseButtonClicked);
+            }
+        }
+
+        /// <summary>
         /// 关闭按钮点击事件处理
         /// </summary>
         private void OnCloseButtonClicked()
@@ -88,37 +114,26 @@ namespace MyGame.UI.About.View
         }
 
         /// <summary>
-        /// 尝试自动绑定控制器
+        /// 尝试自动绑定控制器（标准模式：同物体查找，初始化并注入视图）
         /// </summary>
         protected override void TryBindController()
         {
-            // 尝试在父物体中查找控制器
-            if (!transform.parent.TryGetComponent<AboutPanelController>(out var controller))
+            if (TryGetComponent<AboutPanelController>(out var controller))
             {
-                // 如果父物体中没有，尝试在根物体中查找
-                controller = GetComponentInParent<AboutPanelController>();
-                if (controller == null)
-                {
-                    // 如果都没有，创建一个新的控制器组件
-                    controller = gameObject.AddComponent<AboutPanelController>();
-                }
+                // 找到控制器：初始化、注入视图并绑定
+                controller.Initialize();
+                controller.SetView(this);
+                BindController(controller);
+                return;
             }
-            
+
+            // 如果没有找到控制器，则创建一个新的
+            controller = gameObject.AddComponent<AboutPanelController>();
+            controller.Initialize();
+            controller.SetView(this);
+
+            // 绑定控制器到视图
             BindController(controller);
-        }
-        
-        /// <summary>
-        /// 控制器绑定后的回调
-        /// </summary>
-        protected override void OnControllerBound()
-        {
-            base.OnControllerBound();
-            
-            // 初始化控制器
-            if (m_controller != null)
-            {
-                m_controller.Initialize();
-            }
         }
 
         #endregion

@@ -19,8 +19,9 @@ namespace MyGame.UI
     /// - Cleanup() 用于解绑事件和清理资源
     /// - 如面板不需要淡入淡出动画，可重写Show/Hide直接操作CanvasGroup，但必须维护IsVisible状态
     /// - 按钮点击事件中应先判空 m_controller 再调用其方法
+    /// - View 与 Controller 的挂载关系由各 View 子类的 TryBindController 决定
+    ///   （常见做法：同 GameObject 查找或创建 Controller，见 HUD/PauseMenu/MainMenu 等实现）
     /// </summary>
-    // 重要：Controller和View 必须挂载在同一个 GameObject 上，
     public abstract class BaseView<TController> : MonoBehaviour, IUIPanel where TController : class
     {
         #region 字段和属性
@@ -39,6 +40,14 @@ namespace MyGame.UI
         /// 是否显示面板
         /// </summary>
         public bool IsVisible { get; protected set; }
+
+        /// <summary>
+        /// 面板是否已完成首次初始化（防重入标志）。
+        /// OnEnable 每次激活都会触发，若每次都执行 Initialize() 会导致按钮重复绑定、
+        /// 控制器重复创建等连锁问题；此标志保证 Initialize() 只执行一次，
+        /// 直到面板被 Cleanup 清理后才允许重新初始化。
+        /// </summary>
+        private bool _initialized;
         
         /// <summary>
         /// 面板类型，用于UIManager进行状态管理
@@ -101,12 +110,18 @@ namespace MyGame.UI
         /// 当面板被启用时，自动调用 Initialize() 进行初始化
         /// 
         /// 【使用规范】
-        /// - 子类重写时必须调用 base.OnEnable() 以确保 Initialize() 被触发
+        /// - 子类重写时必须调用 base.OnEnable() 以确保初始化被触发
         /// - 不要在 OnEnable 中绑定按钮事件（应在 Initialize 中完成）
+        /// - 初始化只执行一次（_initialized 防重入）：面板重复 SetActive 不会重复初始化，
+        ///   避免按钮重复绑定 / 控制器重复创建；Cleanup() 后重置标志，允许重新初始化
         /// </summary>
         protected virtual void OnEnable()
         {
-            Initialize();
+            if (!_initialized)
+            {
+                _initialized = true;
+                Initialize();
+            }
         }
 
         /// <summary>
@@ -191,6 +206,8 @@ namespace MyGame.UI
         /// </summary>
         public virtual void Cleanup()
         {
+            // 重置初始化标志：面板注销后再次注册时可重新初始化
+            _initialized = false;
         }
         
         /// <summary>

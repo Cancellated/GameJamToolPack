@@ -73,14 +73,44 @@ namespace MyGame.UI.Settings.View
         }
 
         /// <summary>
-        /// 初始化面板
+        /// 解绑按钮事件（与 BindButtonEvents 成对出现）
+        /// </summary>
+        private void UnbindButtonEvents()
+        {
+            if (m_backButton != null)
+            {
+                m_backButton.onClick.RemoveListener(OnBackButtonClick);
+            }
+
+            if (m_applyButton != null)
+            {
+                m_applyButton.onClick.RemoveListener(OnApplyButtonClick);
+            }
+
+            if (m_saveButton != null)
+            {
+                m_saveButton.onClick.RemoveListener(OnSaveButtonClick);
+            }
+        }
+
+        /// <summary>
+        /// 初始化面板：绑定按钮事件并初始化设置组件
         /// </summary>
         public override void Initialize()
         {
+            base.Initialize();
             Log.Info(LOG_MODULE, "初始化设置面板");
-            TryBindController();
             BindButtonEvents();
             InitializeAllSettingsComponents();
+        }
+
+        /// <summary>
+        /// 清理面板资源：解绑按钮事件
+        /// </summary>
+        public override void Cleanup()
+        {
+            UnbindButtonEvents();
+            base.Cleanup();
         }
         #endregion
 
@@ -146,7 +176,7 @@ namespace MyGame.UI.Settings.View
         #region 控制器绑定
 
         /// <summary>
-        /// 尝试绑定控制器
+        /// 尝试自动绑定控制器（标准模式：同物体查找，初始化并注入视图）
         /// </summary>
         protected override void TryBindController()
         {
@@ -159,6 +189,9 @@ namespace MyGame.UI.Settings.View
                 Log.Error(LOG_MODULE, "未找到SettingsPanelController实例，请确保已将控制器脚本挂载到组件上");
                 return;
             }
+
+            // 初始化控制器（幂等，基类 IsInitialized 防重入）
+            controller.Initialize();
 
             // 注入视图引用，完成View侧绑定
             controller.SetView(this);

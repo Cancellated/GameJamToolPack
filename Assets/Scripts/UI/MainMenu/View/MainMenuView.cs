@@ -42,28 +42,28 @@ namespace MyGame.UI.MainMenu.View
             // 设置面板类型
             m_panelType = UIType.MainMenu;
             base.Awake();
-            
-            // 绑定按钮事件
-            BindButtonEvents();
         }
 
         /// <summary>
-        /// 尝试自动绑定控制器
+        /// 尝试自动绑定控制器（标准模式：同物体查找，初始化并注入视图）
         /// </summary>
         protected override void TryBindController()
         {
-            // 尝试在父物体中查找控制器
-            if (!transform.parent.TryGetComponent<MainMenuController>(out var controller))
+            if (TryGetComponent<MainMenuController>(out var controller))
             {
-                // 如果父物体中没有，尝试在根物体中查找
-                controller = GetComponentInParent<MainMenuController>();
-                if (controller == null)
-                {
-                    // 如果都没有，创建一个新的控制器组件
-                    controller = gameObject.AddComponent<MainMenuController>();
-                }
+                // 找到控制器：初始化、注入视图并绑定
+                controller.Initialize();
+                controller.SetView(this);
+                BindController(controller);
+                return;
             }
-            
+
+            // 如果没有找到控制器，则创建一个新的
+            controller = gameObject.AddComponent<MainMenuController>();
+            controller.Initialize();
+            controller.SetView(this);
+
+            // 绑定控制器到视图
             BindController(controller);
         }
 
@@ -103,12 +103,17 @@ namespace MyGame.UI.MainMenu.View
         }
 
         /// <summary>
-        /// 初始化面板
+        /// 初始化面板：仅绑定按钮事件。
+        /// 注意：不在 Initialize 中显示面板——显示/隐藏由 UIManager.SetUIState 统一调度
+        /// （启动时 UIManager.Start 调 SetUIState(MainMenu, true)；
+        ///   返回主菜单时 MainMenuController.OnSceneLoadComplete 调 TriggerMenuShow）。
+        /// 若在此 Show()，场景切换后 RefreshPanelMap 补注册重建的面板会立即显示，
+        /// 覆盖在其他场景界面上（选关界面被主菜单挡住）。
         /// </summary>
         public override void Initialize()
         {
-            // 初始化时显示主菜单面板
-            Show();
+            // 绑定按钮事件（遵循基类规范：在 Initialize 中绑定，与 Cleanup 中的解绑成对）
+            BindButtonEvents();
         }
 
         /// <summary>

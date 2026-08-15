@@ -1,13 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using Inventory.data;
-using Inventory.controller;
+using MyGame.UI.Inventory.Data;
+using MyGame.UI.Inventory.Controller;
 using MyGame.UI;
 using System.Collections.Generic;
 using Logger;
 
-namespace Inventory.view
+namespace MyGame.UI.Inventory.View
 {
     /// <summary>
     /// 背包视图类，负责背包UI的显示和交互
@@ -38,7 +38,7 @@ namespace Inventory.view
         private int capacity;
         
         /// <summary>
-        /// 初始化
+        /// 初始化（仅设置面板类型与基础绑定）
         /// </summary>
         protected override void Awake()
         {
@@ -48,24 +48,43 @@ namespace Inventory.view
             // 调用基类初始化
             base.Awake();
             
-            // 设置关闭按钮事件
-            closeButton.onClick.AddListener(Hide);
             dragIcon.gameObject.SetActive(false);
         }
 
         /// <summary>
-        /// 尝试自动绑定控制器
-        /// View侧绑定模式：自身查找，找不到则创建，并注入View引用
+        /// 初始化面板：绑定按钮事件（遵循基类规范：在 Initialize 中绑定，与 Cleanup 中的解绑成对）
+        /// </summary>
+        public override void Initialize()
+        {
+            base.Initialize();
+
+            // 绑定关闭按钮事件
+            if (closeButton != null)
+            {
+                closeButton.onClick.AddListener(Hide);
+            }
+        }
+
+        /// <summary>
+        /// 尝试自动绑定控制器（标准模式：同物体查找，初始化并注入视图）
         /// </summary>
         protected override void TryBindController()
         {
-            if (!TryGetComponent<InventoryController>(out var controller))
+            if (TryGetComponent<InventoryController>(out var controller))
             {
-                controller = gameObject.AddComponent<InventoryController>();
+                // 找到控制器：初始化、注入视图并绑定
+                controller.Initialize();
+                controller.SetView(this);
+                BindController(controller);
+                return;
             }
 
-            // 将视图注入控制器，完成槽位初始化与首次刷新
+            // 如果没有找到控制器，则创建一个新的
+            controller = gameObject.AddComponent<InventoryController>();
+            controller.Initialize();
             controller.SetView(this);
+
+            // 绑定控制器到视图
             BindController(controller);
         }
         

@@ -29,77 +29,52 @@ namespace MyGame.UI.SaveLoad.Controller
         }
 
         /// <summary>
-        /// 初始化MVC组件关系
-        /// 创建Model实例并查找/绑定View（二者挂在同一GameObject上）
+        /// 初始化控制器（由 SaveLoadMenuView.TryBindController 调用）。
+        /// 创建 Model、初始化存档槽，再触发基类 OnInitialize。
         /// </summary>
-        private void Awake()
+        public override void Initialize()
         {
-            InitializeMVC();
-            Initialize();
+            if (!IsInitialized)
+            {
+                // 使用基类方法创建并初始化Model实例
+                CreateAndInitializeModel();
+
+                // 初始化存档槽（依赖 m_model 与 Inspector 配置 _config，二者此时已就绪）
+                InitializeSaveSlots();
+
+                // 调用基类初始化（触发 OnInitialize）
+                base.Initialize();
+            }
         }
 
         /// <summary>
-        /// 启用组件时注册事件
+        /// 初始化逻辑：注册存档菜单事件并订阅 Model 变更
         /// </summary>
-        private void OnEnable()
+        protected override void OnInitialize()
         {
+            base.OnInitialize();
             RegisterEvents();
             BindModelEvents();
         }
 
         /// <summary>
-        /// 禁用组件时注销事件
+        /// 清理控制器资源（注销事件、解绑 Model 事件、清理模型）
         /// </summary>
-        private void OnDisable()
+        public override void Cleanup()
         {
-            UnregisterEvents();
-            UnbindModelEvents();
-        }
-
-        /// <summary>
-        /// 初始化逻辑
-        /// </summary>
-        protected override void OnInitialize()
-        {
-            base.OnInitialize();
-        }
-
-        /// <summary>
-        /// 清理逻辑
-        /// </summary>
-        protected override void OnCleanup()
-        {
-            base.OnCleanup();
-            UnregisterEvents();
-            UnbindModelEvents();
-            if (m_view != null)
+            if (IsInitialized)
             {
-                m_view.Cleanup();
+                UnregisterEvents();
+                UnbindModelEvents();
+
+                if (m_model != null)
+                {
+                    m_model.Cleanup();
+                    m_model = null;
+                }
+
+                base.Cleanup();
             }
-        }
-
-        /// <summary>
-        /// 初始化MVC组件关系
-        /// 创建Model实例并查找/绑定View（二者挂在同一GameObject上）
-        /// </summary>
-        private void InitializeMVC()
-        {
-            // 使用基类方法创建并初始化Model实例
-            CreateAndInitializeModel();
-
-            // 查找或获取View引用（同GameObject上的组件）
-            if (m_view == null)
-            {
-                m_view = GetComponent<SaveLoadMenuView>();
-            }
-
-            if (m_view != null)
-            {
-                m_view.Initialize();
-            }
-
-            // 初始化存档槽
-            InitializeSaveSlots();
         }
 
         #region Model事件绑定

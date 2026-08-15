@@ -1,15 +1,21 @@
 using UnityEngine;
-using Inventory.data;
-using Inventory.view;
 using MyGame.Events;
 using MyGame.UI;
+using MyGame.UI.Inventory.Data;
+using MyGame.UI.Inventory.Model;
+using MyGame.UI.Inventory.View;
 using Logger;
 
-namespace Inventory.controller
+namespace MyGame.UI.Inventory.Controller
 {
     /// <summary>
     /// 背包控制器类，负责处理背包的逻辑和数据管理
     /// 作为MVC架构中的控制器层，继承BaseController以遵循MVC规范
+    ///
+    /// 【初始化契约】（标准模式）
+    ///   - 由 InventoryView.TryBindController 调用 Initialize() + SetView()；
+    ///   - Model 在 Initialize() 中创建；
+    ///   - 输入监听由 UIController 统一处理（本类不再自行监听 Inventory 键，避免双输入源）。
     /// </summary>
     public class InventoryController : BaseController<InventoryView, InventoryModel>
     {
@@ -18,68 +24,27 @@ namespace Inventory.controller
         [Tooltip("物品数据库")]
         [SerializeField] private ItemDatabase itemDatabase;
 
-        private GameControl _inputActions;
-
         #endregion
 
         #region 生命周期
 
         /// <summary>
-        /// 初始化控制器
+        /// 初始化控制器（由 InventoryView.TryBindController 调用）。
+        /// 创建 Model 并订阅 Model 变更事件，再触发基类 OnInitialize。
         /// </summary>
-        private void Awake()
+        public override void Initialize()
         {
-            _inputActions = new GameControl();
-            InitializeMVCComponents();
-            Initialize();
-        }
-
-        /// <summary>
-        /// 启用控制器
-        /// </summary>
-        private void OnEnable()
-        {
-            _inputActions.Enable();
-        }
-
-        /// <summary>
-        /// 禁用控制器
-        /// </summary>
-        private void OnDisable()
-        {
-            _inputActions.Disable();
-        }
-
-        /// <summary>
-        /// 销毁时清理资源
-        /// </summary>
-        private void OnDestroy()
-        {
-            // 取消订阅模型事件并清理模型
-            if (m_model != null)
+            if (!IsInitialized)
             {
-                m_model.OnInventoryChanged -= UpdateInventoryView;
-                m_model.Cleanup();
+                // 创建并初始化Model
+                CreateAndInitializeModel();
+
+                // 订阅Model变更事件
+                m_model.OnInventoryChanged += UpdateInventoryView;
+
+                // 调用基类初始化（触发 OnInitialize）
+                base.Initialize();
             }
-
-            // 解绑视图
-            m_view?.UnbindController();
-        }
-
-        /// <summary>
-        /// 初始化MVC组件：创建模型、订阅事件、添加测试物品
-        /// View 由 InventoryView.TryBindController 侧绑定注入，此处不主动查找
-        /// </summary>
-        private void InitializeMVCComponents()
-        {
-            // 创建并初始化Model
-            CreateAndInitializeModel();
-
-            // 订阅Model变更事件
-            m_model.OnInventoryChanged += UpdateInventoryView;
-
-            // 测试添加物品（此时View尚未注入，UpdateInventoryView内判空跳过）
-            AddTestItems();
         }
 
         /// <summary>
@@ -91,8 +56,8 @@ namespace Inventory.controller
         {
             base.SetView(view);
 
-            // 视图注入后初始化槽位并刷新一次显示（测试物品已加入模型）
-            if (m_view != null)
+            // 视图注入后初始化槽位并刷新一次显示
+            if (m_view != null && m_model != null)
             {
                 m_view.InitializeInventory(m_model.Capacity);
                 UpdateInventoryView();
@@ -100,30 +65,33 @@ namespace Inventory.controller
         }
 
         /// <summary>
-        /// 更新函数，处理输入检测
+        /// 清理控制器资源（解绑 Model 事件、清理模型）
         /// </summary>
-        private void Update()
+        public override void Cleanup()
         {
-            // 使用InputSystem检测快捷键
-            if (_inputActions.GamePlay.Inventory.triggered)
+            if (IsInitialized)
             {
-                GameEvents.TriggerMenuShow(UIType.Inventory, true);
+                // 取消订阅模型事件
+                if (m_model != null)
+                {
+                    m_model.OnInventoryChanged -= UpdateInventoryView;
+                    m_model.Cleanup();
+                    m_model = null;
+                }
+
+                base.Cleanup();
             }
         }
 
-        #endregion
-
-        #region 测试数据
-
         /// <summary>
-        /// 添加测试物品
+        /// 销毁时清理资源（兜底：确保 Model 事件解绑与视图解绑）
         /// </summary>
-        private void AddTestItems()
+        private void OnDestroy()
         {
-            // 添加测试物品
-            AddItem("health_potion", 5);
-            AddItem("sword", 1);
-            AddItem("gold_coin", 42);
+            Cleanup();
+
+            // 解绑视图
+            m_view?.UnbindController();
         }
 
         #endregion
@@ -219,7 +187,7 @@ namespace Inventory.controller
         /// </summary>
         private void UpdateInventoryView()
         {
-            // View尚未注入时跳过（AddTestItems在Awake阶段触发的事件）
+            // View尚未注入时跳过
             if (m_view == null) return;
 
             // 更新所有槽位

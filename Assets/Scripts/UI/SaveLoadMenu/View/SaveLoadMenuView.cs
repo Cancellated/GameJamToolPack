@@ -166,8 +166,7 @@ namespace MyGame.UI.SaveLoad.View
         }
 
         /// <summary>
-        /// 初始化视图
-        /// 重写基类Initialize方法，绑定按钮事件并初始化UI状态
+        /// 初始化视图：绑定按钮事件并初始化UI状态
         /// </summary>
         public override void Initialize()
         {
@@ -177,31 +176,37 @@ namespace MyGame.UI.SaveLoad.View
         }
 
         /// <summary>
-        /// 尝试自动绑定控制器
-        /// View和Controller挂载在同一GameObject上，使用GetComponent查找
+        /// 清理面板资源：解绑按钮事件、清理存档槽UI与Addressable句柄
+        /// </summary>
+        public override void Cleanup()
+        {
+            UnbindButtonEvents();
+            ClearSaveSlotUIs();
+            ClearLoadHandles();
+            base.Cleanup();
+        }
+
+        /// <summary>
+        /// 尝试自动绑定控制器（标准模式：同物体查找，初始化并注入视图）
         /// </summary>
         protected override void TryBindController()
         {
             if (TryGetComponent<SaveLoadMenuController>(out var controller))
             {
+                // 找到预挂的控制器：初始化、注入视图并绑定
+                controller.Initialize();
+                controller.SetView(this);
                 BindController(controller);
+                return;
             }
-        }
 
-        /// <summary>
-        /// 控制器绑定后的回调
-        /// </summary>
-        protected override void OnControllerBound()
-        {
-            base.OnControllerBound();
-        }
+            // 未预挂时创建（仅作为防御路径，prefab 上应始终预挂）
+            controller = gameObject.AddComponent<SaveLoadMenuController>();
+            controller.Initialize();
+            controller.SetView(this);
 
-        /// <summary>
-        /// 控制器解绑后的回调
-        /// </summary>
-        protected override void OnControllerUnbound()
-        {
-            base.OnControllerUnbound();
+            // 绑定控制器到视图
+            BindController(controller);
         }
 
         /// <summary>

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Fonts
+  m_EditorClassIdentifier: 
+  m_GroupName: Fonts
+  m_Data:
+    m_SerializedData: []
+  m_GUID: aa68b0ffefaf4ebaa0c723939b3fd74e
+  m_SerializeEntries:
+  - m_GUID: d33d670ee2985354a9fe1cc6ca3294b2
+    m_Address: Fonts/SourceHanSansSC
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 479e68dad06909d48b76cdd2ede0fc0b, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: fbf9ea021c044e0ea4605d7ba72f1686, type: 2}

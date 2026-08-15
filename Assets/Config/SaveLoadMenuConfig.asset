@@ -16,7 +16,7 @@ MonoBehaviour:
   AutoSaveInterval: 300
   MaxAutoSaveCount: 3
   MaxManualSaveCount: 10
-  SaveSlotPrefabPath: Prefabs/UI/SaveSlot
+  SaveSlotPrefabAddress: SaveSlotPrefab
   MenuAnimationDuration: 0.3
   SlotAnimationDuration: 0.2
   NewGameConfirmText: "\u786E\u5B9A\u8981\u521B\u5EFA\u65B0\u6E38\u620F\u5417\uFF1F\u8FD9\u5C06\u8986\u76D6\u5F53\u524D\u8FDB\u5EA6\u3002"

@@ -107,16 +107,6 @@ namespace MyGame.UI.SaveLoad.View
         }
         
         /// <summary>
-        /// 格式化日期时间（已直接在SaveData中格式化）
-        /// </summary>
-        /// <param name="timestamp">格式化的时间字符串</param>
-        /// <returns>格式化后的日期时间字符串</returns>
-        private string FormatDateTime(string timestamp)
-        {
-            return timestamp; // 已在SaveData中格式化
-        }
-        
-        /// <summary>
         /// 显示面板
         /// </summary>
         public override void Show()

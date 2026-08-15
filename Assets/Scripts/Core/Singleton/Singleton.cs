@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace MyGame
 {
@@ -21,17 +21,31 @@ namespace MyGame
         /// </summary>
         private static readonly object _lock = new();
 
+        /// <summary>
+        /// 主实例是否已销毁。
+        /// 销毁后禁止 Instance 再懒创建，避免在 OnDestroy（场景关闭/退出）期间
+        /// 生成新 GameObject 引发 "Some objects were not cleaned up" 警告。
+        /// </summary>
+        private static bool _destroyed;
+
         #endregion
 
         #region 属性
 
         /// <summary>
         /// 获取单例实例，若不存在则自动查找或创建。
+        /// 主实例已销毁或应用正在退出时返回 null（禁止在销毁阶段重新创建）。
         /// </summary>
         public static T Instance
         {
             get
             {
+                // 主实例已销毁或非运行状态下，禁止懒创建（防止在 OnDestroy 中产生新对象）
+                if (_destroyed || !Application.isPlaying)
+                {
+                    return null;
+                }
+
                 if (_instance == null)
                 {
                     lock (_lock)
@@ -73,6 +87,21 @@ namespace MyGame
                 Destroy(gameObject);
                 return;
             }   
+        }
+
+        /// <summary>
+        /// 主实例销毁时置位销毁标志并清空静态引用，禁止后续 Instance 访问再懒创建。
+        /// 【注意】子类若自定义 OnDestroy，必须在其中调用 base.OnDestroy()，
+        /// 否则 Unity 消息只调用最派生的 OnDestroy，本方法不会执行。
+        /// 重复副本实例被销毁时不会置位（_instance 仍指向主实例），不影响后续正常使用。
+        /// </summary>
+        protected virtual void OnDestroy()
+        {
+            if (_instance == this)
+            {
+                _destroyed = true;
+                _instance = null;
+            }
         }
 
         #endregion

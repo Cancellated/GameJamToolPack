@@ -12,7 +12,7 @@ namespace MyGame.UI
     /// 【使用规范】
     /// - Model不继承MonoBehaviour，由Controller通过 new() 创建
     /// - 若需要属性变更通知功能，请使用 ObservableModel 子类
-    /// - Initialize() 由 Controller 的 CreateAndInitializeModel() 通过反射调用
+    /// - Initialize() 由 Controller 的 CreateAndInitializeModel() 直接调用
     /// - Cleanup() 由 Controller 在清理时调用
     /// - Model不应持有View或Controller的引用
     /// </summary>
@@ -45,7 +45,7 @@ namespace MyGame.UI
         /// 初始化模型（双重检查，防止重复初始化）
         /// 
         /// 【使用规范】
-        /// - 由 Controller 的 CreateAndInitializeModel() 通过反射调用
+        /// - 由 Controller 的 CreateAndInitializeModel() 直接调用
         /// - 子类重写时应调用 base.Initialize() 以确保 IsInitialized 标志被正确设置
         /// - 子类重写时在此方法中加载数据（如从 PlayerPrefs、配置文件等）
         /// - 注意：base.Initialize() 使用 try-catch 包装，异常不会中断流程

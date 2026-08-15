@@ -1,19 +1,21 @@
 using UnityEngine;
 using Logger;
+using MyGame.UI;
 
 namespace MyGame.DevTool
 {
     /// <summary>
-    /// 调试控制台控制器，连接模型和视图，处理用户输入和命令执行
+    /// 调试控制台控制器，连接模型和视图，处理用户输入和命令执行。
+    /// 继承 BaseController 以遵循统一生命周期契约（Initialize/Cleanup）。
     /// </summary>
-    public class DebugConsoleController : MonoBehaviour
+    public class DebugConsoleController : BaseController
     {
         private const string LOG_MODULE = LogModules.DEBUGCONSOLE;
-        
+
         // 注入的依赖
         public DebugConsole view;
         private DebugCommandModel model;
-        
+
         /// <summary>
         /// 设置控制器的视图引用
         /// </summary>
@@ -22,32 +24,47 @@ namespace MyGame.DevTool
         {
             view = consoleView;
         }
-        
-        // 初始化
-        private void Awake()
+
+        /// <summary>
+        /// 初始化控制器（由 DebugConsole.TryBindController 调用）：创建命令模型
+        /// </summary>
+        public override void Initialize()
         {
-            // 创建命令模型实例
-            model = new DebugCommandModel();
-            model.InitializeCommands();
-            
-            // 绑定视图事件
-            if (view != null)
+            if (!IsInitialized)
             {
-                // 在现有系统中，需要手动处理命令提交
-                // 这里通过监听OnCommandEntered的调用来实现控制器的功能
-            }
-            else
-            {
-                Log.Error(LOG_MODULE, "未找到DebugConsoleView组件");
+                // 创建命令模型实例
+                model = new DebugCommandModel();
+                model.InitializeCommands();
+
+                base.Initialize();
             }
         }
-        
+
+        /// <summary>
+        /// 清理控制器资源
+        /// </summary>
+        public override void Cleanup()
+        {
+            if (IsInitialized)
+            {
+                model = null;
+                view = null;
+                base.Cleanup();
+            }
+        }
+
         /// <summary>
         /// 处理用户输入的命令
         /// </summary>
         /// <param name="commandText">命令文本</param>
         public void HandleCommand(string commandText)
         {
+            if (model == null)
+            {
+                Log.Error(LOG_MODULE, "命令模型未初始化");
+                return;
+            }
+
             if (model.ExecuteCommand(commandText))
             {
                 // 命令执行成功
@@ -63,7 +80,7 @@ namespace MyGame.DevTool
                 Log.Warning(LOG_MODULE, "未知命令: " + commandText);
             }
         }
-        
+
         /// <summary>
         /// 输出信息到控制台
         /// </summary>

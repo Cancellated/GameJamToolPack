@@ -510,6 +510,10 @@
       <HintPath>D:\unity\2022.3.58f1c1\Editor\Data\Managed\UnityEditor.Graphs.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEditor.Android.Extensions">
+      <HintPath>D:\unity\2022.3.58f1c1\Editor\Data\PlaybackEngines\AndroidPlayer\UnityEditor.Android.Extensions.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEditor.WindowsStandalone.Extensions">
       <HintPath>D:\unity\2022.3.58f1c1\Editor\Data\PlaybackEngines\WindowsStandaloneSupport\UnityEditor.WindowsStandalone.Extensions.dll</HintPath>
       <Private>False</Private>
@@ -538,16 +542,8 @@
       <HintPath>Library\PackageCache\com.unity.visualscripting@1.9.4\Editor\VisualScripting.Core\Dependencies\DotNetZip\Unity.VisualScripting.IonicZip.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="dnlib">
-      <HintPath>Library\PackageCache\com.code-philosophy.hybridclr@d505624c78\Plugins\dnlib.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Unity.VisualScripting.Antlr3.Runtime">
       <HintPath>Library\PackageCache\com.unity.visualscripting@1.9.4\Runtime\VisualScripting.Flow\Dependencies\NCalc\Unity.VisualScripting.Antlr3.Runtime.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="LZ4">
-      <HintPath>Library\PackageCache\com.code-philosophy.hybridclr@d505624c78\Plugins\LZ4.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.VisualScripting.TextureAssets">
@@ -556,6 +552,18 @@
     </Reference>
     <Reference Include="nunit.framework">
       <HintPath>Library\PackageCache\com.unity.ext.nunit@1.0.6\net35\unity-custom\nunit.framework.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Android.Types">
+      <HintPath>D:\unity\2022.3.58f1c1\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.Types.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Android.Gradle">
+      <HintPath>D:\unity\2022.3.58f1c1\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.Gradle.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Android.GradleProject">
+      <HintPath>D:\unity\2022.3.58f1c1\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.GradleProject.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="mscorlib">
@@ -1076,10 +1084,6 @@
       <Project>{A9C4B3D3-B16E-4DED-8B5C-BFA0FB5E026A}</Project>
       <Name>Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary</Name>
     </ProjectReference>
-    <ProjectReference Include="HybridCLR.Runtime.csproj">
-      <Project>{530A4168-C42B-D62B-6970-4D04E0F287BE}</Project>
-      <Name>HybridCLR.Runtime</Name>
-    </ProjectReference>
     <ProjectReference Include="Unity.RenderPipelines.Core.Runtime.csproj">
       <Project>{2892DA1A-3586-00F0-AAB8-B11D203495FF}</Project>
       <Name>Unity.RenderPipelines.Core.Runtime</Name>
@@ -1104,10 +1108,6 @@
       <Project>{9E1B3283-AD6A-6182-C13B-F0DB3DFF2EDF}</Project>
       <Name>Unity.ResourceManager</Name>
     </ProjectReference>
-    <ProjectReference Include="HybridCLR.Editor.csproj">
-      <Project>{2B87CEDA-EE7D-0D2C-3ADE-07873488603C}</Project>
-      <Name>HybridCLR.Editor</Name>
-    </ProjectReference>
     <ProjectReference Include="Unity.Timeline.Editor.csproj">
       <Project>{C6091AF5-F65C-7A38-8EC2-8C4AE1E888E2}</Project>
       <Name>Unity.Timeline.Editor</Name>
@@ -1120,13 +1120,13 @@
       <Project>{A2927405-D084-D048-4600-B959A98B7D83}</Project>
       <Name>Unity.VisualScripting.Shared.Editor</Name>
     </ProjectReference>
-    <ProjectReference Include="Unity.VisualStudio.Editor.csproj">
-      <Project>{416B8F0F-5EB5-D645-CB98-F5754ED72231}</Project>
-      <Name>Unity.VisualStudio.Editor</Name>
-    </ProjectReference>
     <ProjectReference Include="Unity.ShaderGraph.Editor.csproj">
       <Project>{4F539301-18F3-2504-38AF-C5142B201830}</Project>
       <Name>Unity.ShaderGraph.Editor</Name>
+    </ProjectReference>
+    <ProjectReference Include="Unity.VisualStudio.Editor.csproj">
+      <Project>{416B8F0F-5EB5-D645-CB98-F5754ED72231}</Project>
+      <Name>Unity.VisualStudio.Editor</Name>
     </ProjectReference>
     <ProjectReference Include="UnityEditor.UI.csproj">
       <Project>{997C8BC0-932D-7004-561A-66601BF09F9C}</Project>
