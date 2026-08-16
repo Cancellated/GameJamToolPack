@@ -1,42 +1,82 @@
-using UnityEngine;
 using Logger;
 using MyGame.UI;
 
 namespace MyGame.DevTool
 {
     /// <summary>
-    /// 调试控制台控制器，连接模型和视图，处理用户输入和命令执行。
-    /// 继承 BaseController 以遵循统一生命周期契约（Initialize/Cleanup）。
+    /// 调试控制台控制器：连接视图与命令注册表，处理输入、执行命令并按四态结果反馈。
+    /// 继承泛型 BaseController 以遵循统一生命周期契约（Initialize/Cleanup）。
     /// </summary>
-    public class DebugConsoleController : BaseController
+    public class DebugConsoleController : BaseController<DebugConsole, DebugCommandRegistry>
     {
         private const string LOG_MODULE = LogModules.DEBUGCONSOLE;
 
-        // 注入的依赖
-        public DebugConsole view;
-        private DebugCommandModel model;
+        private static DebugConsoleController s_instance;
 
         /// <summary>
-        /// 设置控制器的视图引用
+        /// 全局实例（业务系统可经 Instance.Registry 动态注册自定义调试命令）
         /// </summary>
-        /// <param name="consoleView">调试控制台视图实例</param>
-        public void SetView(DebugConsole consoleView)
+        public static DebugConsoleController Instance
         {
-            view = consoleView;
+            get { return s_instance; }
         }
 
         /// <summary>
-        /// 初始化控制器（由 DebugConsole.TryBindController 调用）：创建命令模型
+        /// 命令注册表（模型）；外部系统通过它注册/注销命令
+        /// </summary>
+        public DebugCommandRegistry Registry
+        {
+            get { return m_model; }
+        }
+
+        #region 生命周期
+
+        /// <summary>
+        /// 初始化控制器（由 DebugConsole.TryBindController 调用）：创建并初始化命令注册表
         /// </summary>
         public override void Initialize()
         {
             if (!IsInitialized)
             {
-                // 创建命令模型实例
-                model = new DebugCommandModel();
-                model.InitializeCommands();
+                // 创建注册表并初始化（内部完成静态命令扫描）
+                CreateAndInitializeModel();
 
                 base.Initialize();
+            }
+        }
+
+        /// <summary>
+        /// 初始化回调：登记静态实例，供业务系统访问注册表
+        /// </summary>
+        protected override void OnInitialize()
+        {
+            base.OnInitialize();
+            s_instance = this;
+        }
+
+        /// <summary>
+        /// 清理回调：清除静态实例，防止悬空引用
+        /// </summary>
+        protected override void OnCleanup()
+        {
+            base.OnCleanup();
+            if (s_instance == this)
+            {
+                s_instance = null;
+            }
+        }
+
+        /// <summary>
+        /// 对象销毁时清理资源（与 MainMenuController 等标准控制器对齐）
+        /// </summary>
+        private void OnDestroy()
+        {
+            Cleanup();
+
+            // 解绑视图
+            if (m_view != null)
+            {
+                m_view.UnbindController();
             }
         }
 
@@ -47,37 +87,67 @@ namespace MyGame.DevTool
         {
             if (IsInitialized)
             {
-                model = null;
-                view = null;
+                // 清理注册表（清空命令）
+                if (m_model != null)
+                {
+                    m_model.Cleanup();
+                    m_model = null;
+                }
+
                 base.Cleanup();
             }
         }
 
+        #endregion
+
+        #region 命令处理
+
         /// <summary>
-        /// 处理用户输入的命令
+        /// 处理用户输入的命令，按四态结果输出不同反馈：
+        /// Ok → 命令已自行输出（附带消息时补打印）；
+        /// NotFound → 未知命令提示；InvalidArgs → 参数错误 + 用法；Error → 执行失败。
         /// </summary>
-        /// <param name="commandText">命令文本</param>
+        /// <param name="commandText">整行命令文本</param>
         public void HandleCommand(string commandText)
         {
-            if (model == null)
+            if (m_model == null)
             {
-                Log.Error(LOG_MODULE, "命令模型未初始化");
+                Log.Error(LOG_MODULE, "命令注册表未初始化");
                 return;
             }
 
-            if (model.ExecuteCommand(commandText))
+            var context = new DebugCommandContext(this, m_model);
+            CommandResult result = m_model.Execute(commandText, context);
+
+            switch (result.Status)
             {
-                // 命令执行成功
-                Log.Info(LOG_MODULE, "执行命令: " + commandText);
-            }
-            else if (!string.IsNullOrEmpty(commandText))
-            {
-                // 命令不存在
-                if (view != null)
-                {
-                    view.Print("未知命令，输入 help 查看可用命令。");
-                }
-                Log.Warning(LOG_MODULE, "未知命令: " + commandText);
+                case CommandStatus.Ok:
+                    // 命令一般已通过上下文输出内容；仅当 Ok 附带消息时额外打印
+                    if (!string.IsNullOrEmpty(result.Message))
+                    {
+                        m_view?.Print(result.Message);
+                    }
+                    break;
+
+                case CommandStatus.NotFound:
+                    m_view?.Print($"未知命令: {result.Message}，输入 help 查看可用命令。");
+                    Log.Warning(LOG_MODULE, "未知命令: " + result.Message);
+                    break;
+
+                case CommandStatus.InvalidArgs:
+                    if (string.IsNullOrEmpty(result.Message))
+                    {
+                        m_view?.Print("参数错误，用法: " + result.Usage);
+                    }
+                    else
+                    {
+                        m_view?.Print($"参数错误: {result.Message}，用法: {result.Usage}");
+                    }
+                    break;
+
+                case CommandStatus.Error:
+                    m_view?.Print("执行命令失败: " + result.Message);
+                    break;
             }
         }
 
@@ -87,10 +157,23 @@ namespace MyGame.DevTool
         /// <param name="message">消息内容</param>
         public void PrintToConsole(string message)
         {
-            if (view != null)
+            if (m_view != null)
             {
-                view.Print(message);
+                m_view.Print(message);
             }
         }
+
+        /// <summary>
+        /// 清空控制台输出（clear 命令调用）
+        /// </summary>
+        public void ClearConsoleOutput()
+        {
+            if (m_view != null)
+            {
+                m_view.ClearOutput();
+            }
+        }
+
+        #endregion
     }
 }

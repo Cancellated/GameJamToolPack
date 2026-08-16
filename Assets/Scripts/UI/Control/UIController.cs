@@ -3,7 +3,6 @@ using MyGame.Managers;
 using MyGame.UI;
 using Logger;
 using UnityEngine;
-using MyGame.DevTool;
 
 namespace MyGame.UI.Control
 {
@@ -45,6 +44,11 @@ namespace MyGame.UI.Control
                     // 重新注册输入回调，确保使用正确的_inputActions
                     UnregisterInputCallbacks();
                     RegisterInputCallbacks();
+
+                    // 订阅UI显隐事件：暂停菜单显示期间需要单独保活 GamePlay.Pause 按键（见 OnMenuShow）
+                    // 先退订再订阅，保证幂等
+                    GameEvents.OnMenuShow -= OnMenuShow;
+                    GameEvents.OnMenuShow += OnMenuShow;
                 }
                 else
                 {
@@ -70,6 +74,9 @@ namespace MyGame.UI.Control
         {
             // 注销按键回调
             UnregisterInputCallbacks();
+
+            // 注销UI显隐事件监听（与 InitializeInputActionsCoroutine 中的订阅成对出现）
+            GameEvents.OnMenuShow -= OnMenuShow;
         }
         #endregion
 
@@ -158,11 +165,46 @@ namespace MyGame.UI.Control
             {
                 Log.Info(LOG_MODULE, "控制台按键被按下");
 
-                // 检查控制台当前状态并切换
-                bool isCurrentlyVisible = DebugConsole.Instance.IsVisible;
+                // 检查控制台当前状态并切换。
+                // 注意：与 Pause/Inventory 一致，必须经 UIManager.PanelMap 判空——
+                // DebugConsole.Instance 在面板尚未加载（Addressable 异步加载中、场景切换后）时为 null，
+                // 直接访问会空引用崩溃。
+                if (UIManager.Instance != null && UIManager.Instance.PanelMap.ContainsKey(UIType.Console))
+                {
+                    bool isCurrentlyVisible = UIManager.Instance.PanelMap[UIType.Console].IsVisible;
+                    // 触发控制台显示/隐藏事件，切换当前状态
+                    GameEvents.TriggerMenuShow(UIType.Console, !isCurrentlyVisible);
+                }
+                else
+                {
+                    // 控制台尚未加载/注册：默认请求显示，
+                    // UIManager.SetUIState 检测到面板缺失后会自动走 Addressable 加载路径
+                    GameEvents.TriggerMenuShow(UIType.Console, true);
+                }
+            }
+        }
 
-                // 触发控制台显示/隐藏事件，切换当前状态
-                GameEvents.TriggerMenuShow(UIType.Console, !isCurrentlyVisible);
+        /// <summary>
+        /// UI显隐事件响应：暂停菜单显示期间单独保活 GamePlay.Pause 按键。
+        /// 暂停菜单的 inputMode 为 UI 独占（显示时 SwitchToUIMode 会禁用整个 GamePlay 图），
+        /// 而关闭/恢复暂停依赖该按键（本类的回调 + GameManager 的轮询检测），
+        /// 因此需要像 InputManager.SwitchToUIMode 对 GamePlay.Console 的特判一样单独保持启用；
+        /// 面板隐藏后若仍处于 UI 模式则恢复禁用，避免暂停键在其他 UI 面板中生效。
+        /// </summary>
+        private void OnMenuShow(UIType state, bool show)
+        {
+            if (state != UIType.PauseMenu || _inputActions == null)
+                return;
+
+            if (show)
+            {
+                _inputActions.GamePlay.Pause.Enable();
+            }
+            else if (!_inputActions.GamePlay.enabled)
+            {
+                // 仅当 GamePlay 图未整体启用（仍处于 UI 模式）时才禁用；
+                // 若已由 UIManager 恢复为玩法模式，保持启用交由模式切换管理
+                _inputActions.GamePlay.Pause.Disable();
             }
         }
         #endregion

@@ -21,7 +21,7 @@ MonoBehaviour:
   - panelType: 7
     addressableAddress: Assets/Art Assets/UI/Debug/DebugConsole.prefab
     lazyLoad: 0
-    inputMode: 1
+    inputMode: 0
     hideOnShow: 
   - panelType: 5
     addressableAddress: Assets/Art Assets/UI/HUD/HUD.prefab
@@ -31,12 +31,12 @@ MonoBehaviour:
   - panelType: 3
     addressableAddress: Assets/Art Assets/UI/PauseMenu/PauseMenu.prefab
     lazyLoad: 1
-    inputMode: 2
+    inputMode: 1
     hideOnShow: 0100000006000000
   - panelType: 6
     addressableAddress: Assets/Art Assets/UI/Loading/LoadingScreen.prefab
     lazyLoad: 0
-    inputMode: 2
+    inputMode: 0
     hideOnShow: 
   - panelType: 4
     addressableAddress: Assets/Art Assets/UI/ResultPanel/ResultPanel.prefab

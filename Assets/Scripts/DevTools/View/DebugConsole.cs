@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using TMPro;
 using System.Linq;
@@ -41,7 +40,7 @@ namespace MyGame.DevTool
         public UnityEngine.UI.ScrollRect scrollRect;
 
         [Header("层级设置")]
-        [Tooltip("控制台Canvas的Sorting Order。值越高，显示层级越高，不易被其他UI遮挡。")]
+        [Tooltip("控制台自身Canvas的Sorting Order。值越高，显示层级越高，不易被其他UI遮挡。")]
         public int canvasSortingOrder = 900; // 设置较高的默认值，确保控制台显示在大多数UI上层
         #endregion
 
@@ -100,19 +99,21 @@ namespace MyGame.DevTool
         }
 
         /// <summary>
-        /// 设置Canvas的Sorting Order，确保控制台显示在其他UI上层
+        /// 设置控制台自身 Canvas 的 Sorting Order，确保控制台显示在其他 UI 上层。
+        /// 控制台使用独立 Canvas（overrideSorting），不再修改父级 GlobalUI 的排序层级，
+        /// 避免污染共享 Canvas 上其他面板（如场景预置的 Loading）的层级。
         /// </summary>
         private void SetCanvasSortingOrder()
         {
-            Canvas canvas = GetComponentInParent<Canvas>();
-            if (canvas != null)
+            // 操作自身 Canvas（prefab 已预挂；缺失时补挂，保证任何部署路径都自包含）
+            Canvas canvas = GetComponent<Canvas>();
+            if (canvas == null)
             {
-                canvas.sortingOrder = canvasSortingOrder;
+                canvas = gameObject.AddComponent<Canvas>();
+                canvas.overrideSorting = true;
             }
-            else
-            {
-                Log.Warning(LOG_MODULE, "未找到父级Canvas组件，无法设置排序层级。", this);
-            }
+
+            canvas.sortingOrder = canvasSortingOrder;
         }
 
         /// <summary>
@@ -128,9 +129,7 @@ namespace MyGame.DevTool
             // 绑定输入框事件处理器
             if (inputField != null)
             {
-                // 使用 onSubmit 而非 onEndEdit：项目使用 InputSystemUIInputModule，
                 // 按回车提交时走 submitHandler -> TMP_InputField.OnSubmit -> onSubmit，
-                // 而不会触发 onEndEdit（输入框不会自动失焦）。
                 inputField.onSubmit.AddListener(HandleInputSubmit);
                 // 设置输入行为模式为提交时结束编辑
                 inputField.lineType = TMP_InputField.LineType.SingleLine;
@@ -282,28 +281,17 @@ namespace MyGame.DevTool
         {
             DisplayText(msg);
         }
-        #endregion
-    }
 
-    /// <summary>
-    /// 调试命令特性，用于标记命令方法
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Method)]
-    public class DebugCommand : Attribute
-    {
-        /// <summary>命令名称</summary>
-        public string CommandName { get; }
-        
-        /// <summary>命令描述</summary> 
-        public string Description { get; set; }
-        
         /// <summary>
-        /// 创建调试命令特性
+        /// 清空控制台输出区（clear 命令调用）
         /// </summary>
-        /// <param name="name">命令名称</param>
-        public DebugCommand(string name)
+        public void ClearOutput()
         {
-            CommandName = name;
+            if (outputText != null)
+            {
+                outputText.text = "调试控制台已启动。输入 help 查看命令。";
+            }
         }
+        #endregion
     }
 }
