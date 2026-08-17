@@ -135,13 +135,18 @@ namespace MyGame.DevTool
                     break;
 
                 case CommandStatus.InvalidArgs:
+                    // Usage 为空（显式注册命令未填用法）时省略"用法:"部分，避免空洞文案
                     if (string.IsNullOrEmpty(result.Message))
                     {
-                        m_view?.Print("参数错误，用法: " + result.Usage);
+                        m_view?.Print(string.IsNullOrEmpty(result.Usage)
+                            ? "参数错误。"
+                            : "参数错误，用法: " + result.Usage);
                     }
                     else
                     {
-                        m_view?.Print($"参数错误: {result.Message}，用法: {result.Usage}");
+                        m_view?.Print(string.IsNullOrEmpty(result.Usage)
+                            ? "参数错误: " + result.Message
+                            : $"参数错误: {result.Message}，用法: {result.Usage}");
                     }
                     break;
 

@@ -145,6 +145,12 @@ namespace MyGame.DevTool
             }
 
             var tokens = Tokenize(input);
+            if (tokens == null)
+            {
+                // 引号未闭合：无法可靠划分命令与参数边界，直接拒绝执行
+                return CommandResult.InvalidArgs("", "引号未闭合");
+            }
+
             if (tokens.Count == 0)
             {
                 return CommandResult.Ok();
@@ -280,7 +286,8 @@ namespace MyGame.DevTool
         }
 
         /// <summary>
-        /// 输入分词：按空白拆分，双引号内的内容（含空格）视为一个参数，引号本身被剥离
+        /// 输入分词：按空白拆分，双引号内的内容（含空格）视为一个参数，引号本身被剥离。
+        /// 引号未闭合时返回 null（由 Execute 返回参数错误，不静默吞掉剩余输入）。
         /// </summary>
         private static List<string> Tokenize(string input)
         {
@@ -308,6 +315,11 @@ namespace MyGame.DevTool
                 {
                     sb.Append(ch);
                 }
+            }
+
+            if (inQuotes)
+            {
+                return null;
             }
 
             if (sb.Length > 0)

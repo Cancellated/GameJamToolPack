@@ -1,4 +1,5 @@
 using MyGame.Managers; // 引入游戏状态枚举
+using MyGame.Data;
 using System;
 using UnityEngine;
 using Logger;
@@ -163,7 +164,12 @@ namespace MyGame.Events
         /// </summary>
         public static event Action<string> OnAutoSave;
         
-        public static void TriggerAutoSave(string slotName = "AutoSave")
+        /// <summary>
+        /// 触发自动保存事件。
+        /// 槽位名称由调用方显式指定（如 SaveManager.DEFAULT_SAVE_SLOT），
+        /// 不再在事件层内置默认值，避免与存档管理器/菜单的槽名约定分叉。
+        /// </summary>
+        public static void TriggerAutoSave(string slotName)
         {
             Log.Info(module, $"触发自动保存事件: {slotName}");
             OnAutoSave?.Invoke(slotName);
@@ -178,6 +184,40 @@ namespace MyGame.Events
         {
             Log.Info(module, $"触发游戏数据加载完成事件: {slotName}");
             OnLoadGame?.Invoke(slotName);
+        }
+
+        /// <summary>
+        /// 游戏进度变更事件（关卡/任务/统计等进度被写入当前存档数据时触发）。
+        /// </summary>
+        public static event Action<GameProgress> OnGameProgressChanged;
+
+        public static void TriggerGameProgressChanged(GameProgress progress)
+        {
+            if (progress == null)
+            {
+                Log.Warning(module, "触发游戏进度变更事件失败：进度为空");
+                return;
+            }
+
+            OnGameProgressChanged?.Invoke(progress);
+        }
+
+        /// <summary>
+        /// 存档进度已加载事件。
+        /// 读取存档成功后触发，供关卡/任务/玩家等系统恢复游戏世界。
+        /// </summary>
+        public static event Action<GameProgress> OnGameProgressLoaded;
+
+        public static void TriggerGameProgressLoaded(GameProgress progress)
+        {
+            if (progress == null)
+            {
+                Log.Warning(module, "触发游戏进度加载事件失败：进度为空");
+                return;
+            }
+
+            Log.Info(module, "触发游戏进度加载事件");
+            OnGameProgressLoaded?.Invoke(progress);
         }
 
         /// <summary>

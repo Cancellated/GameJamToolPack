@@ -1,4 +1,5 @@
 using Logger;
+using MyGame.Managers;
 using MyGame.UI.MainMenu.Controller;
 using UnityEngine;
 using UnityEngine.UI;
@@ -77,6 +78,24 @@ namespace MyGame.UI.MainMenu.View
         /// </summary>
         public override void Show()
         {
+            // 从存档菜单等子界面返回主菜单时，确保 UI 输入图已启用，
+            // 避免关闭子界面后仍停留在 GamePlay 输入模式导致按钮无响应
+            if (InputManager.Instance != null)
+            {
+                InputManager.Instance.SwitchToUIMode();
+            }
+
+            // 幂等重绑按钮：面板 Hide→Show 后监听不会失效，也不会重复触发
+            EnsureButtonBindings();
+
+            // 明确恢复存档入口按钮，防止其在某些导航/输入流程后被置为不可交互
+            if (m_loadGameButton != null)
+            {
+                m_loadGameButton.interactable = true;
+                Log.Info(LOG_MODULE,
+                    $"加载游戏按钮状态: interactable={m_loadGameButton.interactable}");
+            }
+
             if (m_canvasGroup != null)
             {
                 m_canvasGroup.alpha = 1f;
@@ -112,8 +131,8 @@ namespace MyGame.UI.MainMenu.View
         /// </summary>
         public override void Initialize()
         {
-            // 绑定按钮事件（遵循基类规范：在 Initialize 中绑定，与 Cleanup 中的解绑成对）
-            BindButtonEvents();
+            // 绑定按钮事件（幂等：先解绑再绑定）
+            EnsureButtonBindings();
         }
 
         /// <summary>
@@ -132,13 +151,25 @@ namespace MyGame.UI.MainMenu.View
         #region 辅助方法
 
         /// <summary>
+        /// 幂等重绑按钮监听。
+        /// </summary>
+        private void EnsureButtonBindings()
+        {
+            UnbindButtonEvents();
+            BindButtonEvents();
+        }
+
+        /// <summary>
         /// 绑定按钮事件
         /// </summary>
         private void BindButtonEvents()
         {
             if (m_startGameButton != null)
                 m_startGameButton.onClick.AddListener(OnStartGameButtonClick);
-            
+
+            if (m_loadGameButton != null)
+                m_loadGameButton.onClick.AddListener(OnLoadGameButtonClick);
+
             if (m_settingsButton != null)
                 m_settingsButton.onClick.AddListener(OnSettingsButtonClick);
             
@@ -156,7 +187,10 @@ namespace MyGame.UI.MainMenu.View
         {
             if (m_startGameButton != null)
                 m_startGameButton.onClick.RemoveListener(OnStartGameButtonClick);
-            
+
+            if (m_loadGameButton != null)
+                m_loadGameButton.onClick.RemoveListener(OnLoadGameButtonClick);
+
             if (m_settingsButton != null)
                 m_settingsButton.onClick.RemoveListener(OnSettingsButtonClick);
             
@@ -179,6 +213,17 @@ namespace MyGame.UI.MainMenu.View
             if (m_controller != null)
             {
                 m_controller.OnStartGame();
+            }
+        }
+
+        /// <summary>
+        /// 加载游戏按钮点击事件：打开存档菜单
+        /// </summary>
+        private void OnLoadGameButtonClick()
+        {
+            if (m_controller != null)
+            {
+                m_controller.OnShowSaveLoad();
             }
         }
 

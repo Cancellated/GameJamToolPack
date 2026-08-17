@@ -44,11 +44,6 @@ namespace MyGame.UI.Control
                     // 重新注册输入回调，确保使用正确的_inputActions
                     UnregisterInputCallbacks();
                     RegisterInputCallbacks();
-
-                    // 订阅UI显隐事件：暂停菜单显示期间需要单独保活 GamePlay.Pause 按键（见 OnMenuShow）
-                    // 先退订再订阅，保证幂等
-                    GameEvents.OnMenuShow -= OnMenuShow;
-                    GameEvents.OnMenuShow += OnMenuShow;
                 }
                 else
                 {
@@ -66,8 +61,15 @@ namespace MyGame.UI.Control
 
         private void OnEnable()
         {
-            // 注册按键回调
+            // 注册按键回调（先退订保证幂等：OnEnable 与 OnDisable 成对出现）
+            UnregisterInputCallbacks();
             RegisterInputCallbacks();
+
+            // 订阅UI显隐事件：暂停菜单显示期间需要单独保活 GamePlay.Pause 按键（见 OnMenuShow）。
+            // 订阅放在 OnEnable（而非 Awake 协程）中，与 OnDisable 的退订严格成对，
+            // 保证对象经历 disable→enable 循环后订阅仍然有效
+            GameEvents.OnMenuShow -= OnMenuShow;
+            GameEvents.OnMenuShow += OnMenuShow;
         }
 
         private void OnDisable()
@@ -75,7 +77,7 @@ namespace MyGame.UI.Control
             // 注销按键回调
             UnregisterInputCallbacks();
 
-            // 注销UI显隐事件监听（与 InitializeInputActionsCoroutine 中的订阅成对出现）
+            // 注销UI显隐事件监听（与 OnEnable 中的订阅成对出现）
             GameEvents.OnMenuShow -= OnMenuShow;
         }
         #endregion
@@ -185,25 +187,44 @@ namespace MyGame.UI.Control
         }
 
         /// <summary>
-        /// UI显隐事件响应：暂停菜单显示期间单独保活 GamePlay.Pause 按键。
+        /// UI显隐事件响应：按暂停菜单的实际可见状态校准 GamePlay.Pause 按键。
         /// 暂停菜单的 inputMode 为 UI 独占（显示时 SwitchToUIMode 会禁用整个 GamePlay 图），
-        /// 而关闭/恢复暂停依赖该按键（本类的回调 + GameManager 的轮询检测），
-        /// 因此需要像 InputManager.SwitchToUIMode 对 GamePlay.Console 的特判一样单独保持启用；
-        /// 面板隐藏后若仍处于 UI 模式则恢复禁用，避免暂停键在其他 UI 面板中生效。
+        /// 而关闭/恢复暂停依赖该按键（本类的回调 + GameManager 的 performed 事件处理），
+        /// 因此需要像 InputManager.SwitchToUIMode 对 GamePlay.Console 的特判一样单独保持启用。
+        /// 校准覆盖两条隐藏路径：
+        ///   1. 正常关闭：OnMenuShow(PauseMenu, false)；
+        ///   2. 静默隐藏：其他面板（如结算面板）经 hideOnShow 互斥直接 Hide 暂停菜单而不发事件——
+        ///      因此在显示任意面板时按 PauseMenu.IsVisible 重新校准。
         /// </summary>
         private void OnMenuShow(UIType state, bool show)
         {
-            if (state != UIType.PauseMenu || _inputActions == null)
+            if (_inputActions == null)
                 return;
 
-            if (show)
+            if (show && state == UIType.PauseMenu)
             {
                 _inputActions.GamePlay.Pause.Enable();
+                return;
             }
-            else if (!_inputActions.GamePlay.enabled)
+
+            if (!show)
             {
-                // 仅当 GamePlay 图未整体启用（仍处于 UI 模式）时才禁用；
+                // 正常关闭路径：仅当 GamePlay 图未整体启用（仍处于 UI 模式）时才禁用；
                 // 若已由 UIManager 恢复为玩法模式，保持启用交由模式切换管理
+                if (state == UIType.PauseMenu && !_inputActions.GamePlay.enabled)
+                {
+                    _inputActions.GamePlay.Pause.Disable();
+                }
+                return;
+            }
+
+            // 显示其他面板（可能静默隐藏了暂停菜单）：按暂停菜单实际可见状态校准
+            var uiManager = UIManager.Instance;
+            bool pauseVisible = uiManager != null
+                && uiManager.PanelMap.TryGetValue(UIType.PauseMenu, out var pausePanel)
+                && pausePanel.IsVisible;
+            if (!pauseVisible && !_inputActions.GamePlay.enabled)
+            {
                 _inputActions.GamePlay.Pause.Disable();
             }
         }

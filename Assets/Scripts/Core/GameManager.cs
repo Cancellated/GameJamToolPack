@@ -1,4 +1,5 @@
 using MyGame.Events;
+using MyGame.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,6 +40,7 @@ namespace MyGame.Managers
             GameEvents.OnGamePause += PauseGame;
             GameEvents.OnGameResume += ResumeGame;
             GameEvents.OnGameOver += GameOver;
+            GameEvents.OnGameRestart += RestartGame;
         }
 
         /// <summary>
@@ -51,6 +53,13 @@ namespace MyGame.Managers
             GameEvents.OnGamePause -= PauseGame;
             GameEvents.OnGameResume -= ResumeGame;
             GameEvents.OnGameOver -= GameOver;
+            GameEvents.OnGameRestart -= RestartGame;
+
+            // 注销暂停按键事件（与 Start 中的订阅成对出现）
+            if (InputManager.Instance != null && InputManager.Instance.InputActions != null)
+            {
+                InputManager.Instance.InputActions.GamePlay.Pause.performed -= OnPausePerformed;
+            }
 
             // 通知基类置位销毁标志，禁止后续 Instance 懒创建
             base.OnDestroy();
@@ -62,22 +71,38 @@ namespace MyGame.Managers
         private void Start()
         {
             StartMenu();
+
+            // 订阅暂停按键事件（事件驱动，替代 Update 中每帧轮询 Pause.triggered）。
+            // Start 阶段所有 Awake 均已执行完毕，InputManager 的 InputActions 已就绪
+            if (InputManager.Instance != null && InputManager.Instance.InputActions != null)
+            {
+                InputManager.Instance.InputActions.GamePlay.Pause.performed += OnPausePerformed;
+            }
+            else
+            {
+                Log.Warning(LOG_MODULE, "InputManager 未就绪，暂停按键事件未订阅");
+            }
         }
 
-        private void Update()
+        /// <summary>
+        /// 暂停按键事件处理：在 Playing 与 Paused 状态间切换。
+        /// 注意：仅处理游戏状态，暂停菜单的显隐由 UIController 通过同一按键的
+        /// performed 回调经 GameEvents.TriggerMenuShow 处理，两者职责分离。
+        /// </summary>
+        private void OnPausePerformed(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
-            // 检测键盘ESC键和手柄Start键(在Inputsystem中配置的暂停键)
-            if (InputManager.Instance != null && InputManager.Instance.InputActions != null && 
-                InputManager.Instance.InputActions.GamePlay.Pause.triggered)
+            if (!context.performed)
             {
-                if (State == GameState.Playing)
-                {
-                    GameEvents.TriggerGamePause();
-                }
-                else if (State == GameState.Paused)
-                {
-                    GameEvents.TriggerGameResume();
-                }
+                return;
+            }
+
+            if (State == GameState.Playing)
+            {
+                GameEvents.TriggerGamePause();
+            }
+            else if (State == GameState.Paused)
+            {
+                GameEvents.TriggerGameResume();
             }
         }
         #endregion
@@ -115,7 +140,7 @@ namespace MyGame.Managers
                 [GameState.Menu] = new[] { GameState.Playing, GameState.Menu},
                 [GameState.Playing] = new[] { GameState.Paused, GameState.GameOver,GameState.Playing },
                 [GameState.Paused] = new[] { GameState.Playing, GameState.GameOver, GameState.Menu, GameState.Paused },
-                [GameState.GameOver] = new[] { GameState.Menu, GameState.GameOver }
+                [GameState.GameOver] = new[] { GameState.Menu, GameState.Playing, GameState.GameOver }
             };
 
             // 检查当前状态是否有合法的转换到下一个状态
@@ -173,6 +198,7 @@ namespace MyGame.Managers
 
         /// <summary>
         /// 游戏结束，进入GameOver状态。
+        /// 同时显示结算面板；SaveManager 通过 OnGameOver 事件执行自动存档。
         /// </summary>
         /// <param name="isWin">true为胜利，false为失败</param>
         public void GameOver(bool isWin)
@@ -181,7 +207,25 @@ namespace MyGame.Managers
                 return;
             Time.timeScale = 0f;
             Log.Info(LOG_MODULE, $"游戏结束，胜利：{isWin}", this);
-            // TODO: 显示结算界面等
+
+            // 进入结算流程：UIManager 根据 UIConfig 互斥配置隐藏 HUD/PauseMenu
+            GameEvents.TriggerMenuShow(UIType.ResultPanel, true);
+        }
+
+        /// <summary>
+        /// 重新开始：从结算状态回到 Playing，并关闭结算面板。
+        /// 各玩法系统应订阅 OnGameRestart 复位自身状态；
+        /// SaveManager 也会通过该事件重置内存中的本局进度。
+        /// </summary>
+        public void RestartGame()
+        {
+            if (!TryChangeState(GameState.Playing))
+                return;
+            Time.timeScale = 1f;
+            Log.Info(LOG_MODULE, "游戏重新开始", this);
+
+            // 关闭结算面板并恢复 HUD（由 UIManager.SetUIState(false) 统一处理）
+            GameEvents.TriggerMenuShow(UIType.ResultPanel, false);
         }
 
         #endregion

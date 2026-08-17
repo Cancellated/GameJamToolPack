@@ -14,11 +14,17 @@ namespace MyGame.Managers
 
         #region 属性
         /// <summary>
-        /// 全局唯一的InputActions实例
+        /// 全局唯一的InputActions实例。
+        /// 属性在首次访问时自举初始化，避免依赖 Awake 执行顺序：
+        /// 即使其它对象在其 Awake 之前访问，也能立即得到可用的输入实例。
         /// </summary>
         public GameControl InputActions
         {
-            get { return _inputActions; }
+            get
+            {
+                EnsureInitialized();
+                return _inputActions;
+            }
         }
         #endregion
 
@@ -26,10 +32,22 @@ namespace MyGame.Managers
         protected override void Awake()
         {
             base.Awake();
-            
+            EnsureInitialized();
+        }
+
+        /// <summary>
+        /// 创建并启用输入实例（幂等）。
+        /// </summary>
+        private void EnsureInitialized()
+        {
+            if (_inputActions != null)
+            {
+                return;
+            }
+
             // 创建InputActions实例
             _inputActions = new GameControl();
-            
+
             // 默认启用游戏玩法输入
             _inputActions.GamePlay.Enable();
         }

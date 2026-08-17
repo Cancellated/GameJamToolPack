@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 using System.Linq;
 using MyGame.Managers;
@@ -18,15 +19,6 @@ namespace MyGame.DevTool
         //最大日志保留数
         private const int MAX_LOG_LINES = 100;
 
-        private static DebugConsole s_instance;
-
-        /// <summary>
-        /// 静态实例，用于全局访问
-        /// </summary>
-        public static DebugConsole Instance
-        {
-            get { return s_instance; }
-        }
         #region UI引用
 
         [Header("UI组件引用")]
@@ -41,13 +33,13 @@ namespace MyGame.DevTool
 
         [Header("层级设置")]
         [Tooltip("控制台自身Canvas的Sorting Order。值越高，显示层级越高，不易被其他UI遮挡。")]
-        public int canvasSortingOrder = 900; // 设置较高的默认值，确保控制台显示在大多数UI上层
+        public int canvasSortingOrder = UISortingOrder.Console; // 默认值与层级常量统一，可在 Inspector 单独调整
         #endregion
 
         #region 生命周期函数
 
         /// <summary>
-        /// 初始化组件（仅注册静态实例与设置排序层级；输入框绑定见 Initialize）
+        /// 初始化组件（设置面板类型与排序层级；输入框绑定见 Initialize）
         /// </summary>
         protected override void Awake()
         {
@@ -56,23 +48,8 @@ namespace MyGame.DevTool
             
             base.Awake();
 
-            // 设置静态实例
-            s_instance = this;
-
             // 设置Canvas排序层级
             SetCanvasSortingOrder();
-        }
-
-        /// <summary>
-        /// 当对象被销毁时清理静态实例引用，防止悬空
-        /// </summary>
-        protected override void OnDestroy()
-        {
-            if (s_instance == this)
-            {
-                s_instance = null;
-            }
-            base.OnDestroy();
         }
 
         /// <summary>
@@ -100,7 +77,6 @@ namespace MyGame.DevTool
 
         /// <summary>
         /// 设置控制台自身 Canvas 的 Sorting Order，确保控制台显示在其他 UI 上层。
-        /// 控制台使用独立 Canvas（overrideSorting），不再修改父级 GlobalUI 的排序层级，
         /// 避免污染共享 Canvas 上其他面板（如场景预置的 Loading）的层级。
         /// </summary>
         private void SetCanvasSortingOrder()
@@ -125,6 +101,9 @@ namespace MyGame.DevTool
 
             if (outputText != null)
                 outputText.text = "调试控制台已启动。输入 help 查看命令。";
+
+            // 确保输出区具备可滚动布局：ContentSizeFitter + ScrollRect 内容/视口接线
+            EnsureOutputScrollLayout();
 
             // 绑定输入框事件处理器
             if (inputField != null)
@@ -241,6 +220,45 @@ namespace MyGame.DevTool
         }
 
         /// <summary>
+        /// 自愈输出区滚动布局：
+        /// - OutputText 顶部对齐、横向拉伸，纵向高度由文本撑开；
+        /// - 确保存在 ContentSizeFitter(Vertical=PreferredSize)；
+        /// - 校正 ScrollRect 的 content / viewport / 方向。
+        /// </summary>
+        private void EnsureOutputScrollLayout()
+        {
+            if (outputText == null)
+            {
+                return;
+            }
+
+            RectTransform textRect = outputText.rectTransform;
+            textRect.anchorMin = new Vector2(0f, 1f);
+            textRect.anchorMax = new Vector2(1f, 1f);
+            textRect.pivot = new Vector2(0.5f, 1f);
+            textRect.anchoredPosition = Vector2.zero;
+            textRect.sizeDelta = new Vector2(0f, 0f);
+
+            ContentSizeFitter fitter = outputText.GetComponent<ContentSizeFitter>();
+            if (fitter == null)
+            {
+                fitter = outputText.gameObject.AddComponent<ContentSizeFitter>();
+            }
+            fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            if (scrollRect == null)
+            {
+                return;
+            }
+
+            scrollRect.content = textRect;
+            scrollRect.viewport = (RectTransform)textRect.parent;
+            scrollRect.horizontal = false;
+            scrollRect.vertical = true;
+        }
+
+        /// <summary>
         /// 在控制台中显示文本消息
         /// </summary>
         /// <param name="msg">要显示的消息</param>
@@ -248,6 +266,9 @@ namespace MyGame.DevTool
         {
             if (outputText != null)
             {
+                // 记录当前是否贴底：用户上翻阅读历史日志时，新输出不应把滚动位置强行拉回底部
+                bool shouldStickToBottom = scrollRect == null || scrollRect.verticalNormalizedPosition <= 0.01f;
+
                 // 分割现有日志为行数组
                 var lines = outputText.text.Split('\n');
 
@@ -261,11 +282,15 @@ namespace MyGame.DevTool
                 // 添加新日志并重新组合
                 outputText.text = string.Join("\n", lines) + $"\n{msg}";
 
-                // 强制布局更新
+                // 同步刷新布局：OutputText 上挂有 ContentSizeFitter(Vertical=PreferredSize)，
+                // 需要强制重建布局后 ScrollRect 才能获得正确的内容高度
                 Canvas.ForceUpdateCanvases();
+                if (scrollRect != null && scrollRect.content != null)
+                {
+                    UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(scrollRect.content);
+                }
 
-                // 当Scroll Rect存在且内容需要滚动时执行滚动到底部
-                if (scrollRect != null && outputText.preferredHeight > outputText.rectTransform.rect.height)
+                if (scrollRect != null && shouldStickToBottom)
                 {
                     scrollRect.verticalNormalizedPosition = 0f; // 0f 表示滚动到底部
                 }

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MyGame.Data;
 
 namespace MyGame.UI.SaveLoad
 {
@@ -10,9 +11,10 @@ namespace MyGame.UI.SaveLoad
     public static class SaveLoadMenuConstants
     {
         /// <summary>
-        /// 自动存档槽名称
+        /// 自动存档槽名称（单一事实来源：委托 SaveManager.DEFAULT_SAVE_SLOT，
+        /// 避免菜单与存档管理器各写一份不一致的槽名）
         /// </summary>
-        public const string AUTO_SAVE_SLOT = "auto_save";
+        public const string AUTO_SAVE_SLOT = SaveManager.DEFAULT_SAVE_SLOT;
         
         /// <summary>
         /// 默认存档槽数量

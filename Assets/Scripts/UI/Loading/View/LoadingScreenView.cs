@@ -19,7 +19,7 @@ namespace MyGame.UI.Loading.View
 
         [Header("层级设置")]
         [Tooltip("加载界面Canvas的Sorting Order。值越高，显示层级越高，不易被其他UI遮挡。")]
-        public int canvasSortingOrder = 1000;
+        public int canvasSortingOrder = UISortingOrder.Loading; // 默认值与层级常量统一，可在 Inspector 单独调整
 
         /// <summary>
         /// 初始化加载界面

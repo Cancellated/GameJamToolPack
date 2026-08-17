@@ -18,6 +18,11 @@ MonoBehaviour:
     lazyLoad: 1
     inputMode: 1
     hideOnShow: 0500000006000000
+  - panelType: 2
+    addressableAddress: Assets/Art Assets/UI/SaveLoad/SaveLoadMenu.prefab
+    lazyLoad: 1
+    inputMode: 1
+    hideOnShow: 090000000a000000
   - panelType: 7
     addressableAddress: Assets/Art Assets/UI/Debug/DebugConsole.prefab
     lazyLoad: 0

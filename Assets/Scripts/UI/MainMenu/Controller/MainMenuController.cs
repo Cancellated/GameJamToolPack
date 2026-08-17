@@ -146,12 +146,22 @@ namespace MyGame.UI.MainMenu.Controller
         #region 公共方法
 
         /// <summary>
-        /// 开始游戏
+        /// 开始游戏（新游戏）。
+        /// 统一走 CreateNewGame 事件：SaveManager 会重置当前内存存档（不落盘），
+        /// 再由 HandleCreateNewGame 触发 GameStart 加载游戏场景。
         /// </summary>
         public void OnStartGame()
         {
-            // 触发游戏开始事件
-            GameEvents.TriggerGameStart();
+            GameEvents.TriggerCreateNewGame();
+        }
+
+        /// <summary>
+        /// 显示存档菜单
+        /// </summary>
+        public void OnShowSaveLoad()
+        {
+            // UIConfig 中 SaveLoadMenu 的 hideOnShow 配置会负责隐藏主菜单并切换 UI 输入模式
+            GameEvents.TriggerMenuShow(UIType.SaveLoadMenu, true);
         }
 
         /// <summary>

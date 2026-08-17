@@ -32,6 +32,8 @@ namespace Logger
         public const string GAMEDATA = "GameData";
         public const string SAVE = "Save";
         public const string SAVELOAD = "SaveLoad";
+        public const string SAVESYSTEM = "SaveSystem";
+        public const string SAVEMANAGER = "SaveManager";
 
         // 调试模块
         public const string DEVTOOLS = "DevTools";

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using MyGame.Data;
+using MyGame.Managers;
 using MyGame.UI.SaveLoad.View;
 
 namespace MyGame.UI.SaveLoad.View
@@ -31,7 +32,7 @@ namespace MyGame.UI.SaveLoad.View
             // 设置初始标题
             if (_menuTitleText != null)
             {
-                _menuTitleText.text = "存档/读档菜单";
+                _menuTitleText.text = "选择存档";
             }
             
             // 初始化选中信息文本
@@ -56,8 +57,10 @@ namespace MyGame.UI.SaveLoad.View
         /// 更新选中存档信息显示
         /// 通过 Controller 查询方法获取数据，不直接访问Model
         /// </summary>
-        private void UpdateSelectedSlotInfo()
+        protected override void UpdateSelectedSlotInfo()
         {
+            base.UpdateSelectedSlotInfo();
+
             if (_selectedSlotInfoText == null || m_controller == null)
                 return;
 
@@ -93,6 +96,7 @@ namespace MyGame.UI.SaveLoad.View
                 // 添加游戏进度信息
                 if (selectedSlotInfo.SaveData.gameProgress != null)
                 {
+                    selectedSlotInfo.SaveData.gameProgress.EnsureInitialized();
                     info += $"当前关卡：{selectedSlotInfo.SaveData.gameProgress.currentLevel}\n";
                     info += $"已完成关卡：{selectedSlotInfo.SaveData.gameProgress.completedLevels.Count}\n";
                     info += $"活跃任务：{selectedSlotInfo.SaveData.gameProgress.activeQuests.Count}\n";
@@ -111,10 +115,28 @@ namespace MyGame.UI.SaveLoad.View
         /// </summary>
         public override void Show()
         {
+            // UIManager 直接调用 panel.Show()，不会经过 Controller.Show()；
+            // 这里在显示前刷新槽位与选中数据，保证打开菜单时列表是最新的
+            if (m_controller != null)
+            {
+                m_controller.RefreshSaveSlots();
+            }
+
+            // 保证 UI 输入图（Esc/Cancel）启用：
+            // 正常路径由 UIManager 根据 UIConfig 切换，这里兜底处理直接 Show 或配置缺失的情况
+            if (InputManager.Instance != null)
+            {
+                InputManager.Instance.SwitchToUIMode();
+            }
+
+            // 每次显示前幂等重绑按钮并订阅 Cancel，防止 Hide→Show 后交互失效
+            EnsureInteractionBindings();
+
             base.Show();
-            
-            // 隐藏存档选项菜单
+
+            // 隐藏存档选项菜单与确认弹窗
             HideSaveOptionsMenu();
+            HideConfirmationDialog();
         }
         
         /// <summary>
@@ -124,109 +146,9 @@ namespace MyGame.UI.SaveLoad.View
         {
             base.Hide();
             
-            // 隐藏存档选项菜单
+            // 隐藏存档选项菜单与确认弹窗
             HideSaveOptionsMenu();
-        }
-    }
-    
-    /// <summary>
-    /// 具体的存档槽UI实现
-    /// </summary>
-    public class SaveSlotUIImplementation : SaveSlotUI
-    {
-        [SerializeField]
-        private TextMeshProUGUI _slotNameText;
-        
-        [SerializeField]
-        private TextMeshProUGUI _saveTimeText;
-        
-        [SerializeField]
-        private TextMeshProUGUI _gameProgressText;
-        
-        [SerializeField]
-        private Image _highlightImage;
-        
-        [SerializeField]
-        private Button _slotButton;
-        
-        
-        /// <summary>
-        /// 初始化存档槽UI
-        /// </summary>
-        /// <param name="slotInfo">存档槽信息</param>
-        /// <param name="view">视图引用</param>
-        public override void Initialize(SaveSlotInfo slotInfo, SaveLoadMenuView view)
-        {
-            base.Initialize(slotInfo, view);
-            
-            // 设置存档槽名称
-            if (_slotNameText != null)
-            {
-                _slotNameText.text = slotInfo.SlotName;
-            }
-            
-            // 注册点击事件
-            if (_slotButton != null)
-            {
-                _slotButton.onClick.RemoveAllListeners();
-                _slotButton.onClick.AddListener(HandleSlotButtonClick);
-            }
-            
-            // 更新高亮状态
-            UpdateHighlight();
-        }
-        
-        /// <summary>
-        /// 更新显示内容
-        /// </summary>
-        public override void UpdateDisplay()
-        {
-            // 设置存档时间
-            if (_saveTimeText != null)
-            {
-                if (_slotInfo.SaveData != null)
-                {
-                    _saveTimeText.text = _slotInfo.SaveData.saveTime;
-                }
-                else
-                {
-                    _saveTimeText.text = "空存档槽";
-                }
-            }
-            
-            // 设置游戏进度
-            if (_gameProgressText != null)
-            {
-                if (_slotInfo.SaveData != null && _slotInfo.SaveData.gameProgress != null)
-                {
-                    _gameProgressText.text = $"关卡：{_slotInfo.SaveData.gameProgress.currentLevel}";
-                }
-                else
-                {
-                    _gameProgressText.text = "";
-                }
-            }
-        }
-        
-        /// <summary>
-        /// 设置存档槽是否被选中
-        /// </summary>
-        /// <param name="selected">是否选中</param>
-        public override void SetSelected(bool selected)
-        {
-            _isSelected = selected;
-            UpdateHighlight();
-        }
-        
-        /// <summary>
-        /// 更新高亮显示
-        /// </summary>
-        protected override void UpdateHighlight()
-        {
-            if (_highlightImage != null)
-            {
-                _highlightImage.enabled = _isSelected;
-            }
+            HideConfirmationDialog();
         }
     }
 }

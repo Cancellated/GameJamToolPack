@@ -60,7 +60,6 @@
     <Analyzer Include="D:\unity\2022.3.58f1c1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\GameData\SaveSystem\ISaveSystem.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\Model\InventoryItem.cs" />
     <Compile Include="Assets\Scripts\UI\SaveLoadMenu\Model\SaveLoadMenuConfig.cs" />
     <Compile Include="Assets\Scripts\UI\About\Controller\AboutPanelController.cs" />
@@ -68,9 +67,9 @@
     <Compile Include="Assets\Scripts\DevTools\Model\DebugCommandParameter.cs" />
     <Compile Include="Assets\Scripts\DevTools\Model\DebugCommandRegistry.cs" />
     <Compile Include="Assets\Scripts\UI\Components\ToggleSwitch\ToggleSwitch.cs" />
-    <Compile Include="Assets\Scripts\GameData\DataModels\GameSettings.cs" />
     <Compile Include="Assets\Scripts\DevTools\Model\DebugCommandAttribute.cs" />
     <Compile Include="Assets\Scripts\UI\SaveLoadMenu\Model\SaveLoadMenuConstants.cs" />
+    <Compile Include="Assets\Scripts\SaveLoad\DataModels\GameProgress.cs" />
     <Compile Include="Assets\Scripts\UI\Settings\Model\SettingsModel.cs" />
     <Compile Include="Assets\Scripts\DevTools\Model\DebugCommandInfo.cs" />
     <Compile Include="Assets\Scripts\UI\Core\SceneLoadingController.cs" />
@@ -82,6 +81,7 @@
     <Compile Include="Assets\Scripts\DevTools\Model\CommandResult.cs" />
     <Compile Include="Assets\Scripts\UI\About\View\AboutPanelView.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\Model\ItemDatabase.cs" />
+    <Compile Include="Assets\Scripts\Core\ManagersBootstrap.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\View\InventorySlot.cs" />
     <Compile Include="Assets\Scripts\Core\Singleton\Singleton.cs" />
     <Compile Include="Assets\Scripts\UI\Settings\View\Components\BaseSettingsComponent.cs" />
@@ -97,21 +97,21 @@
     <Compile Include="Assets\Scripts\DevTools\Commands\GameplayCommands.cs" />
     <Compile Include="Assets\Scripts\UI\Core\UIType.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\Controller\InventoryController.cs" />
+    <Compile Include="Assets\Scripts\SaveLoad\Manager\SaveManager.cs" />
     <Compile Include="Assets\Scripts\UI\MainMenu\View\MainMenuView.cs" />
     <Compile Include="Assets\Scripts\UI\ResultPanel\Controller\ResultPanelController.cs" />
     <Compile Include="Assets\Scripts\UI\Core\Config\UIConfig.cs" />
     <Compile Include="Assets\Scripts\Core\Events\GameEvents.cs" />
-    <Compile Include="Assets\Scripts\GameData\SaveSystem\JsonSaveSystem.cs" />
+    <Compile Include="Assets\Scripts\SaveLoad\SaveSystem\ISaveSystem.cs" />
     <Compile Include="Assets\Scripts\UI\Core\BaseMVC\BaseModel.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\Controller\HUDController.cs" />
     <Compile Include="Assets\Scripts\UI\SaveLoadMenu\View\SaveLoadMenuView.cs" />
     <Compile Include="Assets\Scripts\DevTools\Commands\CoreCommands.cs" />
     <Compile Include="Assets\Scripts\UI\PauseMenu\View\PauseMenuView.cs" />
-    <Compile Include="Assets\Scripts\GameData\Manager\SaveManager.cs" />
     <Compile Include="Assets\Scripts\Core\Utils\Utils.cs" />
     <Compile Include="Assets\Scripts\DevTools\Model\DebugCommandContext.cs" />
-    <Compile Include="Assets\Scripts\GameData\DataModels\GameProgress.cs" />
     <Compile Include="Assets\Scripts\UI\Core\BaseMVC\BaseController.cs" />
+    <Compile Include="Assets\Scripts\SaveLoad\SaveSystem\JsonSaveSystem.cs" />
     <Compile Include="Assets\Scripts\UI\Loading\Controller\LoadingScreenController.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\View\InventoryView.cs" />
     <Compile Include="Assets\Scripts\UI\Loading\View\LoadingScreenView.cs" />
@@ -119,19 +119,22 @@
     <Compile Include="Assets\Scripts\UI\ResultPanel\View\ResultPanelView.cs" />
     <Compile Include="Assets\Scripts\DevTools\View\DebugConsole.cs" />
     <Compile Include="Assets\Scripts\Core\GameManager.cs" />
+    <Compile Include="Assets\Scripts\SaveLoad\DataModels\GameSettings.cs" />
     <Compile Include="Assets\Scripts\UI\SaveLoadMenu\Model\SaveLoadMenuModel.cs" />
+    <Compile Include="Assets\Scripts\UI\Core\UISortingOrder.cs" />
     <Compile Include="Assets\Scripts\UI\About\Model\AboutModel.cs" />
     <Compile Include="Assets\Settings\Input System\GameControl.cs" />
     <Compile Include="Assets\Scripts\UI\SaveLoadMenu\Controller\SaveLoadMenuController.cs" />
+    <Compile Include="Assets\Scripts\UI\SaveLoadMenu\View\SaveSlotUIImplementation.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\View\HUDView.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\Model\ItemData.cs" />
     <Compile Include="Assets\Scripts\UI\Settings\View\SettingsPanelView.cs" />
     <Compile Include="Assets\Scripts\UI\Components\SettingSlider\SettingSliderComponent.cs" />
     <Compile Include="Assets\Scripts\Core\Scene\SceneSwitcher.cs" />
     <Compile Include="Assets\Scripts\UI\Core\UIManager.cs" />
-    <Compile Include="Assets\Scripts\GameData\DataModels\SaveData.cs" />
-    <Compile Include="Assets\Scripts\UI\SaveLoadMenu\Events\SaveLoadMenuEvents.cs" />
+    <Compile Include="Assets\Scripts\UI\SaveLoadMenu\View\RuntimeSaveSlotUI.cs" />
     <Compile Include="Assets\Scripts\UI\ResultPanel\Model\ResultPanelModel.cs" />
+    <Compile Include="Assets\Scripts\SaveLoad\DataModels\SaveData.cs" />
     <Compile Include="Assets\Scripts\UI\Settings\View\Components\GraphicsSettingsComponent.cs" />
     <Compile Include="Assets\Scripts\UI\SaveLoadMenu\View\SaveLoadMenuPanel.cs" />
     <Compile Include="Assets\Scripts\UI\Core\BaseMVC\BaseView.cs" />

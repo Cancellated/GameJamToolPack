@@ -358,7 +358,12 @@ namespace MyGame.UI
                 onComplete?.Invoke();
                 yield break;
             }
-            
+
+            // 淡出开始就立即关闭交互与射线阻挡：
+            // 若等到动画结束才关闭，淡出期间本面板仍会挡住下层按钮（如返回主菜单后的加载按钮）
+            m_canvasGroup.interactable = false;
+            m_canvasGroup.blocksRaycasts = false;
+
             float elapsedTime = 0f;
             float startAlpha = m_canvasGroup.alpha;
             

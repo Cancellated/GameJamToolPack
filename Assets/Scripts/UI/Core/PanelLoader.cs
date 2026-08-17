@@ -229,23 +229,23 @@ namespace MyGame.UI.Core
         }
         
         /// <summary>
-        /// 设置UI面板的排序层级
-        /// 确保重要的UI元素（如加载界面和控制台）显示在正确的层级
+        /// 设置UI面板的排序层级。
+        /// 层级数值统一取自 UISortingOrder 常量（单一事实来源），
+        /// 与各面板 canvasSortingOrder 字段的默认值保持一致。
         /// </summary>
         /// <param name="panelType">面板类型</param>
         /// <param name="panelTransform">面板的Transform组件</param>
         private void SetPanelSortingOrder(UIType panelType, Transform panelTransform)
         {
-
             // 根据面板类型设置排序层级
             int sortingOrder = panelType switch
             {
-                UIType.Loading => 1000,// 加载界面应该在最顶层
-                UIType.Console => 900,// 调试控制台也应该在较高层级，但比加载界面低
-                _ => 10,// 普通UI面板使用默认层级
+                UIType.Loading => UISortingOrder.Loading,// 加载界面应该在最顶层
+                UIType.Console => UISortingOrder.Console,// 调试控制台也应该在较高层级，但比加载界面低
+                _ => UISortingOrder.Default,// 普通UI面板使用默认层级
             };
 
-            // 创建或获取Sorting Group组件来管理排序
+            // 创建或获取面板自身的Canvas组件来管理排序
             if (!panelTransform.TryGetComponent<Canvas>(out var canvas))
             {
                 canvas = panelTransform.gameObject.AddComponent<Canvas>();
