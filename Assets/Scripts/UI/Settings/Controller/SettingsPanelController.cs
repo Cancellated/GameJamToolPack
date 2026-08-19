@@ -1,6 +1,8 @@
 using System;
 using UnityEngine;
 using Logger;
+using MyGame.Events;
+using MyGame.UI;
 using MyGame.UI.Settings.Model;
 using MyGame.UI.Settings.View;
 using System.Collections.Generic;
@@ -123,7 +125,15 @@ namespace MyGame.UI.Settings.Controller
         /// <param name="propertyName">变化的属性名称</param>
         private void HandleModelPropertyChanged(string propertyName)
         {
-            Log.Info(LOG_MODULE, "检测到设置模型属性变化: " + propertyName);
+            Log.InfoWithCooldown(LOG_MODULE, "检测到设置模型属性变化: " + propertyName,
+                "settings_model_property_" + propertyName, 1f);
+
+            // 脏状态变化不需要刷新所有设置组件
+            if (propertyName == nameof(SettingsModel.HasUnsavedChanges))
+            {
+                return;
+            }
+
             UpdateViewWithCurrentSettings();
         }
 
@@ -149,7 +159,7 @@ namespace MyGame.UI.Settings.Controller
                 // 检查值是否真正改变
                 if (isValueChanged(currentValue, newValue))
                 {
-                    Log.Info(LOG_MODULE, logMessage);
+                    Log.InfoWithCooldown(LOG_MODULE, logMessage, "settings_update_" + logMessage, 1f);
                     
                     // 如果提供了调试日志格式化函数，则记录调试日志
                     if (debugLogFormat != null)
@@ -282,35 +292,86 @@ namespace MyGame.UI.Settings.Controller
         /// <summary>
         /// 应用当前设置
         /// </summary>
-        public void ApplySettings()
+        public bool ApplySettings()
         {
             Log.Info(LOG_MODULE, "应用设置");
             if (m_model != null)
             {
                 m_model.ApplySettings();
                 Log.DebugLog(LOG_MODULE, "设置已成功应用");
+                return true;
             }
-            else
-            {
-                Log.Error(LOG_MODULE, "设置模型为空，无法应用设置");
-            }
+
+            Log.Error(LOG_MODULE, "设置模型为空，无法应用设置");
+            return false;
         }
 
         /// <summary>
         /// 保存当前设置
         /// </summary>
-        public void SaveSettings()
+        public bool SaveSettings()
         {
             Log.Info(LOG_MODULE, "保存设置");
             if (m_model != null)
             {
                 m_model.SaveSettings();
                 Log.DebugLog(LOG_MODULE, "设置已成功保存");
+                return true;
             }
-            else
+
+            Log.Error(LOG_MODULE, "设置模型为空，无法保存设置");
+            return false;
+        }
+
+        /// <summary>
+        /// 是否存在尚未保存的设置修改。
+        /// </summary>
+        public bool HasUnsavedChanges()
+        {
+            return m_model != null && m_model.HasUnsavedChanges;
+        }
+
+        /// <summary>
+        /// 尝试返回主菜单：有未保存修改时由 View 弹出确认，无修改时直接退出。
+        /// </summary>
+        public void RequestBackToMainMenu()
+        {
+            if (HasUnsavedChanges())
             {
-                Log.Error(LOG_MODULE, "设置模型为空，无法保存设置");
+                m_view?.ShowUnsavedConfirmDialog();
+                return;
             }
+
+            ExitToMainMenu();
+        }
+
+        /// <summary>
+        /// 放弃未保存修改并返回主菜单。
+        /// </summary>
+        public void DiscardChangesAndExit()
+        {
+            m_model?.ReloadFromPlayerPrefs();
+            // 如果用户曾点过“应用”，需要把已应用但未保存的修改回滚到已保存值
+            m_model?.ApplySettings();
+            m_view?.HideUnsavedConfirmDialog();
+            ExitToMainMenu();
+        }
+
+        /// <summary>
+        /// 取消退出，留在设置面板。
+        /// </summary>
+        public void CancelExit()
+        {
+            m_view?.HideUnsavedConfirmDialog();
+        }
+
+        /// <summary>
+        /// 返回主菜单：走 UIManager 统一调度，保证 currentState / 输入模式 / 主菜单交互同步。
+        /// </summary>
+        private void ExitToMainMenu()
+        {
+            GameEvents.TriggerMenuShow(UIType.SettingsPanel, false);
+            GameEvents.TriggerMenuShow(UIType.MainMenu, true);
         }
 
         #endregion
@@ -428,6 +489,20 @@ namespace MyGame.UI.Settings.Controller
                 Log.Error(LOG_MODULE, "设置模型为空，返回默认分辨率索引");
                 return 0;
             }
+        }
+
+        /// <summary>
+        /// 获取Y轴反转状态
+        /// </summary>
+        public bool GetInvertYAxis()
+        {
+            if (m_model != null)
+            {
+                return m_model.InvertYAxis;
+            }
+
+            Log.Error(LOG_MODULE, "设置模型为空，返回默认Y轴反转状态");
+            return false;
         }
 
         /// <summary>

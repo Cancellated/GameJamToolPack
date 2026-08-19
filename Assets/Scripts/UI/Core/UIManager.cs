@@ -264,6 +264,18 @@ namespace MyGame.UI
         }
 
         /// <summary>
+        /// 只切换指定面板 CanvasGroup 的可交互性，不改变其显隐。
+        /// 用于子界面打开时保留下层面板作为背景但禁止点击。
+        /// </summary>
+        public void SetPanelInteractable(UIType panelType, bool interactable)
+        {
+            if (PanelMap.TryGetValue(panelType, out IUIPanel panel) && panel != null)
+            {
+                panel.SetInteractable(interactable);
+            }
+        }
+
+        /// <summary>
         /// 设置UI状态并处理互斥关系（互斥名单由 UIConfig 数据化驱动，替代原 switch 特判）
         /// </summary>
         internal void SetUIState(UIType state, bool show)

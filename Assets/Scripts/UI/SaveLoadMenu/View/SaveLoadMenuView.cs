@@ -1113,6 +1113,30 @@ namespace MyGame.UI.SaveLoad.View
         }
 
         /// <summary>
+        /// 只切换主菜单 CanvasGroup 的可交互性，不隐藏主菜单。
+        /// 主菜单保持可见作为背景，避免打开/关闭存档菜单时出现空白真空期。
+        /// </summary>
+        protected void SetMainMenuInteractable(bool interactable)
+        {
+            UIManager uiManager = UIManager.Instance;
+            if (uiManager == null || uiManager.PanelMap == null)
+            {
+                return;
+            }
+
+            if (!uiManager.PanelMap.TryGetValue(UIType.MainMenu, out IUIPanel mainMenuPanel) || mainMenuPanel == null)
+            {
+                return;
+            }
+
+            // 仅当主菜单当前可见时才切换，避免把隐藏面板改成透明但阻挡射线
+            if (mainMenuPanel.IsVisible)
+            {
+                mainMenuPanel.SetInteractable(interactable);
+            }
+        }
+
+        /// <summary>
         /// 退订 InputSystem UI.Cancel 输入（幂等）。
         /// </summary>
         private void TryUnsubscribeCancelInput()

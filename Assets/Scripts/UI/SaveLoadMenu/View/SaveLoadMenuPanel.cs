@@ -89,9 +89,9 @@ namespace MyGame.UI.SaveLoad.View
             // 显示选中的存档信息
             if (selectedSlotInfo != null && selectedSlotInfo.SaveData != null)
             {
-                string info = $"选中存档：{selectedSlotInfo.SlotName}\n";
-                info += $"存档时间：{selectedSlotInfo.SaveData.saveTime}\n";
-                info += $"游戏版本：{selectedSlotInfo.SaveData.version}\n";
+                string info = $"选中存档：{selectedSlotInfo.DisplayName}\n";
+                info += $"存档时间：{selectedSlotInfo.LastModified}\n";
+                info += $"游戏版本：{selectedSlotInfo.Version}\n";
 
                 // 添加游戏进度信息
                 if (selectedSlotInfo.SaveData.gameProgress != null)
@@ -132,6 +132,9 @@ namespace MyGame.UI.SaveLoad.View
             // 每次显示前幂等重绑按钮并订阅 Cancel，防止 Hide→Show 后交互失效
             EnsureInteractionBindings();
 
+            // 主菜单保持可见作为背景，只关闭其交互，避免界面切换出现空白
+            SetMainMenuInteractable(false);
+
             base.Show();
 
             // 隐藏存档选项菜单与确认弹窗
@@ -144,6 +147,9 @@ namespace MyGame.UI.SaveLoad.View
         /// </summary>
         public override void Hide()
         {
+            // 关闭存档菜单时先恢复主菜单交互，主菜单全程未隐藏，因此没有空白真空期
+            SetMainMenuInteractable(true);
+
             base.Hide();
             
             // 隐藏存档选项菜单与确认弹窗

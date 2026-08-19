@@ -1,4 +1,5 @@
 using Logger;
+using MyGame.Audio;
 using MyGame.Data;
 using MyGame.DevTools;
 using MyGame.Managers;
@@ -32,6 +33,7 @@ namespace MyGame
             Ensure<PanelLoader>();
             Ensure<SceneSwitcher>();
             Ensure<UIController>();
+            Ensure<AudioManager>();
             Ensure<AudioListenerManager>();
             Ensure<SceneLoadingController>();
             Ensure<SaveManager>();

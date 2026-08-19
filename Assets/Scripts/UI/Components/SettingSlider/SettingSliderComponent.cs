@@ -107,6 +107,24 @@ namespace MyGame.UI.Components.SettingSlider
             }
 
             UpdatePercentageText(value);
+            OnValueChanged?.Invoke(value);
+        }
+
+        /// <summary>
+        /// 设置滑块值并更新 UI，但不触发 OnValueChanged 事件。
+        /// 供设置面板初始化/回显使用，避免把“回显”误判成用户修改。
+        /// </summary>
+        public void SetValueWithoutNotify(float value)
+        {
+            value = Mathf.Clamp01(value);
+            m_currentValue = value;
+
+            if (m_slider != null)
+            {
+                m_slider.SetValueWithoutNotify(value);
+            }
+
+            UpdatePercentageText(value);
         }
 
         /// <summary>

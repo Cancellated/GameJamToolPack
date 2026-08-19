@@ -177,6 +177,19 @@ namespace MyGame.UI
                 }));
             }
         }
+
+        /// <summary>
+        /// 只切换 CanvasGroup 的可交互性，不改变 alpha、激活状态或 IsVisible。
+        /// 用于子界面打开时保留下层面板作为背景，同时暂时禁止其接收输入。
+        /// </summary>
+        public virtual void SetInteractable(bool interactable)
+        {
+            if (m_canvasGroup != null)
+            {
+                m_canvasGroup.interactable = interactable;
+                m_canvasGroup.blocksRaycasts = interactable;
+            }
+        }
         
         /// <summary>
         /// 初始化面板

@@ -55,9 +55,13 @@ namespace MyGame.UI.Settings.Components
         /// </summary>
         public override void UpdateView()
         {
-            if (m_controller == null)
+            if (m_controller == null || m_invertYAxisToggle == null)
                 return;
 
+            // 临时退订，避免程序赋值时误触发设置变更
+            m_invertYAxisToggle.OnValueChanged -= OnInvertYAxisChanged;
+            m_invertYAxisToggle.IsOn = m_controller.GetInvertYAxis();
+            m_invertYAxisToggle.OnValueChanged += OnInvertYAxisChanged;
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Logger
@@ -8,6 +8,9 @@ namespace Logger
         // 日志级别控制
         public enum LogLevel { None, Error, Warning, Info, Debug }
         public static LogLevel currentLogLevel = LogLevel.Info;
+
+        /// <summary>冷却日志的最近输出时间记录</summary>
+        private static readonly Dictionary<string, float> s_lastLogTimes = new();
 
         // 基础日志方法
         public static void Info(string module, string message, UnityEngine.Object context = null)
@@ -48,6 +51,49 @@ namespace Logger
                 Debug.LogError(formatted, context);
             else
                 Debug.LogError(formatted);
+        }
+
+        // 带冷却的信息日志：同一 key 在 cooldownSeconds 内只输出一次。
+        // 适合滑块拖动、每帧状态变化等高频调用，避免刷屏。
+        public static void InfoWithCooldown(string module, string message,
+            string key = null, float cooldownSeconds = 1f, UnityEngine.Object context = null)
+        {
+            if (!CanLog(key ?? message, cooldownSeconds))
+                return;
+            Info(module, message, context);
+        }
+
+        public static void WarningWithCooldown(string module, string message,
+            string key = null, float cooldownSeconds = 1f, UnityEngine.Object context = null)
+        {
+            if (!CanLog(key ?? message, cooldownSeconds))
+                return;
+            Warning(module, message, context);
+        }
+
+        public static void ErrorWithCooldown(string module, string message,
+            string key = null, float cooldownSeconds = 1f, UnityEngine.Object context = null)
+        {
+            if (!CanLog(key ?? message, cooldownSeconds))
+                return;
+            Error(module, message, context);
+        }
+
+        private static bool CanLog(string key, float cooldownSeconds)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                return true;
+            }
+
+            float now = Time.realtimeSinceStartup;
+            if (s_lastLogTimes.TryGetValue(key, out float lastTime) && now - lastTime < cooldownSeconds)
+            {
+                return false;
+            }
+
+            s_lastLogTimes[key] = now;
+            return true;
         }
 
         // 带颜色的日志

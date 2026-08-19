@@ -1,4 +1,6 @@
 using System;
+using MyGame.Audio;
+using MyGame.Utils;
 using UnityEngine;
 
 namespace MyGame.Data
@@ -54,7 +56,11 @@ namespace MyGame.Data
         public int QualityLevel
         {
             get { return m_qualityLevel; }
-            set { m_qualityLevel = value; }
+            set
+            {
+                int maxLevel = Mathf.Max(0, QualitySettings.names.Length - 1);
+                m_qualityLevel = Mathf.Clamp(value, 0, maxLevel);
+            }
         }
 
         /// <summary>
@@ -72,7 +78,7 @@ namespace MyGame.Data
         public int ResolutionIndex
         {
             get { return m_resolutionIndex; }
-            set { m_resolutionIndex = value; }
+            set { m_resolutionIndex = ResolutionUtility.ClampResolutionIndex(value); }
         }
 
         /// <summary>
@@ -132,12 +138,12 @@ namespace MyGame.Data
         /// </summary>
         public void LoadFromPlayerPrefs()
         {
-            MusicVolume = PlayerPrefs.GetFloat("MusicVolume", 1.0f);
-            SfxVolume = PlayerPrefs.GetFloat("SfxVolume", 1.0f);
-            QualityLevel = PlayerPrefs.GetInt("QualityLevel", 2);
-            Fullscreen = PlayerPrefs.GetInt("Fullscreen", 1) == 1;
-            ResolutionIndex = PlayerPrefs.GetInt("ResolutionIndex", 0);
-            InvertYAxis = PlayerPrefs.GetInt("InvertYAxis", 0) == 1;
+            MusicVolume = PlayerPrefs.GetFloat(SettingsKeys.MusicVolume, 1.0f);
+            SfxVolume = PlayerPrefs.GetFloat(SettingsKeys.SfxVolume, 1.0f);
+            QualityLevel = PlayerPrefs.GetInt(SettingsKeys.QualityLevel, 2);
+            Fullscreen = PlayerPrefs.GetInt(SettingsKeys.Fullscreen, 1) == 1;
+            ResolutionIndex = PlayerPrefs.GetInt(SettingsKeys.ResolutionIndex, 0);
+            InvertYAxis = PlayerPrefs.GetInt(SettingsKeys.InvertYAxis, 0) == 1;
         }
 
         /// <summary>
@@ -145,12 +151,12 @@ namespace MyGame.Data
         /// </summary>
         public void SaveToPlayerPrefs()
         {
-            PlayerPrefs.SetFloat("MusicVolume", MusicVolume);
-            PlayerPrefs.SetFloat("SfxVolume", SfxVolume);
-            PlayerPrefs.SetInt("QualityLevel", QualityLevel);
-            PlayerPrefs.SetInt("Fullscreen", Fullscreen ? 1 : 0);
-            PlayerPrefs.SetInt("ResolutionIndex", ResolutionIndex);
-            PlayerPrefs.SetInt("InvertYAxis", InvertYAxis ? 1 : 0);
+            PlayerPrefs.SetFloat(SettingsKeys.MusicVolume, MusicVolume);
+            PlayerPrefs.SetFloat(SettingsKeys.SfxVolume, SfxVolume);
+            PlayerPrefs.SetInt(SettingsKeys.QualityLevel, QualityLevel);
+            PlayerPrefs.SetInt(SettingsKeys.Fullscreen, Fullscreen ? 1 : 0);
+            PlayerPrefs.SetInt(SettingsKeys.ResolutionIndex, ResolutionIndex);
+            PlayerPrefs.SetInt(SettingsKeys.InvertYAxis, InvertYAxis ? 1 : 0);
             
             PlayerPrefs.Save();
         }
@@ -160,14 +166,19 @@ namespace MyGame.Data
         /// </summary>
         public void ApplyToGame()
         {
+            // 应用音量设置（通过 IAudioService 抽象，不依赖具体实现）
+            if (AudioServiceLocator.Current != null)
+            {
+                AudioServiceLocator.Current.SetMusicVolume(MusicVolume);
+                AudioServiceLocator.Current.SetSfxVolume(SfxVolume);
+            }
+
             // 应用画质设置
             QualitySettings.SetQualityLevel(QualityLevel);
             
-            // 应用分辨率和全屏设置
-            Resolution[] resolutions = Screen.resolutions;
-            if (resolutions != null && resolutions.Length > 0 && ResolutionIndex >= 0 && ResolutionIndex < resolutions.Length)
+            // 应用分辨率和全屏设置：使用与设置界面相同的去重分辨率列表，避免索引错位
+            if (ResolutionUtility.TryGetResolution(ResolutionIndex, out Resolution selectedResolution))
             {
-                Resolution selectedResolution = resolutions[ResolutionIndex];
                 Screen.SetResolution(selectedResolution.width, selectedResolution.height, Fullscreen);
             }
         }

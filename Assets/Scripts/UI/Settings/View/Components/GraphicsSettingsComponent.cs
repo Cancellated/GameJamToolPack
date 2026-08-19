@@ -4,6 +4,7 @@ using Logger;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using MyGame.UI.Components;
+using MyGame.Utils;
 
 namespace MyGame.UI.Settings.Components
 {
@@ -173,25 +174,8 @@ namespace MyGame.UI.Settings.Components
             // 清空现有选项
             m_resolutionDropdown.ClearOptions();
 
-            // 获取系统支持的所有分辨率
-            m_resolutions = Screen.resolutions;
-            
-            // 移除重复的分辨率
-            List<Resolution> uniqueResolutions = new();
-            HashSet<string> resolutionKeys = new();
-
-            foreach (Resolution resolution in m_resolutions)
-            {
-                string key = $"{resolution.width}x{resolution.height}";
-                if (!resolutionKeys.Contains(key))
-                {
-                    resolutionKeys.Add(key);
-                    uniqueResolutions.Add(resolution);
-                }
-            }
-
-            // 更新分辨率数组为去重后的数组
-            m_resolutions = uniqueResolutions.ToArray();
+            // 使用与 GameSettings.ApplyToGame 相同的去重分辨率列表，避免索引错位
+            m_resolutions = ResolutionUtility.GetUniqueResolutions();
 
             // 生成分辨率选项文本
             List<string> options = new();
@@ -234,16 +218,7 @@ namespace MyGame.UI.Settings.Components
             // 如果没有保存的分辨率设置或者保存的索引无效，则使用当前屏幕分辨率
             if (!hasSavedResolution)
             {
-                Resolution currentResolution = Screen.currentResolution;
-                for (int i = 0; i < m_resolutions.Length; i++)
-                {
-                    if (m_resolutions[i].width == currentResolution.width &&
-                        m_resolutions[i].height == currentResolution.height)
-                    {
-                        currentResolutionIndex = i;
-                        break;
-                    }
-                }
+                currentResolutionIndex = ResolutionUtility.GetCurrentResolutionIndex();
             }
 
             // 设置选中项

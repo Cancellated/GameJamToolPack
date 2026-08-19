@@ -37,5 +37,11 @@ namespace MyGame.UI
         /// 清理面板资源
         /// </summary>
         void Cleanup();
+
+        /// <summary>
+        /// 只切换面板 CanvasGroup 的可交互性（interactable + blocksRaycasts）。
+        /// 不改变 alpha、SetActive 或 IsVisible，适合"下层面板保持可见但暂不可点击"的场景。
+        /// </summary>
+        void SetInteractable(bool interactable);
     }
 }

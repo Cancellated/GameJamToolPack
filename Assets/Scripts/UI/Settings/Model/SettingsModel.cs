@@ -1,5 +1,8 @@
 using Logger;
+using MyGame.Audio;
+using MyGame.Data;
 using MyGame.UI;
+using MyGame.Utils;
 using UnityEngine;
 using MyGame.Events;
 using System.Collections.Generic;
@@ -28,6 +31,12 @@ namespace MyGame.UI.Settings.Model
         // 游戏设置
         private bool m_invertYAxis = false;
 
+        /// <summary>是否正在从 PlayerPrefs 加载：加载期间不标记脏状态</summary>
+        private bool m_isLoading;
+
+        /// <summary>是否存在尚未保存到 PlayerPrefs 的修改</summary>
+        private bool m_hasUnsavedChanges;
+
         private const string LOG_MODULE = LogModules.SETTINGS + "Model";
 
         #endregion
@@ -40,7 +49,13 @@ namespace MyGame.UI.Settings.Model
         public float MusicVolume
         {
             get { return m_musicVolume; }
-            set { SetProperty(ref m_musicVolume, value, nameof(MusicVolume)); }
+            set
+            {
+                if (SetProperty(ref m_musicVolume, Mathf.Clamp01(value), nameof(MusicVolume)))
+                {
+                    MarkDirty();
+                }
+            }
         }
 
         /// <summary>
@@ -49,7 +64,13 @@ namespace MyGame.UI.Settings.Model
         public float SfxVolume
         {
             get { return m_sfxVolume; }
-            set { SetProperty(ref m_sfxVolume, value, nameof(SfxVolume)); }
+            set
+            {
+                if (SetProperty(ref m_sfxVolume, Mathf.Clamp01(value), nameof(SfxVolume)))
+                {
+                    MarkDirty();
+                }
+            }
         }
 
         /// <summary>
@@ -58,7 +79,15 @@ namespace MyGame.UI.Settings.Model
         public int QualityLevel
         {
             get { return m_qualityLevel; }
-            set { SetProperty(ref m_qualityLevel, value, nameof(QualityLevel)); }
+            set
+            {
+                int maxLevel = Mathf.Max(0, QualitySettings.names.Length - 1);
+                int clampedValue = Mathf.Clamp(value, 0, maxLevel);
+                if (SetProperty(ref m_qualityLevel, clampedValue, nameof(QualityLevel)))
+                {
+                    MarkDirty();
+                }
+            }
         }
         
         /// <summary>
@@ -76,7 +105,13 @@ namespace MyGame.UI.Settings.Model
         public bool Fullscreen
         {
             get { return m_fullscreen; }
-            set { SetProperty(ref m_fullscreen, value, nameof(Fullscreen)); }
+            set
+            {
+                if (SetProperty(ref m_fullscreen, value, nameof(Fullscreen)))
+                {
+                    MarkDirty();
+                }
+            }
         }
 
         /// <summary>
@@ -85,7 +120,14 @@ namespace MyGame.UI.Settings.Model
         public int ResolutionIndex
         {
             get { return m_resolutionIndex; }
-            set { SetProperty(ref m_resolutionIndex, value, nameof(ResolutionIndex)); }
+            set
+            {
+                int clampedValue = ResolutionUtility.ClampResolutionIndex(value);
+                if (SetProperty(ref m_resolutionIndex, clampedValue, nameof(ResolutionIndex)))
+                {
+                    MarkDirty();
+                }
+            }
         }
 
         /// <summary>
@@ -94,7 +136,22 @@ namespace MyGame.UI.Settings.Model
         public bool InvertYAxis
         {
             get { return m_invertYAxis; }
-            set { SetProperty(ref m_invertYAxis, value, nameof(InvertYAxis)); }
+            set
+            {
+                if (SetProperty(ref m_invertYAxis, value, nameof(InvertYAxis)))
+                {
+                    MarkDirty();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 是否存在未保存的设置修改。
+        /// </summary>
+        public bool HasUnsavedChanges
+        {
+            get { return m_hasUnsavedChanges; }
+            private set { SetProperty(ref m_hasUnsavedChanges, value, nameof(HasUnsavedChanges)); }
         }
 
         #endregion
@@ -107,16 +164,47 @@ namespace MyGame.UI.Settings.Model
         /// </summary>
         public override void Initialize()
         {
-            // 从PlayerPrefs加载设置
-            MusicVolume = PlayerPrefs.GetFloat("MusicVolume", 1.0f);
-            SfxVolume = PlayerPrefs.GetFloat("SfxVolume", 1.0f);
-            QualityLevel = PlayerPrefs.GetInt("QualityLevel", 2);
-            Fullscreen = PlayerPrefs.GetInt("Fullscreen", 1) == 1;
-            ResolutionIndex = PlayerPrefs.GetInt("ResolutionIndex", 0);
-            InvertYAxis = PlayerPrefs.GetInt("InvertYAxis", 0) == 1;
-            
-            // 初始化自定义画质名称
-            InitializeCustomQualityNames();
+            base.Initialize();
+
+            // 从 PlayerPrefs 加载设置；加载期间不触发“未保存修改”标记
+            m_isLoading = true;
+            try
+            {
+                LoadValuesFromPlayerPrefs();
+                InitializeCustomQualityNames();
+            }
+            finally
+            {
+                m_isLoading = false;
+                HasUnsavedChanges = false;
+            }
+        }
+
+        /// <summary>
+        /// 重新从 PlayerPrefs 读取设置，用于放弃未保存修改。
+        /// </summary>
+        public void ReloadFromPlayerPrefs()
+        {
+            m_isLoading = true;
+            try
+            {
+                LoadValuesFromPlayerPrefs();
+            }
+            finally
+            {
+                m_isLoading = false;
+                HasUnsavedChanges = false;
+            }
+        }
+
+        private void LoadValuesFromPlayerPrefs()
+        {
+            MusicVolume = PlayerPrefs.GetFloat(SettingsKeys.MusicVolume, 1.0f);
+            SfxVolume = PlayerPrefs.GetFloat(SettingsKeys.SfxVolume, 1.0f);
+            QualityLevel = PlayerPrefs.GetInt(SettingsKeys.QualityLevel, 2);
+            Fullscreen = PlayerPrefs.GetInt(SettingsKeys.Fullscreen, 1) == 1;
+            ResolutionIndex = PlayerPrefs.GetInt(SettingsKeys.ResolutionIndex, 0);
+            InvertYAxis = PlayerPrefs.GetInt(SettingsKeys.InvertYAxis, 0) == 1;
         }
         
         /// <summary>
@@ -163,14 +251,16 @@ namespace MyGame.UI.Settings.Model
         /// </summary>
         public void SaveSettings()
         {
-            PlayerPrefs.SetFloat("MusicVolume", MusicVolume);
-            PlayerPrefs.SetFloat("SfxVolume", SfxVolume);
-            PlayerPrefs.SetInt("QualityLevel", QualityLevel);
-            PlayerPrefs.SetInt("Fullscreen", Fullscreen ? 1 : 0);
-            PlayerPrefs.SetInt("ResolutionIndex", ResolutionIndex);
-            PlayerPrefs.SetInt("InvertYAxis", InvertYAxis ? 1 : 0);
+            PlayerPrefs.SetFloat(SettingsKeys.MusicVolume, MusicVolume);
+            PlayerPrefs.SetFloat(SettingsKeys.SfxVolume, SfxVolume);
+            PlayerPrefs.SetInt(SettingsKeys.QualityLevel, QualityLevel);
+            PlayerPrefs.SetInt(SettingsKeys.Fullscreen, Fullscreen ? 1 : 0);
+            PlayerPrefs.SetInt(SettingsKeys.ResolutionIndex, ResolutionIndex);
+            PlayerPrefs.SetInt(SettingsKeys.InvertYAxis, InvertYAxis ? 1 : 0);
             
             PlayerPrefs.Save();
+
+            HasUnsavedChanges = false;
             
             // 触发设置保存完成事件
             GameEvents.TriggerSettingsSaved();
@@ -181,23 +271,35 @@ namespace MyGame.UI.Settings.Model
         /// </summary>
         public void ApplySettings()
         {
+            // 应用音量设置：通过 IAudioService 抽象，不依赖具体音频实现
+            if (AudioServiceLocator.Current != null)
+            {
+                AudioServiceLocator.Current.SetMusicVolume(MusicVolume);
+                AudioServiceLocator.Current.SetSfxVolume(SfxVolume);
+            }
+
             // 应用画质设置
             QualitySettings.SetQualityLevel(QualityLevel);
             
-            // 应用分辨率和全屏设置
-            Resolution[] resolutions = Screen.resolutions;
-            if (resolutions != null && resolutions.Length > 0 && ResolutionIndex >= 0 && ResolutionIndex < resolutions.Length)
+            // 应用分辨率和全屏设置：使用与设置界面相同的去重分辨率列表，避免索引错位
+            if (ResolutionUtility.TryGetResolution(ResolutionIndex, out Resolution selectedResolution))
             {
-                Resolution selectedResolution = resolutions[ResolutionIndex];
                 Screen.SetResolution(selectedResolution.width, selectedResolution.height, Fullscreen);
                 Log.Info(LOG_MODULE, $"应用分辨率设置: {selectedResolution.width}x{selectedResolution.height}, 全屏: {Fullscreen}");
             }
             
-            // 应用音量设置
-            // 这里可以添加音量的具体实现
-            
             // 触发设置应用完成事件
             GameEvents.TriggerSettingsApplied();
+        }
+
+        private void MarkDirty()
+        {
+            if (m_isLoading)
+            {
+                return;
+            }
+
+            HasUnsavedChanges = true;
         }
 
         #endregion
