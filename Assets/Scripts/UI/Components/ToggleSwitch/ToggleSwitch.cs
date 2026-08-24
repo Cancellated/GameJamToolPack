@@ -110,6 +110,32 @@ namespace MyGame.UI.Components
         }
 
         /// <summary>
+        /// 代码创建开关时配置内部引用（替代 Inspector 接线）。
+        /// </summary>
+        public void Configure(RectTransform knobRectTransform, Color onColor, Color offColor, Text statusText)
+        {
+            m_knobRectTransform = knobRectTransform;
+            m_onColor = onColor;
+            m_offColor = offColor;
+            m_statusText = statusText;
+            m_backgroundImage = GetComponent<Image>();
+
+            if (m_knobRectTransform != null && m_backgroundImage != null)
+            {
+                float halfBackgroundWidth = m_backgroundImage.rectTransform.rect.width / 2f;
+                float halfKnobWidth = m_knobRectTransform.rect.width / 2f;
+                m_knobStartPosition = new Vector2(
+                    -halfBackgroundWidth + halfKnobWidth + m_positionAdjustment,
+                    m_knobRectTransform.anchoredPosition.y);
+                m_knobEndPosition = new Vector2(
+                    halfBackgroundWidth - halfKnobWidth + m_positionAdjustment,
+                    m_knobRectTransform.anchoredPosition.y);
+            }
+
+            UpdateSwitchVisuals(m_isOn, true);
+        }
+
+        /// <summary>
         /// 处理点击事件
         /// </summary>
         public void OnPointerClick(PointerEventData eventData)

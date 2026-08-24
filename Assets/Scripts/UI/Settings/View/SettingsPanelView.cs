@@ -4,8 +4,6 @@ using TMPro;
 using Logger;
 using MyGame.UI.Settings.Controller;
 using System.Collections;
-using System.Collections.Generic;
-using MyGame.UI.Settings.Components;
 
 namespace MyGame.UI.Settings.View
 {
@@ -17,11 +15,12 @@ namespace MyGame.UI.Settings.View
         #region 字段
 
         [Header("UI References")]
-        [Tooltip("设置面板根对象")]
-        [SerializeField] private GameObject m_settingsPanel;
-
         [Tooltip("返回按钮")]
         [SerializeField] private Button m_backButton;
+
+        [Header("Generated Settings")]
+        [Tooltip("运行时布局")]
+        [SerializeField] private SettingsRuntimeLayout m_runtimeLayout;
 
         [Header("Action Buttons")]
         [Tooltip("应用按钮")]
@@ -47,8 +46,6 @@ namespace MyGame.UI.Settings.View
 
         private const string LOG_MODULE = LogModules.SETTINGS + "View";
 
-        private readonly List<BaseSettingsComponent> m_optionComponents = new();
-
         #endregion
 
         #region 生命周期
@@ -60,10 +57,12 @@ namespace MyGame.UI.Settings.View
         {
             // 设置面板类型
             m_panelType = UIType.SettingsPanel;
+
+            // 运行时布局必须先于 base.Awake() 就绪：
+            // base.Awake 会触发控制器绑定 → OnControllerBound → Build()
+            EnsureRuntimeLayout();
+
             base.Awake();
-            
-            // 查找所有设置组件
-            FindAllSettingsComponents();
         }
 
         /// <summary>
@@ -138,7 +137,12 @@ namespace MyGame.UI.Settings.View
             EnsureUnsavedConfirmDialog();
             EnsureFeedbackText();
             BindButtonEvents();
-            InitializeAllSettingsComponents();
+
+            if (m_runtimeLayout != null && m_runtimeLayout.IsBuilt)
+            {
+                m_runtimeLayout.RefreshAll();
+            }
+
             HideUnsavedConfirmDialog();
             HideFeedbackText();
         }
@@ -149,6 +153,7 @@ namespace MyGame.UI.Settings.View
         public override void Cleanup()
         {
             UnbindButtonEvents();
+            m_runtimeLayout?.Clear();
             base.Cleanup();
         }
         #endregion
@@ -232,6 +237,8 @@ namespace MyGame.UI.Settings.View
             UIManager.Instance?.SetPanelInteractable(UIType.MainMenu, false);
 
             base.Show();
+            // 重新显示时刷新，避免面板隐藏期间设置被外部修改（如控制台 devmode 命令）导致显示旧值
+            UpdateAllSettingsComponents();
             HideUnsavedConfirmDialog();
         }
 
@@ -270,6 +277,22 @@ namespace MyGame.UI.Settings.View
             if (m_fallbackConfirmMessage != null)
             {
                 m_fallbackConfirmMessage.text = "设置尚未保存，确定要退出吗？\n未保存的修改将丢失。";
+            }
+
+            // 确保弹窗位于运行时生成的 Settings 内容之上，并能独立接收点击
+            m_unsavedConfirmDialog.transform.SetAsLastSibling();
+
+            Canvas dialogCanvas = m_unsavedConfirmDialog.GetComponent<Canvas>();
+            if (dialogCanvas == null)
+            {
+                dialogCanvas = m_unsavedConfirmDialog.AddComponent<Canvas>();
+            }
+            dialogCanvas.overrideSorting = true;
+            dialogCanvas.sortingOrder = 1000;
+
+            if (m_unsavedConfirmDialog.GetComponent<GraphicRaycaster>() == null)
+            {
+                m_unsavedConfirmDialog.AddComponent<GraphicRaycaster>();
             }
 
             m_unsavedConfirmDialog.SetActive(true);
@@ -489,8 +512,6 @@ namespace MyGame.UI.Settings.View
             rect.pivot = new Vector2(0f, 0.5f);
             rect.anchoredPosition = new Vector2(320f, -75f);
             rect.sizeDelta = new Vector2(360f, 40f);
-            rect.offsetMin = Vector2.zero;
-            rect.offsetMax = Vector2.zero;
 
             m_fallbackFeedbackText.gameObject.SetActive(false);
         }
@@ -528,73 +549,28 @@ namespace MyGame.UI.Settings.View
         #region 选项组件管理
 
         /// <summary>
-        /// 查找所有设置组件
+        /// 确保运行时布局存在；旧预制体未挂载时运行时补挂。
         /// </summary>
-        private void FindAllSettingsComponents()
+        private void EnsureRuntimeLayout()
         {
-            Log.Info(LOG_MODULE, "查找所有设置组件");
-            
-            // 清空现有列表
-            m_optionComponents.Clear();
-            
-            // 使用基类查找所有派生组件
-            FindSettingsComponentsByBaseClass();
-        }
-        
-        /// <summary>
-        /// 通过基类查找所有派生组件
-        /// 这种方法可以找到所有继承自BaseSettingsComponent的组件，无需单独列出每个派生类
-        /// </summary>
-        private void FindSettingsComponentsByBaseClass()
-        {
-            // 获取所有继承自BaseSettingsComponent的组件。
-            // 注意：多个设置组件可能挂在同一个 GameObject 上，因此必须保存组件引用本身，
-            // 不能保存 GameObject（否则 TryGetComponent 只会反复取到第一个组件）。
-            var settingsComponents = GetComponentsInChildren<BaseSettingsComponent>(true);
-            
-            int addedCount = 0;
-            foreach (var component in settingsComponents)
+            if (m_runtimeLayout == null)
             {
-                if (component != null)
-                {
-                    m_optionComponents.Add(component);
-                    Log.Info(LOG_MODULE,
-                        $"发现设置组件: {component.GetType().Name} @ {component.gameObject.name}");
-                    addedCount++;
-                }
+                m_runtimeLayout = GetComponent<SettingsRuntimeLayout>()
+                    ?? gameObject.AddComponent<SettingsRuntimeLayout>();
             }
-            
-            Log.Info(LOG_MODULE, $"成功添加 {addedCount} 个设置组件到集合");
         }
 
         /// <summary>
-        /// 初始化所有设置组件
+        /// 控制器绑定完成后立即生成设置行（此时 Model 与选项注册表已就绪）。
         /// </summary>
-        private void InitializeAllSettingsComponents()
-        { 
-            if (m_controller == null)
-            {
-                Log.Error(LOG_MODULE, "控制器为空，无法初始化设置组件");
-            }
-            
-            // 遍历并初始化每个设置组件
-            int initializedCount = 0;
-            
-            foreach (BaseSettingsComponent settingsComponent in m_optionComponents)
-            {
-                if (settingsComponent == null)
-                {
-                    Log.Warning(LOG_MODULE, "发现空的设置组件，跳过初始化");
-                    continue;
-                }
+        protected override void OnControllerBound()
+        {
+            base.OnControllerBound();
 
-                Log.Info(LOG_MODULE, "初始化设置组件: " + settingsComponent.GetType().Name);
-                settingsComponent.Initialize(m_controller);
-                // 立即更新视图以显示当前设置值
-                settingsComponent.UpdateView();
-                initializedCount++;
+            if (m_runtimeLayout != null)
+            {
+                m_runtimeLayout.Build(m_controller);
             }
-            Log.Info(LOG_MODULE, $"所有设置组件初始化完成，成功初始化: {initializedCount}/{m_optionComponents.Count}");
         }
 
         /// <summary>
@@ -602,12 +578,9 @@ namespace MyGame.UI.Settings.View
         /// </summary>
         public void UpdateAllSettingsComponents()
         {
-            foreach (BaseSettingsComponent settingsComponent in m_optionComponents)
+            if (m_runtimeLayout != null && m_runtimeLayout.IsBuilt)
             {
-                if (settingsComponent != null)
-                {
-                    settingsComponent.UpdateView();
-                }
+                m_runtimeLayout.RefreshAll();
             }
         }
 

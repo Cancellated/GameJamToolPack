@@ -1,3 +1,4 @@
+using MyGame.DevTools;
 using UnityEngine;
 
 namespace MyGame.Managers
@@ -78,13 +79,17 @@ namespace MyGame.Managers
 
         /// <summary>
         /// 切换到UI输入模式
-        /// 特殊处理：保留控制台按键的功能，即使在UI模式下也能响应
+        /// 特殊处理：仅在开发者模式可用时保留控制台按键，
+        /// 正式发布版默认不允许通过输入唤出调试控制台。
         /// </summary>
         public void SwitchToUIMode()
         {
             _inputActions.GamePlay.Disable();
             // 单独启用控制台按键，确保在任何模式下都能唤出控制台
-            _inputActions.GamePlay.Console.Enable();
+            if (DeveloperMode.IsDebugConsoleEnabled)
+            {
+                _inputActions.GamePlay.Console.Enable();
+            }
             _inputActions.UI.Enable();
         }
 

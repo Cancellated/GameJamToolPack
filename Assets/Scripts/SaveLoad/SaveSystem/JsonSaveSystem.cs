@@ -199,8 +199,7 @@ namespace MyGame.Data
                 saveData.SetSaveTimeMetadata();
                 saveData.version = Application.version;
                 saveData.dataVersion = SaveData.CURRENT_DATA_VERSION;
-                saveData.gameProgress ??= new GameProgress();
-                saveData.gameProgress.EnsureInitialized();
+                saveData.EnsureInitialized();
 
                 // 序列化数据为JSON
                 string jsonData = JsonUtility.ToJson(saveData, true); // true表示格式化输出
@@ -440,24 +439,24 @@ namespace MyGame.Data
         }
 
         /// <summary>
-        /// 按存档结构版本执行迁移。
+        /// 按存档结构版本执行归一化。
+        /// 已废弃的 v1（内嵌 gameProgress）结构不再支持，该版本存档无需保留；
+        /// 这里只负责把低于当前版本但仍可解析的存档补齐必要字段并归一化字符串。
         /// </summary>
         private void MigrateSaveData(SaveData saveData)
         {
             int sourceVersion = saveData.dataVersion;
 
-            // 旧存档没有 dataVersion 字段时，JsonUtility 反序列化为 0
-            if (sourceVersion < 1)
+            if (sourceVersion < SaveData.CURRENT_DATA_VERSION)
             {
-                Log.Info(LOG_MODULE, "迁移旧版存档结构：dataVersion 0 -> 1");
-                saveData.gameProgress ??= new GameProgress();
-                saveData.gameProgress.EnsureInitialized();
+                Log.Info(LOG_MODULE,
+                    $"迁移存档结构：dataVersion {sourceVersion} -> {SaveData.CURRENT_DATA_VERSION}");
                 if (string.IsNullOrEmpty(saveData.saveTimeUtc))
                 {
                     saveData.saveTimeUtc = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
                 }
-                saveData.dataVersion = 1;
-                sourceVersion = 1;
+                saveData.dataVersion = SaveData.CURRENT_DATA_VERSION;
+                sourceVersion = SaveData.CURRENT_DATA_VERSION;
             }
 
             if (sourceVersion > SaveData.CURRENT_DATA_VERSION)
@@ -467,8 +466,7 @@ namespace MyGame.Data
                     "将尽量保留数据加载，未识别字段可能丢失");
             }
 
-            saveData.gameProgress ??= new GameProgress();
-            saveData.gameProgress.EnsureInitialized();
+            saveData.EnsureInitialized();
         }
 
         #endregion

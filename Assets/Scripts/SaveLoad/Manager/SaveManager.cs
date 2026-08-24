@@ -3,7 +3,6 @@ using MyGame.Managers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 using Logger;
 
@@ -12,6 +11,10 @@ namespace MyGame.Data
     /// <summary>
     /// 游戏存档管理器，负责处理游戏数据的保存、加载和删除操作。
     /// 作为单例类提供全局访问点，并与游戏事件系统集成。
+    ///
+    /// 中立化契约：本管理器不再内置任何玩法进度字段（关卡/任务/数值等）。
+    /// 玩法系统实现 IGameplaySaveProvider 并在进入玩法场景时注册，
+    /// 由本管理器在保存时捕获玩法 JSON、加载时通过 GameEvents.OnGameplayDataLoaded 回传。
     /// </summary>
     public class SaveManager : Singleton<SaveManager>
     {
@@ -27,8 +30,11 @@ namespace MyGame.Data
         private ISaveSystem m_saveSystem;
         private SaveData m_currentSaveData;
 
-        /// <summary>读档后待应用进度的标记：等待游戏场景加载完成后广播进度加载事件。</summary>
-        private bool m_pendingProgressToApply;
+        /// <summary>当前注册的玩法存档提供者；场景卸载时由提供者主动注销。</summary>
+        private IGameplaySaveProvider m_gameplaySaveProvider;
+
+        /// <summary>读档后待应用玩法数据的标记：等待游戏场景加载完成后再广播加载事件。</summary>
+        private bool m_pendingGameplayDataToApply;
 
         [Header("自动存档")]
         [SerializeField, Tooltip("是否启用定时自动存档（仅游戏进行中生效）")]
@@ -43,7 +49,7 @@ namespace MyGame.Data
         #region 属性
         
         /// <summary>
-        /// 当前加载的存档数据。
+        /// 当前加载的存档数据（含设置、元数据与不透明的玩法 JSON）。
         /// </summary>
         public SaveData CurrentSaveData
         {
@@ -51,12 +57,12 @@ namespace MyGame.Data
         }
 
         /// <summary>
-        /// 当前存档中的游戏进度（只读入口）。
-        /// 游戏玩法系统如需主动写入进度，请使用本类提供的 UpdateXxx 进度 API。
+        /// 是否已注册可用的玩法存档提供者。
+        /// 在菜单等没有玩法系统的场景中为 false；此时保存仍会写入设置与元数据。
         /// </summary>
-        public GameProgress CurrentGameProgress
+        public bool HasRegisteredGameplaySaveProvider
         {
-            get { return m_currentSaveData != null ? m_currentSaveData.gameProgress : null; }
+            get { return TryGetAliveProvider(out _); }
         }
         
         /// <summary>
@@ -69,86 +75,70 @@ namespace MyGame.Data
         
         #endregion
 
-        #region 进度写入 API（游戏玩法系统与存档数据的唯一桥梁）
+        #region 玩法存档提供者注册（框架与具体游戏的唯一写入桥梁）
 
         /// <summary>
-        /// 获取当前可写的游戏进度对象；尚未初始化时会补齐默认进度。
+        /// 注册玩法存档提供者。通常在玩法场景的引导对象 Start 时调用；
+        /// 同一对象须在 OnDestroy/OnDisable 时调用 UnregisterGameplaySaveProvider。
         /// </summary>
-        public GameProgress GetOrCreateGameProgress()
+        public void RegisterGameplaySaveProvider(IGameplaySaveProvider provider)
         {
-            EnsureCurrentSaveData();
-            if (m_currentSaveData.gameProgress == null)
+            if (provider == null)
             {
-                m_currentSaveData.gameProgress = new GameProgress();
-            }
-            m_currentSaveData.gameProgress.EnsureInitialized();
-            return m_currentSaveData.gameProgress;
-        }
-
-        /// <summary>
-        /// 更新玩家位置。
-        /// 该值可能每帧变化，因此默认不广播进度变更事件。
-        /// </summary>
-        public void UpdatePlayerPosition(Vector3 position, bool notify = false)
-        {
-            GetOrCreateGameProgress().UpdatePlayerPosition(position);
-            if (notify)
-            {
-                NotifyProgressChanged();
-            }
-        }
-
-        /// <summary>
-        /// 更新当前关卡并广播进度变更。
-        /// </summary>
-        public void UpdateCurrentLevel(int level)
-        {
-            GetOrCreateGameProgress().UpdateCurrentLevel(level);
-            NotifyProgressChanged();
-        }
-
-        /// <summary>
-        /// 标记关卡完成并广播进度变更。
-        /// </summary>
-        public void MarkLevelCompleted(int levelId)
-        {
-            GetOrCreateGameProgress().MarkLevelAsCompleted(levelId);
-            NotifyProgressChanged();
-        }
-
-        /// <summary>
-        /// 更新任务进度并广播进度变更。
-        /// </summary>
-        public void UpdateQuestProgress(string questId, int step)
-        {
-            GetOrCreateGameProgress().UpdateQuestProgress(questId, step);
-            NotifyProgressChanged();
-        }
-
-        /// <summary>
-        /// 更新玩家统计并广播进度变更。
-        /// </summary>
-        public void SetPlayerStat(string statName, int value)
-        {
-            GetOrCreateGameProgress().SetPlayerStat(statName, value);
-            NotifyProgressChanged();
-        }
-
-        /// <summary>
-        /// 整体替换当前游戏进度（例如场景初始化器从关卡数据构建进度）并广播变更。
-        /// </summary>
-        public void ReplaceGameProgress(GameProgress progress)
-        {
-            if (progress == null)
-            {
-                Log.Error(LOG_MODULE, "替换游戏进度失败：进度为空");
+                Log.Error(LOG_MODULE, "注册玩法存档提供者失败：提供者为空");
                 return;
             }
 
-            EnsureCurrentSaveData();
-            m_currentSaveData.gameProgress = progress;
-            m_currentSaveData.gameProgress.EnsureInitialized();
-            NotifyProgressChanged();
+            if (ReferenceEquals(m_gameplaySaveProvider, provider))
+            {
+                Log.InfoWithCooldown(LOG_MODULE, "玩法存档提供者重复注册，已忽略", "register-same-provider");
+                return;
+            }
+
+            if (TryGetAliveProvider(out var existingProvider))
+            {
+                Log.Warning(LOG_MODULE,
+                    $"已存在玩法存档提供者，将被替换：{existingProvider.GetType().Name} -> {provider.GetType().Name}");
+            }
+
+            m_gameplaySaveProvider = provider;
+            Log.Info(LOG_MODULE, $"已注册玩法存档提供者: {provider.GetType().Name}");
+        }
+
+        /// <summary>
+        /// 注销玩法存档提供者。场景卸载前必须调用，避免管理器持有失效引用。
+        /// </summary>
+        public void UnregisterGameplaySaveProvider(IGameplaySaveProvider provider)
+        {
+            if (provider == null || !ReferenceEquals(m_gameplaySaveProvider, provider))
+            {
+                return;
+            }
+
+            m_gameplaySaveProvider = null;
+            Log.Info(LOG_MODULE, $"已注销玩法存档提供者: {provider.GetType().Name}");
+        }
+
+        /// <summary>
+        /// 获取当前存活的提供者；若其宿主 MonoBehaviour 已随场景销毁则自动注销。
+        /// </summary>
+        private bool TryGetAliveProvider(out IGameplaySaveProvider provider)
+        {
+            provider = m_gameplaySaveProvider;
+            if (provider == null)
+            {
+                return false;
+            }
+
+            if (provider is UnityEngine.Object unityObject && unityObject == null)
+            {
+                Log.Warning(LOG_MODULE, "玩法存档提供者的宿主对象已随场景销毁，自动注销");
+                m_gameplaySaveProvider = null;
+                provider = null;
+                return false;
+            }
+
+            return true;
         }
 
         #endregion
@@ -275,7 +265,8 @@ namespace MyGame.Data
         
         /// <summary>
         /// 保存当前游戏数据到指定存档槽。
-        /// 包含延迟初始化逻辑，确保在第一次访问时初始化存档系统。
+        /// 存在玩法存档提供者时捕获其玩法 JSON 与摘要；不存在（如菜单场景）时
+        /// 保留内存中已有的玩法数据不变，仅同步设置与元数据。
         /// </summary>
         /// <param name="slotName">存档槽名称，如果为空则使用默认存档槽。</param>
         /// <returns>保存操作是否成功。</returns>
@@ -292,17 +283,27 @@ namespace MyGame.Data
             
             Log.Info(LOG_MODULE, $"开始保存游戏到存档槽: {saveSlot}");
 
-            // 确保当前存档与进度对象已初始化，避免空引用或写入空进度
+            // 确保当前存档对象已初始化，避免空引用
             EnsureCurrentSaveData();
-            if (m_currentSaveData.gameProgress == null)
+
+            // 存在玩法提供者时捕获新玩法数据；不存在（如主菜单）时：
+            // - 当前内存已有玩法数据则保留（例如刚读档后换槽保存/复制存档）；
+            // - 当前内存为空且目标槽已有存档时，回读目标槽玩法数据，
+            //   避免"菜单里改设置后顺手保存"把原槽位的玩法数据清空。
+            if (TryGetAliveProvider(out var provider))
             {
-                m_currentSaveData.gameProgress = new GameProgress();
+                CaptureGameplayDataFromProvider(provider);
             }
-            m_currentSaveData.gameProgress.EnsureInitialized();
+            else
+            {
+                Log.InfoWithCooldown(LOG_MODULE,
+                    "未注册玩法存档提供者，本次保存仅写入设置与元数据（玩法数据按规则保留）",
+                    "save-without-provider");
+                PreserveExistingGameplayData(saveSlot);
+            }
 
             // 保存前同步当前设置：运行时设置统一持久化在 PlayerPrefs（由 SettingsModel 写入），
             // 这里从 PlayerPrefs 读取同步进存档，保证存档中的设置与玩家当前设置一致
-            // （修复：此前存档里的设置字段永远是默认值，读档时会覆盖玩家设置）
             GameSettings currentSettings = new GameSettings();
             currentSettings.LoadFromPlayerPrefs();
             m_currentSaveData.UpdateSettings(currentSettings);
@@ -332,7 +333,7 @@ namespace MyGame.Data
         public bool LoadGame(string slotName = null)
         {
             // 清理上一次可能残留的待应用标记，避免场景加载失败后误广播
-            m_pendingProgressToApply = false;
+            m_pendingGameplayDataToApply = false;
 
             // 延迟初始化存档系统
             if (m_saveSystem == null)
@@ -358,17 +359,18 @@ namespace MyGame.Data
                 // 应用加载的设置
                 ApplyLoadedSettings();
 
-                // 若读档发生在主菜单（随后会切场景），先把进度标记为待应用，
+                // 若读档发生在主菜单（随后会切场景），先把玩法数据标记为待应用，
                 // 待游戏场景加载完成后再广播；若已在游戏场景内，则立即广播
                 bool willLoadGameScene = GameManager.Instance != null
                                          && GameManager.Instance.State == GameState.Menu;
+                string gameplayDataJson = m_currentSaveData.gameplayDataJson ?? string.Empty;
                 if (willLoadGameScene)
                 {
-                    m_pendingProgressToApply = true;
+                    m_pendingGameplayDataToApply = true;
                 }
                 else
                 {
-                    GameEvents.TriggerGameProgressLoaded(m_currentSaveData.gameProgress);
+                    GameEvents.TriggerGameplayDataLoaded(gameplayDataJson);
                 }
 
                 Log.Info(LOG_MODULE, "游戏加载成功");
@@ -469,8 +471,7 @@ namespace MyGame.Data
                 
                 // 确保当前存档数据已初始化
                 m_currentSaveData ??= new SaveData();
-                m_currentSaveData.gameProgress ??= new GameProgress();
-                m_currentSaveData.gameProgress.EnsureInitialized();
+                m_currentSaveData.EnsureInitialized();
                 
                 Log.Info(LOG_MODULE, "存档系统初始化完成");
             }
@@ -478,17 +479,18 @@ namespace MyGame.Data
         
         /// <summary>
         /// 创建一个新的游戏存档（仅内存，不写盘）。
+        /// 玩法数据字段重置为空；具体玩法系统仍通过 GameStart 事件自行初始化世界。
         /// </summary>
         public void NewGame()
         {
             // 初始化新的存档数据
             m_currentSaveData = new SaveData();
-            m_pendingProgressToApply = false;
+            m_pendingGameplayDataToApply = false;
             
             Log.Info(LOG_MODULE, "创建了新游戏存档");
 
-            // 通知玩法系统：当前进度已重置
-            GameEvents.TriggerGameProgressChanged(m_currentSaveData.gameProgress);
+            // 通知玩法系统：当前局内数据已重置
+            GameEvents.TriggerGameplayDataChanged();
         }
         
         #endregion
@@ -516,9 +518,51 @@ namespace MyGame.Data
             GameEvents.TriggerSettingsApplied();
             Log.Info(LOG_MODULE, "已应用加载的游戏设置");
         }
-        
+
         /// <summary>
-        /// 归一化加载出的存档数据：补齐缺失的进度对象与集合字段。
+        /// 从玩法存档提供者捕获玩法 JSON 与摘要。
+        /// 捕获失败时保留内存中已有玩法数据，避免一次异常清空玩家进度。
+        /// </summary>
+        private void CaptureGameplayDataFromProvider(IGameplaySaveProvider provider)
+        {
+            try
+            {
+                string gameplayJson = provider.CaptureGameplayDataJson();
+                string summary = provider.GetProgressSummary();
+                m_currentSaveData.SetGameplayData(gameplayJson, summary);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(LOG_MODULE,
+                    $"玩法存档提供者捕获数据失败，已保留内存中已有玩法数据: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 无玩法提供者（典型：主菜单场景）保存时的防护：
+        /// 当前内存玩法数据为空且目标槽已有存档时，回读目标槽的玩法数据与摘要，
+        /// 防止"仅改设置后保存"把原槽位玩法进度清空。
+        /// </summary>
+        private void PreserveExistingGameplayData(string saveSlot)
+        {
+            if (!string.IsNullOrEmpty(m_currentSaveData.gameplayDataJson))
+            {
+                return;
+            }
+
+            SaveData existingData = m_saveSystem.LoadGame(saveSlot);
+            if (existingData == null)
+            {
+                return;
+            }
+
+            m_currentSaveData.SetGameplayData(existingData.gameplayDataJson, existingData.progressSummary);
+            Log.Info(LOG_MODULE,
+                $"当前无玩法存档提供者且内存玩法数据为空，已回读目标槽 {saveSlot} 的玩法数据以避免覆盖丢失");
+        }
+
+        /// <summary>
+        /// 归一化加载出的存档数据：补齐字符串字段。
         /// 主要防御旧版本存档缺少字段时 UI/玩法层出现空引用。
         /// </summary>
         private void NormalizeLoadedSaveData(SaveData saveData)
@@ -528,8 +572,7 @@ namespace MyGame.Data
                 return;
             }
 
-            saveData.gameProgress ??= new GameProgress();
-            saveData.gameProgress.EnsureInitialized();
+            saveData.EnsureInitialized();
         }
 
         /// <summary>
@@ -543,19 +586,7 @@ namespace MyGame.Data
             }
 
             m_currentSaveData ??= new SaveData();
-            m_currentSaveData.gameProgress ??= new GameProgress();
-            m_currentSaveData.gameProgress.EnsureInitialized();
-        }
-
-        /// <summary>
-        /// 广播当前进度变更事件。
-        /// </summary>
-        private void NotifyProgressChanged()
-        {
-            if (m_currentSaveData != null && m_currentSaveData.gameProgress != null)
-            {
-                GameEvents.TriggerGameProgressChanged(m_currentSaveData.gameProgress);
-            }
+            m_currentSaveData.EnsureInitialized();
         }
 
         /// <summary>
@@ -654,38 +685,38 @@ namespace MyGame.Data
         }
 
         /// <summary>
-        /// 场景加载完成回调：读档触发切场景时，在新场景初始化后再广播进度加载事件。
+        /// 场景加载完成回调：读档触发切场景时，在新场景初始化后再广播玩法数据加载事件。
         /// </summary>
         private void HandleSceneLoadComplete(string sceneName)
         {
-            if (!m_pendingProgressToApply)
+            if (!m_pendingGameplayDataToApply)
             {
                 return;
             }
 
             // 无论加载到哪个场景都清空标记，避免之后误广播
-            m_pendingProgressToApply = false;
+            m_pendingGameplayDataToApply = false;
 
             if (string.IsNullOrEmpty(sceneName) || sceneName == "MainMenu")
             {
                 return;
             }
 
-            Log.Info(LOG_MODULE, $"游戏场景 {sceneName} 加载完成，准备应用存档进度");
-            StartCoroutine(NotifyLoadedProgressNextFrame());
+            Log.Info(LOG_MODULE, $"游戏场景 {sceneName} 加载完成，准备应用玩法存档数据");
+            StartCoroutine(NotifyLoadedGameplayDataNextFrame());
         }
 
         /// <summary>
-        /// 延迟一帧广播进度加载事件：确保新场景对象的 Awake/OnEnable/Start 已执行完毕。
+        /// 延迟一帧广播玩法数据加载事件：确保新场景对象的 Awake/OnEnable/Start 已执行完毕。
         /// </summary>
-        private IEnumerator NotifyLoadedProgressNextFrame()
+        private IEnumerator NotifyLoadedGameplayDataNextFrame()
         {
             yield return null;
 
-            if (m_currentSaveData != null && m_currentSaveData.gameProgress != null)
+            if (m_currentSaveData != null)
             {
-                Log.Info(LOG_MODULE, "向玩法系统广播已加载的存档进度");
-                GameEvents.TriggerGameProgressLoaded(m_currentSaveData.gameProgress);
+                Log.Info(LOG_MODULE, "向玩法系统广播已加载的玩法存档数据");
+                GameEvents.TriggerGameplayDataLoaded(m_currentSaveData.gameplayDataJson ?? string.Empty);
             }
         }
 

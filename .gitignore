@@ -30,3 +30,7 @@ Thumbs.db
 .vscode/
 .trae/
 *.vsconfig
+
+#Temporary files
+Tests/
+

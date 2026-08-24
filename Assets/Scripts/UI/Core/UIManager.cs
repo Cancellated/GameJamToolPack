@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Logger;
+using MyGame.DevTools;
 using MyGame.Events;
 using MyGame.Managers;
 using MyGame.UI.Core;
@@ -140,6 +141,11 @@ namespace MyGame.UI
                     if (entry.lazyLoad)
                     {
                         continue; // 懒加载：首次显示时再实例化
+                    }
+                    // 开发者模式未开启时不自动加载调试控制台（mod 开发者可经 DeveloperMode 开启）
+                    if (entry.panelType == UIType.Console && !DeveloperMode.IsDebugConsoleEnabled)
+                    {
+                        continue;
                     }
                     // 统一经 PanelLoader 按 Addressable 地址异步加载
                     if (!string.IsNullOrEmpty(entry.addressableAddress))
@@ -300,15 +306,24 @@ namespace MyGame.UI
                 // 输入模式（数据化）：由配置决定显示本面板时切换到的输入状态
                 ApplyInputMode(state);
             }
-            // 关闭当前独占面板（非 Loading/Console）时，切回玩法模式并恢复 HUD
+            // 关闭当前独占面板（非 Loading/Console）时，切回玩法模式并恢复 HUD。
+            // 菜单类面板（主菜单/存档/设置/关于）关闭时不应切到 Gameplay：
+            // 它们通常仍在菜单场景中（例如关闭 AboutPanel 后 MainMenu 继续可见），
+            // 若切到 Gameplay 会禁用 UI action map，导致菜单按钮全部失效。
             else if (currentState == state && currentState != UIType.None && currentState != UIType.Loading && currentState != UIType.Console)
             {
+                bool isMenuPanel = currentState == UIType.MainMenu || currentState == UIType.SaveLoadMenu ||
+                                   currentState == UIType.SettingsPanel || currentState == UIType.AboutPanel;
+
                 if (InputManager.Instance != null)
                 {
-                    InputManager.Instance.SwitchToGamePlayMode();
-                    // 关闭菜单类面板后恢复 HUD（主菜单/存档/设置/关于除外，它们属于非游戏场景 UI）
-                    if (currentState != UIType.MainMenu && currentState != UIType.SaveLoadMenu &&
-                        currentState != UIType.SettingsPanel && currentState != UIType.AboutPanel)
+                    if (!isMenuPanel)
+                    {
+                        InputManager.Instance.SwitchToGamePlayMode();
+                    }
+
+                    // 关闭玩法类面板后恢复 HUD
+                    if (!isMenuPanel)
                     {
                         SetUIState(UIType.HUD, true);
                     }
@@ -407,6 +422,13 @@ namespace MyGame.UI
         /// <param name="panelType">需要加载的面板类型</param>
         private IEnumerator LoadPanelAutomatically(UIType panelType)
         {
+            // 开发者模式未开启时禁止任何路径自动加载调试控制台
+            if (panelType == UIType.Console && !DeveloperMode.IsDebugConsoleEnabled)
+            {
+                Log.Warning(LOG_MODULE, "开发者模式未开启，禁止加载调试控制台");
+                yield break;
+            }
+
             Log.Info(LOG_MODULE, "开始自动加载面板: " + panelType);
 
             // Addressable 异步加载
@@ -482,6 +504,11 @@ namespace MyGame.UI
                         continue;
                     }
                     if (PanelMap.ContainsKey(entry.panelType) || entry.lazyLoad)
+                    {
+                        continue;
+                    }
+                    // 开发者模式未开启时不自动加载调试控制台（mod 开发者可经 DeveloperMode 开启）
+                    if (entry.panelType == UIType.Console && !DeveloperMode.IsDebugConsoleEnabled)
                     {
                         continue;
                     }

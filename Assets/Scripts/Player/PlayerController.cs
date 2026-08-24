@@ -8,7 +8,7 @@ namespace MyGame.Control
     /// 玩家控制器，负责处理玩家的游戏玩法输入
     /// 与UIController分离，专注于玩家控制逻辑
     /// </summary>
-    public class PlayerController
+    public class PlayerController : Singleton<PlayerController>
     {
         #region 字段
         private GameControl _inputActions;
@@ -25,8 +25,10 @@ namespace MyGame.Control
         #endregion
 
         #region 生命周期
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
+
             // 获取InputManager中的InputActions实例
             if (InputManager.Instance != null)
             {

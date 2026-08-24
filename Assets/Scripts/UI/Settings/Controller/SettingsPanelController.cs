@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using Logger;
+using MyGame.DevTools;
 using MyGame.Events;
 using MyGame.UI;
 using MyGame.UI.Settings.Model;
@@ -13,7 +14,7 @@ namespace MyGame.UI.Settings.Controller
     /// 设置面板控制器
     /// 负责处理设置面板的逻辑和设置更新
     /// </summary>
-    public class SettingsPanelController : BaseController<SettingsPanelView, SettingsModel>
+    public class SettingsPanelController : BaseController<SettingsPanelView, SettingsModel>, ISettingsValueProvider
     {
         #region 字段
 
@@ -22,6 +23,12 @@ namespace MyGame.UI.Settings.Controller
         [SerializeField] private SettingsPanelView m_settingsPanelView;
 
         private const string LOG_MODULE = LogModules.SETTINGS + "Controller";
+
+        /// <summary>选项 key -> 读取当前值</summary>
+        private Dictionary<string, Func<object>> m_optionGetters;
+
+        /// <summary>选项 key -> 写入新值</summary>
+        private Dictionary<string, Action<object>> m_optionSetters;
 
         #endregion
 
@@ -39,6 +46,9 @@ namespace MyGame.UI.Settings.Controller
 
                 // 创建并初始化模型
                 CreateAndInitializeModel();
+
+                // 初始化标准化设置项注册表（供 SettingsOptionRowView 经 ISettingsValueProvider 按 key 读写）
+                InitializeOptionRegistry();
 
                 // 视图注入兜底：View 侧 TryBindController 未注入时使用 Inspector 引用
                 if (m_view == null && m_settingsPanelView != null)
@@ -151,15 +161,16 @@ namespace MyGame.UI.Settings.Controller
         /// <param name="updateAction">值更新操作</param>
         /// <param name="logMessage">日志消息</param>
         /// <param name="errorMessage">模型为空时的错误消息</param>
+        /// <param name="cooldownKey">日志冷却 key（必须固定，不能拼接动态值，否则冷却失效且缓存字典无限增长）</param>
         /// <param name="debugLogFormat">调试日志格式化函数</param>
-        private void UpdateValue<T>(T currentValue, T newValue, Func<T, T, bool> isValueChanged, Action updateAction, string logMessage, string errorMessage, Func<T, T, string> debugLogFormat = null)
+        private void UpdateValue<T>(T currentValue, T newValue, Func<T, T, bool> isValueChanged, Action updateAction, string logMessage, string errorMessage, string cooldownKey, Func<T, T, string> debugLogFormat = null)
         {
             if (m_model != null)
             {
                 // 检查值是否真正改变
                 if (isValueChanged(currentValue, newValue))
                 {
-                    Log.InfoWithCooldown(LOG_MODULE, logMessage, "settings_update_" + logMessage, 1f);
+                    Log.InfoWithCooldown(LOG_MODULE, logMessage, cooldownKey, 1f);
                     
                     // 如果提供了调试日志格式化函数，则记录调试日志
                     if (debugLogFormat != null)
@@ -194,6 +205,7 @@ namespace MyGame.UI.Settings.Controller
                 () => m_model.MusicVolume = volume,
                 "更新音乐音量: " + volume,
                 "设置模型为空，无法更新音乐音量",
+                "settings_update_musicVolume",
                 (current, newVal) => string.Format("设置模型: 更新前音乐音量={0}, 更新后音量={1}", current, newVal)
             );
         }
@@ -211,6 +223,7 @@ namespace MyGame.UI.Settings.Controller
                 () => m_model.SfxVolume = volume,
                 "更新音效音量: " + volume,
                 "设置模型为空，无法更新音效音量",
+                "settings_update_sfxVolume",
                 (current, newVal) => string.Format("设置模型: 更新前音效音量={0}, 更新后音量={1}", current, newVal)
             );
         }
@@ -228,6 +241,7 @@ namespace MyGame.UI.Settings.Controller
                 () => m_model.QualityLevel = qualityLevel,
                 "更新画质级别: " + qualityLevel,
                 "设置模型为空，无法更新画质级别",
+                "settings_update_qualityLevel",
                 (current, newVal) => string.Format("设置模型: 更新前画质级别={0}, 更新后画质级别={1}", current, newVal)
             );
         }
@@ -245,6 +259,7 @@ namespace MyGame.UI.Settings.Controller
                 () => m_model.Fullscreen = isFullscreen,
                 "更新全屏状态: " + (isFullscreen ? "全屏" : "窗口"),
                 "设置模型为空，无法更新全屏状态",
+                "settings_update_fullscreen",
                 (current, newVal) => string.Format("设置模型: 更新前全屏状态={0}, 更新后全屏状态={1}", 
                     current ? "全屏" : "窗口", newVal ? "全屏" : "窗口")
             );
@@ -263,6 +278,7 @@ namespace MyGame.UI.Settings.Controller
                 () => m_model.ResolutionIndex = resolutionIndex,
                 "更新分辨率索引: " + resolutionIndex,
                 "设置模型为空，无法更新分辨率索引",
+                "settings_update_resolutionIndex",
                 (current, newVal) => string.Format("设置模型: 更新前分辨率索引={0}, 更新后分辨率索引={1}", current, newVal)
             );
         }
@@ -280,9 +296,31 @@ namespace MyGame.UI.Settings.Controller
                 () => m_model.InvertYAxis = invertYAxis,
                 "更新Y轴反转设置: " + (invertYAxis ? "反转" : "不反转"),
                 "设置模型为空，无法更新Y轴反转设置",
+                "settings_update_invertYAxis",
                 (current, newVal) => string.Format("设置模型: 更新前Y轴反转={0}, 更新后Y轴反转={1}", 
                     current ? "反转" : "不反转", newVal ? "反转" : "不反转")
             );
+        }
+
+        /// <summary>
+        /// 更新开发者模式开关：写入 Model 并标记未保存，点击“保存”后持久化生效。
+        /// </summary>
+        public void SetDeveloperModeEnabled(bool enabled)
+        {
+            if (m_model == null)
+            {
+                Log.Error(LOG_MODULE, "设置模型为空，无法更新开发者模式");
+                return;
+            }
+
+            if (m_model.DeveloperModeEnabled == enabled)
+            {
+                return;
+            }
+
+            m_model.DeveloperModeEnabled = enabled;
+            Log.InfoWithCooldown(LOG_MODULE, "更新开发者模式: " + (enabled ? "开启" : "关闭"),
+                "settings_developer_mode", 1f);
         }
 
         #endregion
@@ -397,6 +435,100 @@ namespace MyGame.UI.Settings.Controller
 
         #endregion
 
+        #region 标准化设置项注册表
+
+        /// <summary>
+        /// 注册所有可经 Catalog 生成的设置项。
+        /// 新增设置项时：在 SettingsCatalog 加定义，并在这里补一对 get/set。
+        /// </summary>
+        private void InitializeOptionRegistry()
+        {
+            m_optionGetters = new Dictionary<string, Func<object>>
+            {
+                ["musicVolume"] = () => m_model != null ? m_model.MusicVolume : 0f,
+                ["sfxVolume"] = () => m_model != null ? m_model.SfxVolume : 0f,
+                ["qualityLevel"] = () => m_model != null ? m_model.QualityLevel : 0,
+                ["fullscreen"] = () => m_model != null ? m_model.Fullscreen : false,
+                ["resolutionIndex"] = () => m_model != null ? m_model.ResolutionIndex : 0,
+                ["invertYAxis"] = () => m_model != null ? m_model.InvertYAxis : false,
+                ["developerMode"] = () => GetDeveloperModeEnabled(),
+            };
+
+            m_optionSetters = new Dictionary<string, Action<object>>
+            {
+                ["musicVolume"] = value => UpdateMusicVolume(Convert.ToSingle(value)),
+                ["sfxVolume"] = value => UpdateSfxVolume(Convert.ToSingle(value)),
+                ["qualityLevel"] = value => UpdateQualityLevel(Convert.ToInt32(value)),
+                ["fullscreen"] = value => UpdateFullscreen(Convert.ToBoolean(value)),
+                ["resolutionIndex"] = value => UpdateResolutionIndex(Convert.ToInt32(value)),
+                ["invertYAxis"] = value => UpdateInvertYAxis(Convert.ToBoolean(value)),
+                ["developerMode"] = value => SetDeveloperModeEnabled(Convert.ToBoolean(value)),
+            };
+        }
+
+        /// <summary>
+        /// 按 key 读取设置值（供 SettingsOptionRowView 回显）。
+        /// </summary>
+        public object GetOptionValue(string key)
+        {
+            if (string.IsNullOrEmpty(key) || m_optionGetters == null || !m_optionGetters.TryGetValue(key, out Func<object> getter))
+            {
+                Log.Warning(LOG_MODULE, $"未注册的设置项 key: {key}");
+                return null;
+            }
+
+            try
+            {
+                return getter();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(LOG_MODULE, $"读取设置项失败: {key}, {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 按 key 写入设置值（供 SettingsOptionRowView 事件回传）。
+        /// </summary>
+        public bool SetOptionValue(string key, object value)
+        {
+            if (string.IsNullOrEmpty(key) || m_optionSetters == null || !m_optionSetters.TryGetValue(key, out Action<object> setter))
+            {
+                Log.Warning(LOG_MODULE, $"未注册的设置项 key: {key}");
+                return false;
+            }
+
+            try
+            {
+                setter(value);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(LOG_MODULE, $"写入设置项失败: {key}, {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// ISettingsValueProvider 适配：读取设置值。
+        /// </summary>
+        public object GetValue(string key)
+        {
+            return GetOptionValue(key);
+        }
+
+        /// <summary>
+        /// ISettingsValueProvider 适配：写入设置值。
+        /// </summary>
+        public void SetValue(string key, object value)
+        {
+            SetOptionValue(key, value);
+        }
+
+        #endregion
+
         #region 获取设置值方法
 
         /// <summary>
@@ -506,18 +638,17 @@ namespace MyGame.UI.Settings.Controller
         }
 
         /// <summary>
-        /// 获取自定义画质名称列表
+        /// 获取开发者模式状态（从 Model 读取，保存流程统一持久化）。
         /// </summary>
-        /// <returns>自定义画质名称列表</returns>
-        public List<string> GetCustomQualityNames()
+        public bool GetDeveloperModeEnabled()
         {
-            if (m_model == null)
+            if (m_model != null)
             {
-                Log.Error(LOG_MODULE, "Settings model is null when getting custom quality names");
-                return null;
+                return m_model.DeveloperModeEnabled;
             }
-            
-            return m_model.CustomQualityNames;
+
+            Log.Error(LOG_MODULE, "设置模型为空，返回默认开发者模式状态");
+            return false;
         }
 
         #endregion

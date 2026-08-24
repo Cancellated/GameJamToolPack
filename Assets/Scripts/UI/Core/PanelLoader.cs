@@ -251,7 +251,14 @@ namespace MyGame.UI.Core
                 canvas = panelTransform.gameObject.AddComponent<Canvas>();
                 canvas.overrideSorting = true;
             }
-            
+
+            // 面板根上的嵌套 Canvas 不会继承 GlobalUI 根 Canvas 的 GraphicRaycaster，
+            // 必须在面板自己的 Canvas 上补一个，否则该面板内所有按钮/图形收不到点击事件。
+            if (panelTransform.GetComponent<GraphicRaycaster>() == null)
+            {
+                panelTransform.gameObject.AddComponent<GraphicRaycaster>();
+            }
+
             canvas.sortingOrder = sortingOrder;
             Log.Info(module, $"为面板 {panelType} 设置了排序层级 {sortingOrder}");
         }

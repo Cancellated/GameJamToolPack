@@ -1,4 +1,5 @@
 using MyGame.Events;
+using MyGame.DevTools;
 using MyGame.Managers;
 using MyGame.UI;
 using Logger;
@@ -14,6 +15,19 @@ namespace MyGame.UI.Control
     {
         #region 常量
         private const string LOG_MODULE = LogModules.UI;
+        #endregion
+
+        #region 属性
+
+        /// <summary>
+        /// 调试控制台是否可用：编辑器/Development Build 默认可用；
+        /// 发布版需通过启动参数、dev_config.json 或 PlayerPrefs 开启开发者模式。
+        /// </summary>
+        private static bool IsDebugConsoleAvailable
+        {
+            get { return DeveloperMode.IsDebugConsoleEnabled; }
+        }
+
         #endregion
 
         #region 字段
@@ -93,7 +107,12 @@ namespace MyGame.UI.Control
                 // 注册游戏玩法中的UI相关按键
                 _inputActions.GamePlay.Pause.performed += OnPausePerformed;
                 _inputActions.GamePlay.Inventory.performed += OnInventoryPerformed;
-                _inputActions.GamePlay.Console.performed += OnConsolePerformed;
+
+                // 控制台按键仅在开发者模式可用时注册；发布版默认不注册，mod 可通过 DeveloperMode 开启
+                if (IsDebugConsoleAvailable)
+                {
+                    _inputActions.GamePlay.Console.performed += OnConsolePerformed;
+                }
             }
         }
 
@@ -163,26 +182,28 @@ namespace MyGame.UI.Control
         /// </summary>
         private void OnConsolePerformed(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
-            if (context.performed)
+            if (!IsDebugConsoleAvailable || !context.performed)
             {
-                Log.Info(LOG_MODULE, "控制台按键被按下");
+                return;
+            }
 
-                // 检查控制台当前状态并切换。
-                // 注意：与 Pause/Inventory 一致，必须经 UIManager.PanelMap 判空——
-                // DebugConsole.Instance 在面板尚未加载（Addressable 异步加载中、场景切换后）时为 null，
-                // 直接访问会空引用崩溃。
-                if (UIManager.Instance != null && UIManager.Instance.PanelMap.ContainsKey(UIType.Console))
-                {
-                    bool isCurrentlyVisible = UIManager.Instance.PanelMap[UIType.Console].IsVisible;
-                    // 触发控制台显示/隐藏事件，切换当前状态
-                    GameEvents.TriggerMenuShow(UIType.Console, !isCurrentlyVisible);
-                }
-                else
-                {
-                    // 控制台尚未加载/注册：默认请求显示，
-                    // UIManager.SetUIState 检测到面板缺失后会自动走 Addressable 加载路径
-                    GameEvents.TriggerMenuShow(UIType.Console, true);
-                }
+            Log.Info(LOG_MODULE, "控制台按键被按下");
+
+            // 检查控制台当前状态并切换。
+            // 注意：与 Pause/Inventory 一致，必须经 UIManager.PanelMap 判空——
+            // DebugConsole.Instance 在面板尚未加载（Addressable 异步加载中、场景切换后）时为 null，
+            // 直接访问会空引用崩溃。
+            if (UIManager.Instance != null && UIManager.Instance.PanelMap.ContainsKey(UIType.Console))
+            {
+                bool isCurrentlyVisible = UIManager.Instance.PanelMap[UIType.Console].IsVisible;
+                // 触发控制台显示/隐藏事件，切换当前状态
+                GameEvents.TriggerMenuShow(UIType.Console, !isCurrentlyVisible);
+            }
+            else
+            {
+                // 控制台尚未加载/注册：默认请求显示，
+                // UIManager.SetUIState 检测到面板缺失后会自动走 Addressable 加载路径
+                GameEvents.TriggerMenuShow(UIType.Console, true);
             }
         }
 

@@ -20,8 +20,8 @@ namespace MyGame.UI.MainMenu.Controller
         #region 字段
 
         [Header("菜单配置")]
-        [Tooltip("默认启动的游戏场景名称")]
-        [SerializeField] private string m_defaultGameScene = "Level Select";
+        [Tooltip("默认启动的游戏场景名称。核心不再预设具体场景：请在预制体/场景中配置，或留空禁用开始游戏跳转")]
+        [SerializeField] private string m_defaultGameScene = string.Empty;
 
         #endregion
 
@@ -40,10 +40,17 @@ namespace MyGame.UI.MainMenu.Controller
                 // 创建并初始化模型
                 CreateAndInitializeModel();
 
-                // 应用默认游戏场景配置
-                if (m_model != null && !string.IsNullOrEmpty(m_defaultGameScene))
+                // 应用默认游戏场景配置（可能为空：留空表示该菜单实例不负责加载游戏场景）
+                if (m_model != null)
                 {
-                    m_model.DefaultGameScene = m_defaultGameScene;
+                    m_model.DefaultGameScene = m_defaultGameScene ?? string.Empty;
+
+                    if (string.IsNullOrEmpty(m_model.DefaultGameScene))
+                    {
+                        Log.Warning(LogModules.MAINMENU,
+                            "主菜单未配置默认游戏场景，开始游戏/读档按钮将无法加载玩法场景。" +
+                            "请在 MainMenu 预制体或场景中的 MainMenuController 上配置 m_defaultGameScene");
+                    }
                 }
 
                 // 调用基类初始化（触发 OnInitialize）
@@ -209,10 +216,19 @@ namespace MyGame.UI.MainMenu.Controller
         /// </summary>
         private void OnGameStart()
         {
-            if (m_model != null)
+            if (m_model == null)
             {
-                SceneSwitcher.RequestLoadScene(m_model.DefaultGameScene);
+                return;
             }
+
+            if (string.IsNullOrEmpty(m_model.DefaultGameScene))
+            {
+                Log.Error(LogModules.MAINMENU,
+                    "未配置默认游戏场景，无法加载玩法场景。请在 MainMenuController 上配置 m_defaultGameScene");
+                return;
+            }
+
+            SceneSwitcher.RequestLoadScene(m_model.DefaultGameScene);
         }
 
         /// <summary>

@@ -1,11 +1,11 @@
 using Logger;
 using MyGame.Audio;
 using MyGame.Data;
+using MyGame.DevTools;
 using MyGame.UI;
 using MyGame.Utils;
 using UnityEngine;
 using MyGame.Events;
-using System.Collections.Generic;
 
 namespace MyGame.UI.Settings.Model
 {
@@ -25,11 +25,12 @@ namespace MyGame.UI.Settings.Model
         private int m_qualityLevel = 2;
         private bool m_fullscreen = true;
         private int m_resolutionIndex = 0;
-        // 自定义画质名称列表
-        private List<string> m_customQualityNames = new();
 
         // 游戏设置
         private bool m_invertYAxis = false;
+
+        // 开发者模式：随设置面板保存流程持久化
+        private bool m_developerModeEnabled = false;
 
         /// <summary>是否正在从 PlayerPrefs 加载：加载期间不标记脏状态</summary>
         private bool m_isLoading;
@@ -91,15 +92,6 @@ namespace MyGame.UI.Settings.Model
         }
         
         /// <summary>
-        /// 自定义画质名称列表
-        /// </summary>
-        public List<string> CustomQualityNames
-        {
-            get { return m_customQualityNames; }
-            set { SetProperty(ref m_customQualityNames, value, nameof(CustomQualityNames)); }
-        }
-
-        /// <summary>
         /// 是否全屏
         /// </summary>
         public bool Fullscreen
@@ -146,6 +138,21 @@ namespace MyGame.UI.Settings.Model
         }
 
         /// <summary>
+        /// 开发者模式：仅在点击“保存”后持久化生效。
+        /// </summary>
+        public bool DeveloperModeEnabled
+        {
+            get { return m_developerModeEnabled; }
+            set
+            {
+                if (SetProperty(ref m_developerModeEnabled, value, nameof(DeveloperModeEnabled)))
+                {
+                    MarkDirty();
+                }
+            }
+        }
+
+        /// <summary>
         /// 是否存在未保存的设置修改。
         /// </summary>
         public bool HasUnsavedChanges
@@ -171,7 +178,6 @@ namespace MyGame.UI.Settings.Model
             try
             {
                 LoadValuesFromPlayerPrefs();
-                InitializeCustomQualityNames();
             }
             finally
             {
@@ -205,47 +211,9 @@ namespace MyGame.UI.Settings.Model
             Fullscreen = PlayerPrefs.GetInt(SettingsKeys.Fullscreen, 1) == 1;
             ResolutionIndex = PlayerPrefs.GetInt(SettingsKeys.ResolutionIndex, 0);
             InvertYAxis = PlayerPrefs.GetInt(SettingsKeys.InvertYAxis, 0) == 1;
+            DeveloperModeEnabled = DeveloperMode.GetSavedDeveloperModeEnabled();
         }
         
-        /// <summary>
-        /// 初始化自定义画质名称
-        /// 这里可以根据需要修改为从配置文件加载或使用硬编码的名称
-        /// </summary>
-        private void InitializeCustomQualityNames()
-        {
-            // 默认使用Unity的画质等级名称作为后备
-            string[] unityQualityNames = QualitySettings.names;
-            
-            // 根据项目需求设置自定义名称
-            List<string> customNames = new();
-            
-            // 创建Unity默认画质名称到自定义名称的映射
-            Dictionary<string, string> qualityNameMapping = new()
-            {
-                { "Performant", "低" },
-                { "Balanced", "中" },
-                { "High Fidelity", "高" },
-                // 如果想要定义更多等级画质，在Edit > Project Settings > Quality 打开画质设置面板，点击"+"按钮添加新的画质级别
-                // 然后在qualityNameMapping中添加对应的映射关系
-            };
-            
-            // 使用foreach循环遍历所有Unity默认画质名称
-            foreach (string unityName in unityQualityNames)
-            {
-                // 检查是否有对应的自定义名称，如果有则使用自定义名称，否则使用原始名称
-                if (qualityNameMapping.TryGetValue(unityName, out string customName))
-                {
-                    customNames.Add(customName);
-                }
-                else
-                {
-                    customNames.Add(unityName);
-                }
-            }
-            
-            CustomQualityNames = customNames;
-        }
-
         /// <summary>
         /// 保存设置到PlayerPrefs
         /// </summary>
@@ -257,6 +225,7 @@ namespace MyGame.UI.Settings.Model
             PlayerPrefs.SetInt(SettingsKeys.Fullscreen, Fullscreen ? 1 : 0);
             PlayerPrefs.SetInt(SettingsKeys.ResolutionIndex, ResolutionIndex);
             PlayerPrefs.SetInt(SettingsKeys.InvertYAxis, InvertYAxis ? 1 : 0);
+            DeveloperMode.SetDeveloperModeEnabled(DeveloperModeEnabled);
             
             PlayerPrefs.Save();
 

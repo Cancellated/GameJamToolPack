@@ -10,8 +10,8 @@ namespace MyGame.UI.MainMenu.Model
     {
         #region 字段与属性
 
-        // 默认关卡场景名称
-        private string m_defaultGameScene = "Level Select";
+        // 默认启动场景（核心不预设具体场景名，由 MainMenuController 从预制体/场景配置注入）
+        private string m_defaultGameScene = string.Empty;
         private bool m_isSettingsVisible = false;
         private bool m_isAboutVisible = false;
 

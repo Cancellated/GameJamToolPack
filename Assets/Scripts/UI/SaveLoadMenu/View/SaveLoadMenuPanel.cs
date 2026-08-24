@@ -93,13 +93,10 @@ namespace MyGame.UI.SaveLoad.View
                 info += $"存档时间：{selectedSlotInfo.LastModified}\n";
                 info += $"游戏版本：{selectedSlotInfo.Version}\n";
 
-                // 添加游戏进度信息
-                if (selectedSlotInfo.SaveData.gameProgress != null)
+                // 添加玩法进度摘要（由玩法存档提供者生成的纯文本，核心只透传）
+                if (!string.IsNullOrEmpty(selectedSlotInfo.SaveData.progressSummary))
                 {
-                    selectedSlotInfo.SaveData.gameProgress.EnsureInitialized();
-                    info += $"当前关卡：{selectedSlotInfo.SaveData.gameProgress.currentLevel}\n";
-                    info += $"已完成关卡：{selectedSlotInfo.SaveData.gameProgress.completedLevels.Count}\n";
-                    info += $"活跃任务：{selectedSlotInfo.SaveData.gameProgress.activeQuests.Count}\n";
+                    info += $"进度：{selectedSlotInfo.SaveData.progressSummary}\n";
                 }
 
                 _selectedSlotInfoText.text = info;

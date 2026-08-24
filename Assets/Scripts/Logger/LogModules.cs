@@ -25,6 +25,7 @@ namespace Logger
         public const string PAUSEMENU = "PauseMenu";
         public const string HUD = "HUD";
         public const string RESULT = "ResultPanel";
+        public const string DIALOGUE = "Dialogue";
         public const string UI_COMPONENTS = "UIComponents";
         
 

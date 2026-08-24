@@ -1,5 +1,4 @@
 using MyGame.Managers; // 引入游戏状态枚举
-using MyGame.Data;
 using System;
 using UnityEngine;
 using Logger;
@@ -187,37 +186,35 @@ namespace MyGame.Events
         }
 
         /// <summary>
-        /// 游戏进度变更事件（关卡/任务/统计等进度被写入当前存档数据时触发）。
+        /// 玩法数据变更事件（无参数）。
+        /// 玩法系统写入新状态后触发，可用于"存在未保存进度"标记、手动自动存档等场景。
+        /// 事件不携带任何玩法字段：具体数据始终由玩法系统通过 IGameplaySaveProvider 自己持有。
         /// </summary>
-        public static event Action<GameProgress> OnGameProgressChanged;
+        public static event Action OnGameplayDataChanged;
 
-        public static void TriggerGameProgressChanged(GameProgress progress)
+        public static void TriggerGameplayDataChanged()
         {
-            if (progress == null)
-            {
-                Log.Warning(module, "触发游戏进度变更事件失败：进度为空");
-                return;
-            }
-
-            OnGameProgressChanged?.Invoke(progress);
+            Log.Info(module, "触发玩法数据变更事件");
+            OnGameplayDataChanged?.Invoke();
         }
 
         /// <summary>
-        /// 存档进度已加载事件。
-        /// 读取存档成功后触发，供关卡/任务/玩家等系统恢复游戏世界。
+        /// 玩法存档数据已加载事件。
+        /// 读取存档成功后触发，参数为玩法自定义 JSON（无玩法数据时为空字符串），
+        /// 由关卡/玩家等系统自行反序列化并恢复游戏世界。
         /// </summary>
-        public static event Action<GameProgress> OnGameProgressLoaded;
+        public static event Action<string> OnGameplayDataLoaded;
 
-        public static void TriggerGameProgressLoaded(GameProgress progress)
+        public static void TriggerGameplayDataLoaded(string gameplayDataJson)
         {
-            if (progress == null)
+            if (gameplayDataJson == null)
             {
-                Log.Warning(module, "触发游戏进度加载事件失败：进度为空");
+                Log.Warning(module, "触发玩法数据加载事件失败：数据为空");
                 return;
             }
 
-            Log.Info(module, "触发游戏进度加载事件");
-            OnGameProgressLoaded?.Invoke(progress);
+            Log.Info(module, "触发玩法数据加载事件");
+            OnGameplayDataLoaded?.Invoke(gameplayDataJson);
         }
 
         /// <summary>

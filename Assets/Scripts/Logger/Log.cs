@@ -56,7 +56,7 @@ namespace Logger
         // 带冷却的信息日志：同一 key 在 cooldownSeconds 内只输出一次。
         // 适合滑块拖动、每帧状态变化等高频调用，避免刷屏。
         public static void InfoWithCooldown(string module, string message,
-            string key = null, float cooldownSeconds = 1f, UnityEngine.Object context = null)
+            string key = null, float cooldownSeconds = 1f, Object context = null)
         {
             if (!CanLog(key ?? message, cooldownSeconds))
                 return;
@@ -64,7 +64,7 @@ namespace Logger
         }
 
         public static void WarningWithCooldown(string module, string message,
-            string key = null, float cooldownSeconds = 1f, UnityEngine.Object context = null)
+            string key = null, float cooldownSeconds = 1f, Object context = null)
         {
             if (!CanLog(key ?? message, cooldownSeconds))
                 return;
@@ -72,7 +72,7 @@ namespace Logger
         }
 
         public static void ErrorWithCooldown(string module, string message,
-            string key = null, float cooldownSeconds = 1f, UnityEngine.Object context = null)
+            string key = null, float cooldownSeconds = 1f, Object context = null)
         {
             if (!CanLog(key ?? message, cooldownSeconds))
                 return;

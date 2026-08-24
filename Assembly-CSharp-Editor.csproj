@@ -61,6 +61,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\UI\SaveLoadMenu\Editor\SaveLoadMenuPrefabBuilder.cs" />
+    <Compile Include="Assets\Tests\DialogueSmokeTest\Editor\DialogueSmokeTestSceneBuilder.cs" />
+    <Compile Include="Assets\Scripts\UI\Dialogue\Editor\DialoguePrefabBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Library\PackageCache\com.unity.collab-proxy@2.8.2\Lib\Editor\Localization\differences.ja.txt" />

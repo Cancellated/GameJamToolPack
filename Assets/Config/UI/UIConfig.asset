@@ -53,3 +53,8 @@ MonoBehaviour:
     lazyLoad: 1
     inputMode: 1
     hideOnShow: 
+  - panelType: 11
+    addressableAddress: Assets/Art Assets/UI/Dialogue/DialoguePanel.prefab
+    lazyLoad: 0
+    inputMode: 1
+    hideOnShow: 

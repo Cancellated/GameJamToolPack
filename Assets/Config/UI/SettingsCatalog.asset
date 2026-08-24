@@ -1,0 +1,95 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 158265a150b047259ec9e98c3bc414e0, type: 3}
+  m_Name: SettingsCatalog
+  m_EditorClassIdentifier: 
+  m_entries:
+  - key: header_audio
+    title: "\u97F3\u9891"
+    type: 0
+    minValue: 0
+    maxValue: 1
+    wholeNumbers: 0
+    options: []
+  - key: musicVolume
+    title: "\u97F3\u4E50\u97F3\u91CF"
+    type: 1
+    minValue: 0
+    maxValue: 1
+    wholeNumbers: 0
+    options: []
+  - key: sfxVolume
+    title: "\u97F3\u6548\u97F3\u91CF"
+    type: 1
+    minValue: 0
+    maxValue: 1
+    wholeNumbers: 0
+    options: []
+  - key: header_graphics
+    title: "\u753B\u8D28"
+    type: 0
+    minValue: 0
+    maxValue: 1
+    wholeNumbers: 0
+    options: []
+  - key: qualityLevel
+    title: "\u753B\u8D28\u7B49\u7EA7"
+    type: 3
+    minValue: 0
+    maxValue: 1
+    wholeNumbers: 0
+    options:
+    - "\u4F4E"
+    - "\u4E2D"
+    - "\u9AD8"
+  - key: fullscreen
+    title: "\u5168\u5C4F"
+    type: 2
+    minValue: 0
+    maxValue: 1
+    wholeNumbers: 0
+    options: []
+  - key: resolutionIndex
+    title: "\u5206\u8FA8\u7387"
+    type: 3
+    minValue: 0
+    maxValue: 1
+    wholeNumbers: 0
+    options: []
+  - key: header_controls
+    title: "\u64CD\u4F5C"
+    type: 0
+    minValue: 0
+    maxValue: 1
+    wholeNumbers: 0
+    options: []
+  - key: invertYAxis
+    title: "Y\u8F74\u53CD\u8F6C"
+    type: 2
+    minValue: 0
+    maxValue: 1
+    wholeNumbers: 0
+    options: []
+  - key: header_developer
+    title: "\u5F00\u53D1\u8005"
+    type: 0
+    minValue: 0
+    maxValue: 1
+    wholeNumbers: 0
+    options: []
+  - key: developerMode
+    title: "\u5F00\u53D1\u8005\u6A21\u5F0F"
+    type: 2
+    minValue: 0
+    maxValue: 1
+    wholeNumbers: 0
+    options: []

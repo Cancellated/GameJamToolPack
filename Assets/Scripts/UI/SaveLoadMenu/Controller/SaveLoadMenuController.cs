@@ -224,14 +224,9 @@ namespace MyGame.UI.SaveLoad.Controller
                             ? saveData.saveTime
                             : (!string.IsNullOrEmpty(saveData.saveTimeUtc) ? saveData.saveTimeUtc : "时间未知");
                         slot.Version = string.IsNullOrEmpty(saveData.version) ? "未知" : saveData.version;
-                        string progress = "无进度信息";
-                        if (saveData.gameProgress != null)
-                        {
-                            saveData.gameProgress.EnsureInitialized();
-                            progress = string.Format("关卡: {0}, 完成: {1}个",
-                                                   saveData.gameProgress.currentLevel,
-                                                   saveData.gameProgress.completedLevels.Count);
-                        }
+                        string progress = string.IsNullOrEmpty(saveData.progressSummary)
+                            ? "无进度信息"
+                            : saveData.progressSummary;
                         slot.ProgressText = progress;
                     }
                     else

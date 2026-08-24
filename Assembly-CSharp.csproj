@@ -60,18 +60,23 @@
     <Analyzer Include="D:\unity\2022.3.58f1c1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\SaveLoad\DataModels\IGameplaySaveProvider.cs" />
     <Compile Include="Assets\Scripts\SaveLoad\DataModels\SettingsKeys.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\Model\InventoryItem.cs" />
+    <Compile Include="Assets\Scripts\UI\Settings\Model\SettingsCatalog.cs" />
+    <Compile Include="Assets\Tests\DialogueSmokeTest\Scripts\DialogueSmokeTestController.cs" />
+    <Compile Include="Assets\Scripts\UI\Dialogue\Controller\DialoguePanelController.cs" />
     <Compile Include="Assets\Scripts\UI\SaveLoadMenu\Model\SaveLoadMenuConfig.cs" />
     <Compile Include="Assets\Scripts\UI\About\Controller\AboutPanelController.cs" />
+    <Compile Include="Assets\Scripts\UI\Dialogue\Core\DialogueEvents.cs" />
     <Compile Include="Assets\Scripts\Logger\LogModules.cs" />
     <Compile Include="Assets\Scripts\DevTools\Model\DebugCommandParameter.cs" />
+    <Compile Include="Assets\Scripts\UI\Dialogue\Model\DialoguePanelModel.cs" />
     <Compile Include="Assets\Scripts\DevTools\Model\DebugCommandRegistry.cs" />
     <Compile Include="Assets\Scripts\Audio\IAudioService.cs" />
     <Compile Include="Assets\Scripts\UI\Components\ToggleSwitch\ToggleSwitch.cs" />
     <Compile Include="Assets\Scripts\DevTools\Model\DebugCommandAttribute.cs" />
     <Compile Include="Assets\Scripts\UI\SaveLoadMenu\Model\SaveLoadMenuConstants.cs" />
-    <Compile Include="Assets\Scripts\SaveLoad\DataModels\GameProgress.cs" />
     <Compile Include="Assets\Scripts\UI\Settings\Model\SettingsModel.cs" />
     <Compile Include="Assets\Scripts\DevTools\Model\DebugCommandInfo.cs" />
     <Compile Include="Assets\Scripts\UI\Core\SceneLoadingController.cs" />
@@ -86,22 +91,24 @@
     <Compile Include="Assets\Scripts\Core\ManagersBootstrap.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\View\InventorySlot.cs" />
     <Compile Include="Assets\Scripts\Core\Singleton\Singleton.cs" />
-    <Compile Include="Assets\Scripts\UI\Settings\View\Components\BaseSettingsComponent.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\Model\HUDModel.cs" />
+    <Compile Include="Assets\Scripts\UI\Settings\View\SettingsRuntimeLayout.cs" />
     <Compile Include="Assets\Scripts\DevTools\Controller\DebugConsoleController.cs" />
     <Compile Include="Assets\Scripts\Core\InputManager.cs" />
-    <Compile Include="Assets\Scripts\UI\Settings\View\Components\AudioSettingsComponent.cs" />
     <Compile Include="Assets\Scripts\UI\MainMenu\Controller\MainMenuController.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\Model\InventoryModel.cs" />
     <Compile Include="Assets\Scripts\UI\Core\IUIPanel.cs" />
     <Compile Include="Assets\Scripts\Logger\Log.cs" />
     <Compile Include="Assets\Scripts\UI\Core\PanelLoader.cs" />
     <Compile Include="Assets\Scripts\DevTools\Commands\GameplayCommands.cs" />
+    <Compile Include="Assets\Scripts\DevTools\DeveloperMode.cs" />
     <Compile Include="Assets\Scripts\UI\Core\UIType.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\Controller\InventoryController.cs" />
     <Compile Include="Assets\Scripts\SaveLoad\Manager\SaveManager.cs" />
+    <Compile Include="Assets\Scripts\UI\Dialogue\View\DialoguePanelView.cs" />
     <Compile Include="Assets\Scripts\UI\MainMenu\View\MainMenuView.cs" />
     <Compile Include="Assets\Scripts\UI\ResultPanel\Controller\ResultPanelController.cs" />
+    <Compile Include="Assets\Scripts\UI\Settings\View\ISettingsValueProvider.cs" />
     <Compile Include="Assets\Scripts\UI\Core\Config\UIConfig.cs" />
     <Compile Include="Assets\Scripts\Audio\AudioManager.cs" />
     <Compile Include="Assets\Scripts\Core\Events\GameEvents.cs" />
@@ -115,10 +122,12 @@
     <Compile Include="Assets\Scripts\DevTools\Model\DebugCommandContext.cs" />
     <Compile Include="Assets\Scripts\UI\Core\BaseMVC\BaseController.cs" />
     <Compile Include="Assets\Scripts\SaveLoad\SaveSystem\JsonSaveSystem.cs" />
+    <Compile Include="Assets\Scripts\UI\Dialogue\Core\DialogueManager.cs" />
     <Compile Include="Assets\Scripts\UI\Loading\Controller\LoadingScreenController.cs" />
     <Compile Include="Assets\Scripts\UI\Inventory\View\InventoryView.cs" />
     <Compile Include="Assets\Scripts\UI\Loading\View\LoadingScreenView.cs" />
     <Compile Include="Assets\Scripts\Core\AudioListenerManager.cs" />
+    <Compile Include="Assets\Scripts\UI\Settings\View\SettingsOptionRowView.cs" />
     <Compile Include="Assets\Scripts\UI\ResultPanel\View\ResultPanelView.cs" />
     <Compile Include="Assets\Scripts\DevTools\View\DebugConsole.cs" />
     <Compile Include="Assets\Scripts\Core\GameManager.cs" />
@@ -136,16 +145,16 @@
     <Compile Include="Assets\Scripts\UI\Components\SettingSlider\SettingSliderComponent.cs" />
     <Compile Include="Assets\Scripts\Core\Scene\SceneSwitcher.cs" />
     <Compile Include="Assets\Scripts\UI\Core\UIManager.cs" />
+    <Compile Include="Assets\Scripts\UI\Dialogue\Data\DialogueData.cs" />
     <Compile Include="Assets\Scripts\UI\SaveLoadMenu\View\RuntimeSaveSlotUI.cs" />
+    <Compile Include="Assets\Scripts\UI\Dialogue\Core\IDialogueConditionProvider.cs" />
     <Compile Include="Assets\Scripts\UI\ResultPanel\Model\ResultPanelModel.cs" />
     <Compile Include="Assets\Scripts\SaveLoad\DataModels\SaveData.cs" />
-    <Compile Include="Assets\Scripts\UI\Settings\View\Components\GraphicsSettingsComponent.cs" />
     <Compile Include="Assets\Scripts\UI\SaveLoadMenu\View\SaveLoadMenuPanel.cs" />
     <Compile Include="Assets\Scripts\UI\Core\BaseMVC\BaseView.cs" />
     <Compile Include="Assets\Scripts\UI\MainMenu\Model\MainMenuModel.cs" />
     <Compile Include="Assets\Scripts\UI\Settings\Controller\SettingsPanelController.cs" />
     <Compile Include="Assets\Scripts\DevTools\Commands\UiCommands.cs" />
-    <Compile Include="Assets\Scripts\UI\Settings\View\Components\ControlsSettingsComponent.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
